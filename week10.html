@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מיקרוביולוגיה כללית - שבוע 10: וירוסים ובקטריופאג'ים</title>
+    <style>
+        /* CSS Styles are identical to revised week1/2/8/9... etc. */
+         body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #eef5f3;
+            color: #333;
+            direction: rtl;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #006847; /* Dark green */
+            text-align: center;
+            border-bottom: 2px solid #8fbc8f; /* Dark Sea Green */
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        /* --- Flashcards Styles --- */
+        .flashcards-container {
+            perspective: 1000px;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-direction: column;
+        }
+        .flashcard {
+            width: 80%;
+            max-width: 400px;
+            height: 180px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 8px;
+            font-size: 1.2em;
+        }
+        .flashcard-front {
+            background-color: #c8e6c9;
+            color: #1b5e20;
+        }
+        .flashcard-back {
+            background-color: #a5d6a7;
+            color: #1b5e20;
+            transform: rotateY(180deg);
+            font-size: 1em;
+        }
+        .flashcard-nav {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .flashcard-nav button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .flashcard-nav button:hover {
+            background-color: #004d40;
+        }
+         #flashcard-counter {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        /* --- MCQ Styles --- */
+        .mcqs-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #view-toggle-btn {
+             padding: 6px 12px;
+             background-color: #6c757d;
+             color: white;
+             border: none;
+             border-radius: 4px;
+             cursor: pointer;
+             font-size: 0.9em;
+         }
+        #view-toggle-btn:hover {
+             background-color: #5a6268;
+         }
+
+        .mcq {
+            background-color: #ffffff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #004d40;
+        }
+        .options {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .options li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: 2px solid transparent; /* Add transparent border for layout consistency */
+        }
+        .options li:hover {
+            background-color: #ced4da;
+        }
+        /* Styles for answer states */
+        .options li.answered.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .options li.answered.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+         /* Style for selected but not yet confirmed answer (optional) */
+        .options li.selected {
+             border-color: #007bff;
+         }
+         /* Disable options after answering */
+        .mcq-answered .options li {
+            cursor: default;
+            pointer-events: none;
+             opacity: 0.8;
+        }
+        .mcq-answered .options li.correct,
+        .mcq-answered .options li.incorrect {
+            opacity: 1; /* Keep selected/correct ones fully visible */
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+             border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-right: 5px solid #8fbc8f;
+            font-size: 0.95em;
+            border-radius: 4px;
+        }
+        .mcq-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .mcq-navigation button {
+            padding: 10px 20px;
+            background-color: #00796b; /* Teal */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .mcq-navigation button:hover:not(:disabled) {
+            background-color: #004d40; /* Darker Teal */
+        }
+        .mcq-navigation button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #results {
+            text-align: center;
+            font-size: 1.4em;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e0f2f1;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            color: #00695c;
+        }
+         #mcq-counter {
+             text-align: center;
+             margin-bottom: 15px;
+             font-weight: bold;
+             color: #555;
+         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>שבוע 10: וירוסים ובקטריופאג'ים</h1>
+
+        <!-- Flashcards Section -->
+        <div class="section">
+             <h2>כרטיסיות לימוד</h2>
+             <div class="flashcards-container">
+                 <div class="flashcard" id="flashcard">
+                     <div class="flashcard-face flashcard-front">מונח</div>
+                     <div class="flashcard-face flashcard-back">הגדרה</div>
+                 </div>
+                 <div class="flashcard-nav">
+                     <button id="prev-card">הקודם</button>
+                     <button id="flip-card">הפוך</button>
+                     <button id="next-card">הבא</button>
+                 </div>
+                 <div id="flashcard-counter">כרטיס 1 מתוך X</div>
+             </div>
+        </div>
+
+        <!-- MCQs Section -->
+        <div class="section">
+             <div class="mcqs-section-header">
+                 <h2>שאלות חזרה (MCQs)</h2>
+                 <button id="view-toggle-btn">הצג הכל</button>
+             </div>
+             <div id="mcq-counter">שאלה 1 מתוך 30</div>
+             <div id="mcqs-container">
+                 <!-- MCQs will be loaded here by JavaScript -->
+             </div>
+             <div id="results" style="display: none;">
+                 תוצאה סופית תופיע כאן.
+             </div>
+             <div class="mcq-navigation" id="mcq-nav" style="display: none;">
+                 <button id="prev-mcq-btn" disabled>הקודם</button>
+                 <button id="next-mcq-btn">הבא</button>
+             </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Flashcard Data and Logic for Week 10 ---
+        const flashcardData_w10 = [
+            { term: "וירוס (Virus)", definition: "אלמנט גנטי זעיר, טפיל תוך-תאי מוחלט, המתרבה רק בתוך תא חי (פונדקאי) תוך שימוש במנגנוני התא." },
+            { term: "ויריון (Virion)", definition: "החלקיק הנגיפי השלם והמדביק, הנמצא מחוץ לתא הפונדקאי. מורכב מחומר תורשתי (DNA או RNA) עטוף במעטפת חלבונית (קפסיד), ולעיתים גם במעטפת שומנית (envelope)." },
+            { term: "קפסיד (Capsid)", definition: "מעטפת חלבונית המקיפה ומגינה על החומר התורשתי של הוירוס. בנויה מיחידות חוזרות הנקראות קפסומרים." },
+            { term: "קפסומר (Capsomer)", definition: "היחידה החלבונית המבנית הבסיסית המרכיבה את הקפסיד הנגיפי." },
+            { term: "נוקלאוקפסיד (Nucleocapsid)", definition: "הקומפלקס המורכב מהחומר התורשתי (חומצת גרעין) והקפסיד החלבוני העוטף אותו." },
+            { term: "מעטפת שומנית (Envelope)", definition: "שכבה ליפידית חיצונית העוטפת וירוסים מסוימים (enveloped viruses). מקורה לרוב בממברנת התא הפונדקאי, והיא מכילה גם חלבונים נגיפיים." },
+            { term: "וירוס ערום (Naked virus)", definition: "וירוס שאינו עטוף במעטפת שומנית, כלומר מורכב מנוקלאוקפסיד בלבד." },
+            { term: "בקטריופאג' (Bacteriophage) או פאג' (Phage)", definition: "וירוס התוקף ומדביק חיידקים." },
+            { term: "מחזור ליטי (Lytic cycle)", definition: "מחזור הדבקה נגיפי שבו הוירוס משתלט על מנגנוני התא הפונדקאי, משכפל את עצמו פעמים רבות, ולבסוף גורם להרס (ליזיס) של התא ושחרור הויריונים החדשים." },
+            { term: "מחזור ליזוגני (Lysogenic cycle)", definition: "מחזור הדבקה נגיפי שבו הגנום הנגיפי משתלב בגנום התא הפונדקאי (או נשאר כפלסמיד) ומוכפל יחד איתו, מבלי לגרום להרס מיידי של התא." },
+            { term: "פאג' מתון (Temperate phage)", definition: "בקטריופאג' המסוגל לבצע הן את המחזור הליטי והן את המחזור הליזוגני." },
+            { term: "פרופאג' (Prophage)", definition: "הגנום הנגיפי של פאג' מתון כשהוא משולב בכרומוזום החיידק הפונדקאי או נמצא כפלסמיד יציב." },
+            { term: "ליזוגן (Lysogen)", definition: "תא חיידקי המכיל פרופאג'." },
+            { term: "אינדוקציה (Induction)", definition: "התהליך שבו פרופאג' 'מתעורר' מהמצב הליזוגני, נחתך מהכרומוזום החיידקי (אם היה משולב), ומתחיל מחזור ליטי." },
+            { term: "חיסון (Immunity / Superinfection immunity)", definition: "תופעה שבה חיידק ליזוגני (המכיל פרופאג') הופך עמיד להדבקה נוספת על ידי פאג'ים מאותו סוג או מסוגים קרובים." },
+            { term: "שלבי המחזור הליטי", definition: "1. היצמדות (Attachment), 2. חדירה (Penetration), 3. סינתזה (Synthesis) של חומצות גרעין וחלבונים נגיפיים, 4. הרכבה (Assembly) של ויריונים חדשים, 5. שחרור (Release) בליזיס." },
+            { term: "רצפטור נגיפי", definition: "מולקולה על פני שטח התא הפונדקאי (לרוב חלבון, פחמימה או ליפיד) שהוירוס מזהה ונקשר אליה בשלב ההיצמדות." },
+            { term: "Plaque assay", definition: "שיטה כמותית למדידת מספר החלקיקים הנגיפיים הפעילים (המדביקים) בדגימה. מבוססת על זריעת הוירוס יחד עם תאים פונדקאים על מצע מוצק וספירת אזורי הליזיס (plaques)." },
+            { term: "Plaque (פלאק)", definition: "אזור צלול (או שקוף) במרבד של תאים פונדקאים על מצע מוצק, הנגרם כתוצאה מהדבקה והרס של התאים על ידי וירוס." },
+            { term: "PFU (Plaque Forming Unit)", definition: "יחידת מידה לריכוז וירוסים פעילים, המייצגת את מספר הויריונים בדגימה המקורית המסוגלים ליצור פלאק אחד." },
+            { term: "עקומת גידול חד-שלבית (One-step growth curve)", definition: "ניסוי המתאר את שלבי ההתרבות של וירוס בתרבית תאים מסונכרנת: תקופה סמויה (latent period) הכוללת את שלב הליקוי (eclipse), ושלב העלייה (rise period)." },
+            { term: "תקופה סמויה (Latent period)", definition: "הזמן מתחילת ההדבקה ועד לשחרור הויריונים הראשונים מהתא. כוללת את שלב הליקוי." },
+            { term: "שלב הליקוי (Eclipse phase)", definition: "החלק הראשון של התקופה הסמויה, שבו לא ניתן לזהות ויריונים מדביקים בתוך התא, מכיוון שהוירוס 'פורק' לחלקיו לצורך שכפול." },
+            { term: "שיעור הדבקה (Burst size)", definition: "מספר הויריונים החדשים המשתחררים בממוצע מתא פונדקאי בודד בסוף המחזור הליטי." },
+            { term: "אנזימי רסטריקציה (Restriction enzymes)", definition: "אנזימים חיידקיים המזהים רצפי DNA ספציפיים (לרוב פלינדרומיים) וחותכים אותם. משמשים כמנגנון הגנה נגד DNA זר, כולל DNA נגיפי." },
+            { term: "מערכת מתילציה (Modification system)", definition: "מערכת חיידקית המבצעת מתילציה (הוספת קבוצת מתיל) על רצפי DNA עצמיים באתרים המזוהים על ידי אנזימי הרסטריקציה של החיידק, ובכך מגינה על ה-DNA העצמי מחיתוך." },
+            { term: "CRISPR (Clustered Regularly Interspaced Short Palindromic Repeats)", definition: "מערכת הגנה חיידקית נרכשת, מעין 'זיכרון חיסוני', המאפשרת לחיידק לזהות ולהשמיד DNA זר (כמו של פאג') שאליו נחשף בעבר." },
+            { term: "וירוס של RNA", definition: "וירוס שהחומר התורשתי שלו הוא RNA (חד-גדילי או דו-גדילי)." },
+            { term: "וירוס של DNA", definition: "וירוס שהחומר התורשתי שלו הוא DNA (חד-גדילי או דו-גדילי)." },
+            { term: "רטרווירוס (Retrovirus)", definition: "וירוס RNA המשתמש באנזים רוורס טרנסקריפטאז כדי ליצור עותק DNA מהגנום הנגיפי, אשר משתלב בגנום הפונדקאי." }
+        ];
+
+
+        let currentCardIndex_w10 = 0;
+        // ... (rest of flashcard JS logic, using unique variable names like _w10)
+        const flashcardElement_w10 = document.getElementById('flashcard');
+        const flashcardFront_w10 = flashcardElement_w10.querySelector('.flashcard-front');
+        const flashcardBack_w10 = flashcardElement_w10.querySelector('.flashcard-back');
+        const flipButton_w10 = document.getElementById('flip-card');
+        const nextButton_w10 = document.getElementById('next-card');
+        const prevButton_w10 = document.getElementById('prev-card');
+        const cardCounterElement_w10 = document.getElementById('flashcard-counter');
+
+        function displayCard_w10(index) {
+            if (!flashcardElement_w10) return;
+            const card = flashcardData_w10[index];
+            flashcardFront_w10.textContent = card.term;
+            flashcardBack_w10.textContent = card.definition;
+            flashcardElement_w10.classList.remove('is-flipped');
+            cardCounterElement_w10.textContent = `כרטיס ${index + 1} מתוך ${flashcardData_w10.length}`;
+        }
+        function flipCard_w10() { flashcardElement_w10.classList.toggle('is-flipped'); }
+        function nextCard_w10() { currentCardIndex_w10 = (currentCardIndex_w10 + 1) % flashcardData_w10.length; displayCard_w10(currentCardIndex_w10); }
+        function prevCard_w10() { currentCardIndex_w10 = (currentCardIndex_w10 - 1 + flashcardData_w10.length) % flashcardData_w10.length; displayCard_w10(currentCardIndex_w10); }
+
+        flipButton_w10.addEventListener('click', flipCard_w10);
+        nextButton_w10.addEventListener('click', nextCard_w10);
+        prevButton_w10.addEventListener('click', prevCard_w10);
+        if (flashcardData_w10.length > 0) displayCard_w10(currentCardIndex_w10);
+
+
+        // --- MCQ Data and Logic for Week 10 ---
+        const mcqData_w10 = [
+             { id: 'w10q1', question: "מהו ויריון (Virion)?", options: [ { text: "החומר התורשתי של הוירוס בלבד", correct: false }, { text: "החלקיק הנגיפי השלם והמדביק הנמצא מחוץ לתא", correct: true }, { text: "הוירוס כשהוא משולב בגנום הפונדקאי", correct: false }, { text: "התא הפונדקאי לאחר ההדבקה", correct: false } ], explanation: "ויריון הוא הצורה החוץ-תאית של הוירוס, הכוללת את כל מרכיביו (חומצת גרעין, קפסיד, ולעיתים מעטפת) והיא זו שמסוגלת להדביק תא חדש." },
+             { id: 'w10q2', question: "הקפסיד הנגיפי מורכב בעיקר מ:", options: [ { text: "חומצות גרעין (DNA או RNA)", correct: false }, { text: "ליפידים (שומנים)", correct: false }, { text: "חלבונים (קפסומרים)", correct: true }, { text: "פוליסכרידים (רב-סוכרים)", correct: false } ], explanation: "הקפסיד הוא מעטפת חלבונית הבנויה מיחידות חוזרות של חלבון אחד או יותר, הנקראות קפסומרים, המסודרות בצורה סימטרית." },
+             { id: 'w10q3', question: "מה ההבדל המרכזי בין וירוס ערום (Naked) לוירוס עטוף (Enveloped)?", options: [ { text: "לוירוס ערום אין חומר תורשתי", correct: false }, { text: "לוירוס ערום יש קפסיד, לוירוס עטוף אין", correct: false }, { text: "לוירוס עטוף יש מעטפת שומנית חיצונית בנוסף לקפסיד, לוירוס ערום אין", correct: true }, { text: "וירוס ערום מדביק רק חיידקים, וירוס עטוף רק תאי אדם", correct: false } ], explanation: "וירוסים עטופים רוכשים מעטפת שומנית (ליפידית), לרוב ממברנת התא הפונדקאי, בעת יציאתם מהתא. מעטפת זו מכילה גם חלבונים נגיפיים (spikes)." },
+             { id: 'w10q4', question: "בקטריופאג' הוא וירוס ש:", options: [ { text: "מדביק תאי צמח", correct: false }, { text: "מדביק תאי אדם", correct: false }, { text: "מדביק חיידקים", correct: true }, { text: "גורם למחלות נשימה", correct: false } ], explanation: "בקטריופאג'ים, או בקיצור פאג'ים, הם וירוסים שהפונדקאים הספציפיים שלהם הם חיידקים." },
+             { id: 'w10q5', question: "מה מתרחש במחזור הליטי אך לא (או לא מיד) במחזור הליזוגני?", options: [ { text: "היצמדות הוירוס לתא הפונדקאי", correct: false }, { text: "חדירת החומר התורשתי הנגיפי לתא", correct: false }, { text: "שכפול מהיר של הוירוס והרס התא הפונדקאי", correct: true }, { text: "שילוב הגנום הנגיפי בגנום הפונדקאי", correct: false } ], explanation: "המחזור הליטי מאופיין בשכפול מהיר של הוירוס, הרכבת ויריונים חדשים, ולבסוף ליזיס של התא הפונדקאי ושחרור הצאצאים. במחזור הליזוגני, הגנום הנגיפי לרוב משתלב בגנום המארח ונותר רדום יחסית." },
+             { id: 'w10q6', question: "מהו פרופאג' (Prophage)?", options: [ { text: "חלקיק נגיפי לא שלם", correct: false }, { text: "אנזים המפרק את דופן החיידק", correct: false }, { text: "הגנום של פאג' מתון כשהוא משולב בכרומוזום החיידקי", correct: true }, { text: "הרצפטור על פני החיידק שאליו הפאג' נקשר", correct: false } ], explanation: "כאשר פאג' מתון נכנס למסלול ליזוגני, הגנום שלו משתלב בגנום החיידק. במצב משולב זה, הגנום הנגיפי נקרא פרופאג'." },
+             { id: 'w10q7', question: "מהי אינדוקציה (Induction) בהקשר של מחזור ליזוגני?", options: [ { text: "תהליך ההיצמדות של הפאג' לחיידק", correct: false }, { text: "המעבר של הפרופאג' ממצב רדום למחזור ליטי פעיל", correct: true }, { text: "השילוב של גנום הפאג' בכרומוזום החיידק", correct: false }, { text: "יצירת המעטפת החלבונית של הפאג'", correct: false } ], explanation: "בתגובה לאותות עקה מסוימים (כמו נזק ל-DNA של החיידק), הפרופאג' יכול 'להיחתך' מהכרומוזום החיידקי ולהתחיל מחזור ליטי, תהליך המכונה אינדוקציה." },
+             { id: 'w10q8', question: "בניסוי Plaque assay, מה מייצג כל Plaque (פלאק)?", options: [ { text: "מושבת חיידקים עמידים", correct: false }, { text: "ויריון בודד", correct: false }, { text: "אזור שבו וירוסים הרסו את תאי החיידקים המארחים", correct: true }, { text: "חור פיזי במצע האגר", correct: false } ], explanation: "פלאק הוא אזור שקוף או צלול המופיע על 'מרבד' אחיד של חיידקים, ונוצר כתוצאה מהדבקה והרס (ליזיס) של החיידקים באזור זה על ידי פאג' שהתרבה והתפשט." },
+             { id: 'w10q9', question: "מהי יחידת המידה לריכוז וירוסים פעילים המתקבלת מ-Plaque assay?", options: [ { text: "CFU/ml (Colony Forming Units)", correct: false }, { text: "MIC (Minimal Inhibitory Concentration)", correct: false }, { text: "OD (Optical Density)", correct: false }, { text: "PFU/ml (Plaque Forming Units)", correct: true } ], explanation: "הנחת היסוד היא שכל פלאק נוצר מויריון מדביק אחד. לכן, ספירת הפלאקים, תוך התחשבות במיהול הדגימה ובנפח שנזרע, מאפשרת לחשב את ריכוז הוירוסים הפעילים ביחידות PFU למ\"ל." },
+             { id: 'w10q10', question: "בעקומת גידול חד-שלבית של פאג', שלב הליקוי (Eclipse) הוא הזמן שבו:", options: [ { text: "מספר הויריונים החוץ-תאיים עולה במהירות", correct: false }, { text: "לא ניתן לגלות ויריונים מדביקים שלמים בתוך התא המודבק", correct: true }, { text: "הפאג' נצמד לחיידק אך עדיין לא חדר", correct: false }, { text: "החיידקים הופכים לליזוגנים", correct: false } ], explanation: "בשלב הליקוי, מיד לאחר חדירת החומר התורשתי, הוירוס 'מפורק' למרכיביו הבסיסיים לצורך שכפול. לכן, אם נבצע ליזיס מלאכותי של התאים המודבקים בשלב זה, לא נמצא ויריונים שלמים ומדביקים." },
+            { id: 'w10q11', question: "מהו 'Burst size'?", options: [ { text: "הזמן הדרוש למחזור הדבקה אחד", correct: false }, { text: "קוטר הפלאק המקסימלי", correct: false }, { text: "מספר הויריונים החדשים המשתחררים בממוצע מתא פונדקאי בודד", correct: true }, { text: "ריכוז הוירוסים ההתחלתי", correct: false } ], explanation: "Burst size הוא מדד ליעילות ההתרבות של הוירוס בתא המארח, ומחושב כיחס בין מספר הויריונים הסופי (לאחר הליזיס) למספר התאים המודבקים ההתחלתי." },
+            { id: 'w10q12', question: "כיצד אנזימי רסטריקציה מגנים על החיידק מפני הדבקה בפאג'ים?", options: [ { text: "הם מונעים את היצמדות הפאג' לתא", correct: false }, { text: "הם מפרקים את חלבוני הקפסיד של הפאג'", correct: false }, { text: "הם מזהים וחותכים רצפי DNA ספציפיים ב-DNA הנגיפי שחדר לתא", correct: true }, { text: "הם גורמים לאינדוקציה של פרופאג'ים", correct: false } ], explanation: "אנזימי רסטריקציה מזהים רצפי DNA קצרים וספציפיים. אם רצפים אלו קיימים ב-DNA הנגיפי אך אינם מוגנים על ידי מתילציה (כפי שה-DNA החיידקי מוגן), האנזימים יחתכו את ה-DNA הנגיפי וימנעו את שכפולו." },
+            { id: 'w10q13', question: "מה תפקיד מערכת המתילציה (Modification) בהגנה מפני אנזימי רסטריקציה?", options: [ { text: "לסמן DNA נגיפי לחיתוך", correct: false }, { text: "להוסיף קבוצות מתיל ל-DNA העצמי של החיידק באתרי הזיהוי של אנזימי הרסטריקציה שלו", correct: true }, { text: "לפרק את אנזימי הרסטריקציה", correct: false }, { text: "לשנות את מבנה הקפסיד הנגיפי", correct: false } ], explanation: "מערכת המתילציה מוסיפה קבוצת מתיל לבסיס מסוים (לרוב אדנין או ציטוזין) בתוך רצף הזיהוי של אנזים הרסטריקציה התואם על גבי ה-DNA של החיידק עצמו. המתילציה מונעת מאנזים הרסטריקציה לחתוך את ה-DNA העצמי." },
+            { id: 'w10q14', question: "איזה סוג חומר תורשתי אופייני לרוב הבקטריופאג'ים?", options: [ { text: "RNA חד-גדילי", correct: false }, { text: "RNA דו-גדילי", correct: false }, { text: "DNA דו-גדילי", correct: true }, { text: "DNA חד-גדילי", correct: false } ], explanation: "בעוד שיש מגוון רחב של גנומים נגיפיים, רובם המכריע של הבקטריופאג'ים שנחקרו הם בעלי גנום DNA דו-גדילי (dsDNA)." },
+            { id: 'w10q15', question: "מערכת CRISPR-Cas היא דוגמה ל:", options: [ { text: "מנגנון שכפול ויראלי", correct: false }, { text: "אנזים רסטריקציה", correct: false }, { text: "מערכת הגנה חיידקית נרכשת כנגד פאג'ים ופלסמידים", correct: true }, { text: "חלבון בקפסיד של פאג'", correct: false } ], explanation: "מערכת CRISPR-Cas מאפשרת לחיידק 'לזכור' רצפי DNA זר שבהם נתקל בעבר (על ידי שילוב מקטעים מהם בגנום החיידקי באזור ה-CRISPR) ולהשתמש במידע זה כדי לכוון אנזימי Cas לחתוך ולהשמיד DNA זר תואם בהדבקות עתידיות." },
+            { id: 'w10q16', question: "באיזה שלב במחזור הליטי מסונתזים חלבוני הקפסיד של הפאג'?", options: [ { text: "היצמדות (Attachment)", correct: false }, { text: "חדירה (Penetration)", correct: false }, { text: "סינתזה (Synthesis) - בשלב מאוחר (late proteins)", correct: true }, { text: "שחרור (Release)", correct: false } ], explanation: "סינתזת חלבוני הקפסיד (חלבוני מבנה) מתרחשת בשלב מאוחר יחסית של הסינתזה, לאחר שכפול הגנום הנגיפי וסינתזת החלבונים המוקדמים (early proteins) הדרושים לשכפול ולהשתלטות על התא." },
+            { id: 'w10q17', question: "וירוס T4 הוא דוגמה קלאסית ל:", options: [ { text: "רטרווירוס", correct: false }, { text: "בקטריופאג' בעל מבנה מורכב (ראש וזנב) ומחזור ליטי", correct: true }, { text: "וירוס צמחי", correct: false }, { text: "וירוס RNA עטוף", correct: false } ], explanation: "פאג' T4, המדביק E. coli, הוא אחד הבקטריופאג'ים הנחקרים ביותר, בעל מבנה 'חללית' אופייני עם ראש איקוזהדרלי וזנב מורכב, והוא מבצע מחזור הדבקה ליטי." },
+            { id: 'w10q18', question: "מהי תופעת 'חיסון' (Superinfection immunity) בחיידק ליזוגני?", options: [ { text: "החיידק הופך עמיד לכל סוגי הוירוסים", correct: false }, { text: "החיידק מפתח יכולת לתקוף פאג'ים", correct: false }, { text: "הנוכחות של פרופאג' מונעת הדבקה מוצלחת על ידי פאג'ים נוספים מאותו סוג", correct: true }, { text: "החיידק מייצר נוגדנים נגד הפאג'", correct: false } ], explanation: "הפרופאג' מייצר חלבונים (כמו רפרסורים) המדכאים את ביטוי הגנים של הפאג'. חלבונים אלו יכולים גם לדכא את הביטוי של גנים מפאג'ים נוספים מאותו סוג המנסים להדביק את התא, ובכך למנוע הדבקת-על." },
+            { id: 'w10q19', question: "מה נכון לגבי רטרווירוסים כמו HIV?", options: [ { text: "הגנום שלהם הוא DNA דו-גדילי", correct: false }, { text: "הם משתמשים ב-RNA פולימראז נגיפי לשכפול הגנום", correct: false }, { text: "הם משתמשים באנזים רוורס טרנסקריפטאז ליצירת DNA מ-RNA", correct: true }, { text: "הם מתרבים אך ורק במחזור ליטי", correct: false } ], explanation: "רטרווירוסים הם וירוסי RNA ייחודיים המביאים איתם את האנזים רוורס טרנסקריפטאז, המאפשר להם ליצור עותק DNA דו-גדילי מהגנום ה-RNA שלהם לאחר החדירה לתא הפונדקאי. ה-DNA הנגיפי משתלב לאחר מכן בגנום הפונדקאי." },
+            { id: 'w10q20', question: "מה מאפשר לבקטריופאג' כמו T4 להזריק את ה-DNA שלו דרך דופן הפפטידוגליקן של החיידק?", options: [ { text: "לחץ אוסמוטי גבוה בתוך הקפסיד", correct: false }, { text: "נוכחות אנזים דמוי ליזוזים בבסיס הזנב של הפאג'", correct: true }, { text: "שימוש בפורינים בממברנה החיצונית", correct: false }, { text: "פגיעה מכנית על ידי סיבי הזנב", correct: false } ], explanation: "לבסיס הזנב של פאג' T4 יש פעילות אנזימטית דמוית ליזוזים, המפרקת מקומית את שכבת הפפטידוגליקן ומאפשרת לצינור הזנב לחדור דרך הדופן ולהזריק את ה-DNA לציטופלסמה." },
+             { id: 'w10q21', question: "מדוע כימות וירוסים באמצעות מיקרוסקופ אלקטרונים אינו מבדיל בין ויריונים מדביקים ללא-מדביקים?", options: [ { text: "כי המיקרוסקופ אינו יכול להגדיל מספיק", correct: false }, { text: "כי לא ניתן לראות וירוסים כלל במיקרוסקופ", correct: false }, { text: "כי המיקרוסקופ מזהה חלקיקים נגיפיים שלמים פיזית, אך לא את יכולתם להדביק", correct: true }, { text: "כי הוירוסים נהרסים בהכנה למיקרוסקופ", correct: false } ], explanation: "מיקרוסקופ אלקטרונים מאפשר לראות ו'לספור' חלקיקים בעלי מורפולוגיה נגיפית, אך הוא אינו יכול לקבוע אם חלקיקים אלו שלמים מבחינה גנטית ותפקודית ומסוגלים להשלים מחזור הדבקה." },
+             { id: 'w10q22', question: "מה נכון לגבי הגנום של וירוס השפעת (Influenza)?", options: [ { text: "הוא DNA דו-גדילי יחיד ומעגלי", correct: false }, { text: "הוא RNA חד-גדילי המורכב ממספר מקטעים נפרדים", correct: true }, { text: "הוא RNA דו-גדילי רציף", correct: false }, { text: "הוא DNA חד-גדילי", correct: false } ], explanation: "וירוס השפעת הוא וירוס RNA חד-גדילי שלילי (-) שהגנום שלו מחולק ל-8 מקטעים נפרדים. מבנה מקוטע זה מאפשר ערבוב גנטי (reassortment) כאשר שני זנים שונים מדביקים את אותו תא, ותורם לשינויים האנטיגניים המהירים של הוירוס." },
+             { id: 'w10q23', question: "מה נדרש כדי שפאג' מתון יעבור אינדוקציה ויתחיל מחזור ליטי?", options: [ { text: "נוכחות של חיידק F+", correct: false }, { text: "מחסור בנוטריינטים חיוניים לחיידק", correct: false }, { text: "אות עקה הגורם נזק ל-DNA החיידקי (כמו קרינת UV)", correct: true }, { text: "טמפרטורה נמוכה מאוד", correct: false } ], explanation: "אינדוקציה מתרחשת לרוב כאשר התא הפונדקאי נכנס למצב עקה, במיוחד כזו הפוגעת ב-DNA. נזק ל-DNA מפעיל את מערכת SOS החיידקית, הכוללת את החלבון RecA, אשר בין היתר גורם לפירוק הרפרסור הנגיפי (כמו cI בפאג' למדא) שאחראי לשמירה על המצב הליזוגני." },
+             { id: 'w10q24', question: "וירוס הגורם להפיכת תא נורמלי לתא סרטני נקרא:", options: [ { text: "וירוס ליטי", correct: false }, { text: "וירוס ליזוגני", correct: false }, { text: "וירוס אונקוגני (Oncogenic virus)", correct: true }, { text: "בקטריופאג'", correct: false } ], explanation: "וירוסים אונקוגניים הם וירוסים הנושאים גנים (אונקוגנים) או משפיעים על ביטוי גנים תאיים באופן שגורם לאובדן בקרת הגדילה התקינה ולהתמרה סרטנית של התא הפונדקאי." },
+             { id: 'w10q25', question: "מהי אחת הדרכים שבהן וירוסים עטופים חודרים לתאי פונדקאי אאוקריוטיים?", options: [ { text: "הזרקת החומר התורשתי דרך הדופן", correct: false }, { text: "איחוי (Fusion) של המעטפת הנגיפית עם ממברנת התא", correct: true }, { text: "פירוק אנזימטי של ממברנת התא", correct: false }, { text: "מעבר דרך תעלות חלבוניות ייעודיות", correct: false } ], explanation: "וירוסים עטופים רבים חודרים לתא על ידי איחוי המעטפת השומנית שלהם עם ממברנת התא הפונדקאי, תהליך המתווך על ידי חלבונים נגיפיים ספציפיים במעטפת. תהליך זה משחרר את הנוקלאוקפסיד ישירות לציטופלסמה." },
+             { id: 'w10q26', question: "וירואיד (Viroid) הוא:", options: [ { text: "וירוס חסר קפסיד", correct: false }, { text: "מולקולת RNA קטנה, מעגלית וחד-גדילית הגורמת למחלות בצמחים", correct: true }, { text: "חלקיק חלבוני מדביק", correct: false }, { text: "שלב ביניים במחזור החיים של רטרווירוס", correct: false } ], explanation: "וירואידים הם הפתוגנים הקטנים ביותר הידועים. הם מורכבים מ-RNA בלבד, ללא קידוד לחלבונים, ומתרבים בתאי צמח תוך ניצול מנגנוני השעתוק של הפונדקאי." },
+             { id: 'w10q27', question: "הספציפיות של היצמדות פאג' לחיידק נקבעת בעיקר על ידי:", options: [ { text: "סוג ה-DNA של הפאג'", correct: false }, { text: "האינטראקציה בין חלבוני הזנב/היצמדות של הפאג' לרצפטורים על פני החיידק", correct: true }, { text: "טמפרטורת הסביבה", correct: false }, { text: "נוכחות אנטיביוטיקה", correct: false } ], explanation: "ההיצמדות הראשונית, שהיא שלב קריטי בהדבקה, היא תהליך ספציפי מאוד המבוסס על זיהוי והתאמה מבנית בין חלבונים ייעודיים על פני הוירוס (למשל בסיבי הזנב של פאג' T4) למולקולות ספציפיות (רצפטורים) על פני שטח התא הפונדקאי." },
+             { id: 'w10q28', question: "באיזו שיטה ניתן להעריך בצורה המדויקת ביותר את ריכוז הויריונים *המדביקים* בדגימה?", options: [ { text: "מיקרוסקופיה אלקטרונית", correct: false }, { text: "PCR כמותי לגילוי DNA/RNA נגיפי", correct: false }, { text: "Plaque assay", correct: true }, { text: "מדידת עכירות (OD)", correct: false } ], explanation: "Plaque assay היא השיטה הסטנדרטית למדידת כייל (titer) של וירוסים המסוגלים להשלים מחזור הדבקה ליטי ולהרוס תאים, כלומר וירוסים פעילים ומדביקים. שיטות אחרות מודדות נוכחות פיזית של חלקיקים או חומצות גרעין, ללא קשר ליכולת ההדבקה." },
+             { id: 'w10q29', question: "פאג' למדא (λ) הוא דוגמה לפאג':", options: [ { text: "ליטי בלבד", correct: false }, { text: "מתון (מסוגל גם לליזווגניה וגם לליזיס)", correct: true }, { text: "בעל גנום RNA", correct: false }, { text: "המדביק תאי אדם", correct: false } ], explanation: "פאג' למדא, המדביק E. coli, הוא המודל הקלאסי לחקר הבחירה בין המסלול הליטי למסלול הליזוגני, והבקרה הגנטית המורכבת המעורבת בהחלטה זו." },
+             { id: 'w10q30', question: "מה נכון לגבי שחרור וירוסים עטופים מתאי פונדקאי?", options: [ { text: "הוא תמיד כרוך בליזיס מיידי של התא", correct: false }, { text: "הוא מתרחש לרוב בתהליך הנצה (Budding) דרך ממברנת התא", correct: true }, { text: "הוא דורש נוכחות של אנזימי רסטריקציה", correct: false }, { text: "הוא מתרחש רק בשלב הליקוי", correct: false } ], explanation: "וירוסים עטופים רבים משתחררים מהתא בתהליך הנצה, שבו הנוקלאוקפסיד הנגיפי 'דוחף' את ממברנת התא החוצה ומתעטף בחלק ממנה תוך כדי ניתוק מהתא. תהליך זה לא בהכרח הורג את התא באופן מיידי." }
+        ];
+
+
+        // --- MCQ JavaScript Logic for Week 10 (Use unique names like _w10) ---
+         let currentMCQIndex_w10 = 0;
+         let score_w10 = 0;
+         let userAnswers_w10 = {};
+         let viewMode_w10 = 'single';
+         const mcqsContainer_w10 = document.getElementById('mcqs-container');
+         const resultsContainer_w10 = document.getElementById('results');
+         const mcqNav_w10 = document.getElementById('mcq-nav');
+         const mcqCounterElement_w10 = document.getElementById('mcq-counter');
+         const prevBtn_w10 = document.getElementById('prev-mcq-btn');
+         const nextBtn_w10 = document.getElementById('next-mcq-btn');
+         const viewToggleBtn_w10 = document.getElementById('view-toggle-btn');
+         let shuffledMCQs_w10 = [];
+
+         function shuffleArray(array) { /* ... */
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+         function renderMCQElement_w10(mcq, index) { /* ... */
+            let shuffledOptions = [...mcq.options];
+            shuffleArray(shuffledOptions);
+
+            let optionsHTML = '<ul class="options">';
+            shuffledOptions.forEach(option => {
+                const isSelected = userAnswers_w10[mcq.id] === option.text;
+                 optionsHTML += `<li data-correct="${option.correct}" class="${isSelected ? 'selected' : ''}">${option.text}</li>`;
+             });
+             optionsHTML += '</ul>';
+
+             const isAnswered = mcq.id in userAnswers_w10;
+             const correctOptionText = mcq.options.find(opt => opt.correct).text;
+             const userAnswer = userAnswers_w10[mcq.id];
+             const wasCorrect = isAnswered && userAnswer === correctOptionText;
+
+             const mcqElement = document.createElement('div');
+             mcqElement.classList.add('mcq');
+             mcqElement.id = `mcq-${mcq.id}`; // Unique ID
+             if (isAnswered) {
+                mcqElement.classList.add('mcq-answered');
+             }
+
+             mcqElement.innerHTML = `
+                 <p class="question-text">${index + 1}. ${mcq.question}</p>
+                 ${optionsHTML}
+                 <div class="feedback" style="display: ${isAnswered ? 'block' : 'none'};">
+                     ${isAnswered ? (wasCorrect ? 'נכון!' : 'לא נכון.') : ''}
+                 </div>
+                 <div class="explanation" style="display: ${isAnswered ? 'block' : 'none'};">
+                     ${mcq.explanation}
+                 </div>
+             `;
+
+            if (isAnswered) {
+                const optionsLi = mcqElement.querySelectorAll('.options li');
+                optionsLi.forEach(li => {
+                    li.classList.add('answered');
+                    if (li.textContent === userAnswer) {
+                        li.classList.add(wasCorrect ? 'correct' : 'incorrect');
+                    } else if (li.dataset.correct === 'true' && !wasCorrect) {
+                         li.classList.add('correct');
+                     }
+                 });
+                 const feedbackDiv = mcqElement.querySelector('.feedback');
+                 feedbackDiv.classList.add(wasCorrect ? 'correct' : 'incorrect');
+             }
+
+            if (!isAnswered) {
+                const optionsElements = mcqElement.querySelectorAll('.options li');
+                 optionsElements.forEach(optionEl => {
+                     optionEl.addEventListener('click', () => checkAnswer_w10(mcq.id, optionEl, mcqElement));
+                 });
+             }
+
+            return mcqElement;
+         }
+         function displayMCQs_w10() { /* ... */
+             mcqsContainer_w10.innerHTML = '';
+             resultsContainer_w10.style.display = 'none';
+
+             if (viewMode_w10 === 'single') {
+                 mcqNav_w10.style.display = 'flex';
+                 mcqCounterElement_w10.style.display = 'block';
+                 mcqCounterElement_w10.textContent = `שאלה ${currentMCQIndex_w10 + 1} מתוך ${shuffledMCQs_w10.length}`;
+                 const mcqElement = renderMCQElement_w10(shuffledMCQs_w10[currentMCQIndex_w10], currentMCQIndex_w10);
+                 mcqsContainer_w10.appendChild(mcqElement);
+                 updateNavButtons_w10();
+             } else { // 'all' mode
+                 mcqNav_w10.style.display = 'none';
+                 mcqCounterElement_w10.style.display = 'none';
+                 shuffledMCQs_w10.forEach((mcq, index) => {
+                     const mcqElement = renderMCQElement_w10(mcq, index);
+                     mcqsContainer_w10.appendChild(mcqElement);
+                 });
+                 updateResultsDisplay_w10();
+                 resultsContainer_w10.style.display = 'block';
+             }
+         }
+         function checkAnswer_w10(mcqId, selectedOptionEl, mcqElement) { /* ... */
+             if (userAnswers_w10[mcqId]) return;
+
+             const isCorrect = selectedOptionEl.getAttribute('data-correct') === 'true';
+             const feedbackEl = mcqElement.querySelector('.feedback');
+             const explanationEl = mcqElement.querySelector('.explanation');
+             const optionsUl = mcqElement.querySelector('.options');
+             const allOptions = optionsUl.querySelectorAll('li');
+
+             userAnswers_w10[mcqId] = selectedOptionEl.textContent;
+
+             mcqElement.classList.add('mcq-answered');
+             allOptions.forEach(opt => {
+                 opt.classList.add('answered');
+             });
+
+             if (isCorrect) {
+                 score_w10++;
+             }
+
+             selectedOptionEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+             feedbackEl.textContent = isCorrect ? 'נכון!' : 'לא נכון.';
+             feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+             feedbackEl.style.display = 'block';
+             explanationEl.style.display = 'block';
+
+             if (!isCorrect) {
+                 allOptions.forEach(opt => {
+                     if (opt.getAttribute('data-correct') === 'true') {
+                         opt.classList.add('correct');
+                     }
+                 });
+             }
+
+             if (viewMode_w10 === 'all') {
+                 updateResultsDisplay_w10();
+             }
+         }
+         function updateResultsDisplay_w10() { /* ... */
+            const answeredCount = Object.keys(userAnswers_w10).length;
+             resultsContainer_w10.innerHTML = `ענית על ${answeredCount} מתוך ${shuffledMCQs_w10.length}<br>ציון נוכחי: ${score_w10} מתוך ${answeredCount || 0}`;
+             resultsContainer_w10.style.display = 'block';
+         }
+         function updateNavButtons_w10() { /* ... */
+            prevBtn_w10.disabled = currentMCQIndex_w10 === 0;
+            nextBtn_w10.disabled = currentMCQIndex_w10 === shuffledMCQs_w10.length - 1;
+         }
+         function nextMCQ_w10() { /* ... */
+            if (currentMCQIndex_w10 < shuffledMCQs_w10.length - 1) {
+                 currentMCQIndex_w10++;
+                 displayMCQs_w10();
+             }
+             if(currentMCQIndex_w10 === shuffledMCQs_w10.length -1){
+                 updateResultsDisplay_w10();
+                 resultsContainer_w10.style.display = 'block';
+             }
+         }
+         function prevMCQ_w10() { /* ... */
+             if (currentMCQIndex_w10 > 0) {
+                 currentMCQIndex_w10--;
+                 resultsContainer_w10.style.display = 'none';
+                 displayMCQs_w10();
+             }
+         }
+         function toggleViewMode_w10() { /* ... */
+            if (viewMode_w10 === 'single') {
+                 viewMode_w10 = 'all';
+                 viewToggleBtn_w10.textContent = 'הצג שאלה בודדת';
+             } else {
+                 viewMode_w10 = 'single';
+                 viewToggleBtn_w10.textContent = 'הצג הכל';
+             }
+             displayMCQs_w10();
+         }
+
+        function initWeek10() { // Unique init function name for Week 10
+            shuffledMCQs_w10 = [...mcqData_w10];
+            shuffleArray(shuffledMCQs_w10);
+            userAnswers_w10 = {};
+            score_w10 = 0;
+            currentMCQIndex_w10 = 0;
+            viewMode_w10 = 'single';
+            viewToggleBtn_w10.textContent = 'הצג הכל';
+
+            displayMCQs_w10();
+
+            prevBtn_w10.addEventListener('click', prevMCQ_w10);
+            nextBtn_w10.addEventListener('click', nextMCQ_w10);
+            viewToggleBtn_w10.addEventListener('click', toggleViewMode_w10);
+        }
+
+        window.onload = initWeek10; // Initialize Week 10 logic
+
+    </script>
+
+</body>
+</html>

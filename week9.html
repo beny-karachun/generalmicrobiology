@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מיקרוביולוגיה כללית - שבוע 9: חומרים אנטימיקרוביאליים</title>
+    <style>
+        /* CSS Styles are identical to revised week1/2/8... etc. */
+         body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #eef5f3;
+            color: #333;
+            direction: rtl;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #006847; /* Dark green */
+            text-align: center;
+            border-bottom: 2px solid #8fbc8f; /* Dark Sea Green */
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        /* --- Flashcards Styles --- */
+        .flashcards-container {
+            perspective: 1000px;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-direction: column;
+        }
+        .flashcard {
+            width: 80%;
+            max-width: 400px;
+            height: 180px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 8px;
+            font-size: 1.2em;
+        }
+        .flashcard-front {
+            background-color: #c8e6c9;
+            color: #1b5e20;
+        }
+        .flashcard-back {
+            background-color: #a5d6a7;
+            color: #1b5e20;
+            transform: rotateY(180deg);
+            font-size: 1em;
+        }
+        .flashcard-nav {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .flashcard-nav button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .flashcard-nav button:hover {
+            background-color: #004d40;
+        }
+         #flashcard-counter {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        /* --- MCQ Styles --- */
+        .mcqs-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #view-toggle-btn {
+             padding: 6px 12px;
+             background-color: #6c757d;
+             color: white;
+             border: none;
+             border-radius: 4px;
+             cursor: pointer;
+             font-size: 0.9em;
+         }
+        #view-toggle-btn:hover {
+             background-color: #5a6268;
+         }
+
+        .mcq {
+            background-color: #ffffff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #004d40;
+        }
+        .options {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .options li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: 2px solid transparent; /* Add transparent border for layout consistency */
+        }
+        .options li:hover {
+            background-color: #ced4da;
+        }
+        /* Styles for answer states */
+        .options li.answered.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .options li.answered.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+         /* Style for selected but not yet confirmed answer (optional) */
+        .options li.selected {
+             border-color: #007bff;
+         }
+         /* Disable options after answering */
+        .mcq-answered .options li {
+            cursor: default;
+            pointer-events: none;
+             opacity: 0.8;
+        }
+        .mcq-answered .options li.correct,
+        .mcq-answered .options li.incorrect {
+            opacity: 1; /* Keep selected/correct ones fully visible */
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+             border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-right: 5px solid #8fbc8f;
+            font-size: 0.95em;
+            border-radius: 4px;
+        }
+        .mcq-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .mcq-navigation button {
+            padding: 10px 20px;
+            background-color: #00796b; /* Teal */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .mcq-navigation button:hover:not(:disabled) {
+            background-color: #004d40; /* Darker Teal */
+        }
+        .mcq-navigation button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #results {
+            text-align: center;
+            font-size: 1.4em;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e0f2f1;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            color: #00695c;
+        }
+         #mcq-counter {
+             text-align: center;
+             margin-bottom: 15px;
+             font-weight: bold;
+             color: #555;
+         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>שבוע 9: חומרים אנטימיקרוביאליים</h1>
+
+        <!-- Flashcards Section -->
+        <div class="section">
+             <h2>כרטיסיות לימוד</h2>
+             <div class="flashcards-container">
+                 <div class="flashcard" id="flashcard">
+                     <div class="flashcard-face flashcard-front">מונח</div>
+                     <div class="flashcard-face flashcard-back">הגדרה</div>
+                 </div>
+                 <div class="flashcard-nav">
+                     <button id="prev-card">הקודם</button>
+                     <button id="flip-card">הפוך</button>
+                     <button id="next-card">הבא</button>
+                 </div>
+                 <div id="flashcard-counter">כרטיס 1 מתוך X</div>
+             </div>
+        </div>
+
+        <!-- MCQs Section -->
+        <div class="section">
+             <div class="mcqs-section-header">
+                 <h2>שאלות חזרה (MCQs)</h2>
+                 <button id="view-toggle-btn">הצג הכל</button>
+             </div>
+             <div id="mcq-counter">שאלה 1 מתוך 30</div>
+             <div id="mcqs-container">
+                 <!-- MCQs will be loaded here by JavaScript -->
+             </div>
+             <div id="results" style="display: none;">
+                 תוצאה סופית תופיע כאן.
+             </div>
+             <div class="mcq-navigation" id="mcq-nav" style="display: none;">
+                 <button id="prev-mcq-btn" disabled>הקודם</button>
+                 <button id="next-mcq-btn">הבא</button>
+             </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Flashcard Data and Logic for Week 9 ---
+        const flashcardData_w9 = [
+            { term: "חומר אנטימיקרוביאלי", definition: "כימיקל, טבעי או סינתטי, שהורג או מעכב גידול של מיקרואורגניזמים." },
+            { term: "חומר סידי (Cidal agent)", definition: "חומר אנטימיקרוביאלי שהורג מיקרואורגניזמים (למשל, בקטריוצידי הורג חיידקים)." },
+            { term: "חומר ליטי (Lytic agent)", definition: "חומר סידי הגורם לליזיס (פיצוץ) של התא המיקרוביאלי (למשל, בקטריוליטי)." },
+            { term: "חומר סטטי (Static agent)", definition: "חומר אנטימיקרוביאלי שמעכב את גידול המיקרואורגניזמים, אך לא בהכרח הורג אותם (למשל, בקטריוסטטי)." },
+            { term: "MIC (Minimal Inhibitory Concentration)", definition: "הריכוז המינימלי של חומר אנטימיקרוביאלי הדרוש לעיכוב מוחלט (נראה לעין) של גידול אורגניזם מסוים בתנאי מבחנה." },
+            { term: "MLC (Minimal Lethal Concentration)", definition: "הריכוז המינימלי של חומר אנטימיקרוביאלי הדרוש להרוג אחוז מסוים (לרוב 99.9%) מאוכלוסיית האורגניזם הנבדק בתנאי מבחנה." },
+            { term: "שיטת דילוול במבחנה (Tube dilution)", definition: "שיטה לקביעת MIC על ידי חשיפת ריכוז קבוע של חיידקים לסדרת דילולים של החומר האנטימיקרוביאלי במצע נוזלי." },
+            { term: "שיטת דיפוזיה באגר (Agar diffusion)", definition: "שיטה להערכת רגישות חיידק לחומרים אנטימיקרוביאליים, שבה דסקיות ספוגות בחומר מונחות על אגר שנזרע בחיידק, ונמדד קוטר אזור העיכוב סביבן." },
+            { term: "Sterilant (מעקר)", definition: "חומר כימי או תהליך פיזיקלי המשמיד את כל צורות החיים המיקרוביאליות, כולל אנדוספורות." },
+            { term: "Disinfectant (מחטא)", definition: "חומר כימי המשמיד את רוב המיקרואורגניזמים הפתוגניים על משטחים דוממים, אך לא בהכרח אנדוספורות." },
+            { term: "Antiseptic (אנטיספטי)", definition: "חומר כימי המיועד להפחתת מספר המיקרואורגניזמים על רקמות חיות (כמו עור) לרמה בטוחה." },
+            { term: "Sanitizer", definition: "חומר כימי המפחית את אוכלוסיית המיקרואורגניזמים לרמה הנחשבת בטוחה על פי תקני בריאות הציבור (נפוץ בתעשיית המזון)." },
+            { term: "אנטיביוטיקה", definition: "חומר אנטימיקרוביאלי, לרוב ממקור טבעי (מיוצר על ידי מיקרואורגניזמים אחרים), הפועל בריכוזים נמוכים כנגד חיידקים." },
+            { term: "Growth factor analog (אנלוג לפקטור גידול)", definition: "חומר הדומה במבנהו למטבוליט חיוני (כמו ויטמין או חומצת אמינו), המתחרה איתו ומשבש מסלול מטבולי חיוני בתא." },
+            { term: "סולפונאמידים (Sulfa drugs)", definition: "קבוצת תרופות אנטיבקטריאליות סינתטיות, אנלוגים מבניים של PABA, המעכבות סינתזה של חומצה פולית בחיידקים." },
+            { term: "PABA (Para-aminobenzoic acid)", definition: "חומר מוצא חיוני לסינתזת חומצה פולית בחיידקים רבים." },
+            { term: "בטא-לקטם (β-Lactam)", definition: "קבוצה גדולה של אנטיביוטיקות (כמו פניצילין וצפלוספורין) המכילות טבעת בטא-לקטם במבנה שלהן ופוגעות בסינתזת דופן הפפטידוגליקן בחיידקים." },
+            { term: "פניצילין (Penicillin)", definition: "האנטיביוטיקה הראשונה שהתגלתה, מופקת מפטריית Penicillium, מעכבת את האנזים טרנספפטידאז החיוני ליצירת קשרי צילוב בפפטידוגליקן." },
+            { term: "טרנספפטידאז (Transpeptidase)", definition: "אנזים חיידקי המכונה גם Penicillin-Binding Protein (PBP), היוצר את קשרי הפפטיד בין שרשראות הפפטידוגליקן במהלך סינתזת הדופן." },
+            { term: "בטא-לקטמאז (β-Lactamase)", definition: "אנזים המיוצר על ידי חיידקים עמידים, המפרק את טבעת הבטא-לקטם ובכך מנטרל את פעילות האנטיביוטיקה." },
+            { term: "אמינוגליקוזידים (Aminoglycosides)", definition: "קבוצת אנטיביוטיקות (כמו סטרפטומיצין, גנטמיצין) הנקשרות לתת-היחידה 30S של הריבוזום החיידקי וגורמות לשגיאות בקריאת ה-mRNA ולעיכוב סינתזת חלבונים." },
+            { term: "טטרציקלינים (Tetracyclines)", definition: "קבוצת אנטיביוטיקות הנקשרות לתת-היחידה 30S של הריבוזום ומונעות קישור של aminoacyl-tRNA לאתר A, ובכך מעכבות סינתזת חלבונים." },
+            { term: "מקרולידים (Macrolides)", definition: "קבוצת אנטיביוטיקות (כמו אריתרומיצין) הנקשרות לתת-היחידה 50S של הריבוזום ומעכבות את שלב הטרנסלוקציה בסינתזת חלבונים." },
+            { term: "קווינולונים (Quinolones)", definition: "קבוצת אנטיביוטיקות סינתטיות (כמו ציפרופלוקסצין) המעכבות את האנזים DNA גיראז (gyrase) בחיידקים, החיוני לשכפול, תיקון ושעתוק DNA." },
+            { term: "DNA גיראז (DNA gyrase)", definition: "אנזים ממשפחת הטופואיזומראזות, המכניס פיתולי-על שליליים ל-DNA החיידקי ומאפשר את פתיחת הסליל הכפול." },
+            { term: "ריפמפין (Rifampicin)", definition: "אנטיביוטיקה המעכבת את האנזים RNA פולימראז התלוי ב-DNA בחיידקים, ובכך חוסמת את תהליך השעתוק." },
+            { term: "פולימיקסינים (Polymyxins)", definition: "קבוצת אנטיביוטיקות הפוגעות בממברנה הציטופלסמית של חיידקים גרם-שליליים על ידי אינטראקציה עם LPS, וגורמות לדליפת תוכן התא." },
+            { term: "עמידות לאנטיביוטיקה (Antibiotic resistance)", definition: "יכולתו הנרכשת של מיקרואורגניזם לגדול ולהתרבות בנוכחות ריכוז של אנטיביוטיקה שבדרך כלל היה מעכב או הורג אותו." },
+            { term: "מנגנוני עמידות", definition: "דרכים שבהן חיידק יכול להתגבר על פעילות אנטיביוטיקה, כגון: שינוי אתר המטרה, פירוק האנטיביוטיקה, הוצאת האנטיביוטיקה מהתא (efflux pumps), או שינוי מסלול מטבולי." },
+            { term: "Horizontal Gene Transfer (HGT)", definition: "העברת חומר גנטי בין אורגניזמים שאינם צאצאים ישירים, למשל על ידי טרנספורמציה, טרנסדוקציה או קוניוגציה. דרך נפוצה להפצת גנים לעמידות." }
+        ];
+
+
+        let currentCardIndex_w9 = 0;
+        // ... (rest of flashcard JS logic, using unique variable names like _w9)
+        const flashcardElement_w9 = document.getElementById('flashcard');
+        const flashcardFront_w9 = flashcardElement_w9.querySelector('.flashcard-front');
+        const flashcardBack_w9 = flashcardElement_w9.querySelector('.flashcard-back');
+        const flipButton_w9 = document.getElementById('flip-card');
+        const nextButton_w9 = document.getElementById('next-card');
+        const prevButton_w9 = document.getElementById('prev-card');
+        const cardCounterElement_w9 = document.getElementById('flashcard-counter');
+
+        function displayCard_w9(index) {
+            if (!flashcardElement_w9) return;
+            const card = flashcardData_w9[index];
+            flashcardFront_w9.textContent = card.term;
+            flashcardBack_w9.textContent = card.definition;
+            flashcardElement_w9.classList.remove('is-flipped');
+            cardCounterElement_w9.textContent = `כרטיס ${index + 1} מתוך ${flashcardData_w9.length}`;
+        }
+        function flipCard_w9() { flashcardElement_w9.classList.toggle('is-flipped'); }
+        function nextCard_w9() { currentCardIndex_w9 = (currentCardIndex_w9 + 1) % flashcardData_w9.length; displayCard_w9(currentCardIndex_w9); }
+        function prevCard_w9() { currentCardIndex_w9 = (currentCardIndex_w9 - 1 + flashcardData_w9.length) % flashcardData_w9.length; displayCard_w9(currentCardIndex_w9); }
+
+        flipButton_w9.addEventListener('click', flipCard_w9);
+        nextButton_w9.addEventListener('click', nextCard_w9);
+        prevButton_w9.addEventListener('click', prevCard_w9);
+        if (flashcardData_w9.length > 0) displayCard_w9(currentCardIndex_w9);
+
+
+        // --- MCQ Data and Logic for Week 9 ---
+        const mcqData_w9 = [
+             { id: 'w9q1', question: "מהו MIC (Minimal Inhibitory Concentration)?", options: [ { text: "הריכוז הנמוך ביותר של אנטיביוטיקה ההורג 99.9% מהחיידקים", correct: false }, { text: "הריכוז הגבוה ביותר של אנטיביוטיקה שאינו גורם לתופעות לוואי", correct: false }, { text: "הריכוז הנמוך ביותר של אנטיביוטיקה המעכב גידול נראה לעין של חיידק", correct: true }, { text: "הריכוז שבו האנטיביוטיקה גורמת לליזיס של החיידק", correct: false } ], explanation: "MIC הוא מדד ליעילות העיכוב (פעילות סטטית) של חומר אנטימיקרוביאלי כנגד חיידק מסוים בתנאי מבחנה." },
+             { id: 'w9q2', question: "חומר בקטריוסטטי (Bacteriostatic):", options: [ { text: "הורג חיידקים באופן מיידי", correct: false }, { text: "גורם לליזיס של דופן התא החיידקי", correct: false }, { text: "מעכב את גידול החיידקים אך לא בהכרח הורג אותם", correct: true }, { text: "פעיל רק נגד וירוסים", correct: false } ], explanation: "חומרים סטטיים עוצרים את התרבות החיידקים, ומאפשרים למערכת החיסון של המאכסן לחסל את הזיהום. הסרת החומר הסטטי עשויה לאפשר לחיידקים לחדש את גידולם." },
+             { id: 'w9q3', question: "איזו שיטה משמשת לקביעת MIC על ידי מדידת קוטר אזור עיכוב סביב דסקית?", options: [ { text: "Tube dilution (דילוול במבחנה)", correct: false }, { text: "Agar diffusion (דיפוזיה באגר) / Kirby-Bauer test", correct: true }, { text: "PCR", correct: false }, { text: "Flow cytometry", correct: false } ], explanation: "בשיטת הדיפוזיה באגר (מבחן קירבי-באואר), גודל אזור העיכוב סביב דסקית הספוגה באנטיביוטיקה נמצא ביחס הפוך ל-MIC. ככל שאזור העיכוב גדול יותר, החיידק רגיש יותר (וה-MIC נמוך יותר)." },
+             { id: 'w9q4', question: "מה ההבדל העיקרי בין Disinfectant ל-Antiseptic?", options: [ { text: "Disinfectant הורג נבגים, Antiseptic לא", correct: false }, { text: "Disinfectant מיועד למשטחים דוממים, Antiseptic לרקמות חיות", correct: true }, { text: "Antiseptic תמיד הורג, Disinfectant תמיד מעכב", correct: false }, { text: "אין הבדל משמעותי ביניהם", correct: false } ], explanation: "ההבחנה העיקרית היא בשימוש המיועד ובפוטנציאל הנזק לרקמות. Disinfectants חזקים יותר אך רעילים מדי לשימוש על עור או פצעים, בעוד Antiseptics בטוחים יותר לשימוש על רקמות חיות אך יעילותם עשויה להיות נמוכה יותר." },
+             { id: 'w9q5', question: "פניצילין ותרופות ממשפחת הבטא-לקטם פוגעות בעיקר ב:", options: [ { text: "סינתזת חלבונים בריבוזום", correct: false }, { text: "שלמות הממברנה הציטופלסמית", correct: false }, { text: "סינתזת הפפטידוגליקן בדופן התא", correct: true }, { text: "שכפול ה-DNA החיידקי", correct: false } ], explanation: "אנטיביוטיקות בטא-לקטם מעכבות את האנזים טרנספפטידאז (PBP), החיוני ליצירת קשרי הצילוב בין שרשראות הפפטידוגליקן, ובכך מחלישות את דופן התא ומובילות לליזיס אוסמוטי." },
+             { id: 'w9q6', question: "מהו מנגנון הפעולה של תרופות סולפה (Sulfonamides)?", options: [ { text: "עיכוב DNA gyrase", correct: false }, { text: "עיכוב תחרותי של סינתזת חומצה פולית", correct: true }, { text: "פגיעה בממברנה הציטופלסמית", correct: false }, { text: "פירוק טבעת הבטא-לקטם", correct: false } ], explanation: "תרופות סולפה הן אנלוגים מבניים של PABA. הן מתחרות עם PABA על הקישור לאנזים Dihydropteroate synthase, ובכך מעכבות את השלב הראשון בסינתזת חומצה פולית, החיונית לייצור נוקלאוטידים בחיידקים." },
+             { id: 'w9q7', question: "אנטיביוטיקות ממשפחת האמינוגליקוזידים (כמו סטרפטומיצין) פועלות על ידי:", options: [ { text: "עיכוב סינתזת דופן התא", correct: false }, { text: "פגיעה בשלמות הממברנה", correct: false }, { text: "קישור לתת-יחידה 30S של הריבוזום וגרימת שגיאות תרגום", correct: true }, { text: "עיכוב האנזים RNA פולימראז", correct: false } ], explanation: "אמינוגליקוזידים נקשרים לאתר A בתת-היחידה 30S וגורמים לצימוד שגוי של aminoacyl-tRNA לקודון ה-mRNA, מה שמוביל ליצירת חלבונים פגומים ולמוות תאי." },
+             { id: 'w9q8', question: "איזו קבוצת אנטיביוטיקות ידועה ביכולתה לעכב את האנזים DNA gyrase?", options: [ { text: "מקרולידים", correct: false }, { text: "טטרציקלינים", correct: false }, { text: "קווינולונים", correct: true }, { text: "פניצילינים", correct: false } ], explanation: "קווינולונים (ופלואורוקווינולונים) הם מעכבים ספציפיים של DNA gyrase ו-Topoisomerase IV בחיידקים, אנזימים החיוניים לניהול פיתולי-העל ב-DNA במהלך שכפול, שעתוק ותיקון." },
+            { id: 'w9q9', question: "מהו אחד ממנגנוני העמידות הנפוצים כנגד אנטיביוטיקות בטא-לקטם?", options: [ { text: "שינוי במבנה הריבוזום", correct: false }, { text: "ייצור אנזימי בטא-לקטמאז המפרקים את האנטיביוטיקה", correct: true }, { text: "הגברת ייצור חומצה פולית", correct: false }, { text: "עיבוי משמעותי של הקפסולה", correct: false } ], explanation: "בטא-לקטמאזות הן אנזימים המבצעים הידרוליזה של טבעת הבטא-לקטם, שהיא החלק הפעיל באנטיביוטיקות אלו, והופכים אותן ללא פעילות. זהו מנגנון עמידות נפוץ ומשמעותי קלינית." },
+            { id: 'w9q10', question: "אנטיביוטיקה המעכבת RNA פולימראז חיידקי היא:", options: [ { text: "ציפרופלוקסצין", correct: false }, { text: "אריתרומיצין", correct: false }, { text: "ריפמפין (ריפמפיצין)", correct: true }, { text: "ונקומיצין", correct: false } ], explanation: "ריפמפין נקשר לתת-יחידה β של RNA פולימראז התלוי ב-DNA בחיידקים, ומונע את אתחול תהליך השעתוק (יצירת RNA)." },
+            { id: 'w9q11', question: "מה ההבדל בין חומר סידי לחומר ליטי?", options: [ { text: "חומר ליטי פועל מהר יותר", correct: false }, { text: "חומר ליטי גורם לפירוק התא, חומר סידי רק הורג", correct: true }, { text: "חומר סידי פוגע ב-DNA, חומר ליטי פוגע בדופן", correct: false }, { text: "חומר סידי תמיד טבעי, חומר ליטי תמיד סינתטי", correct: false } ], explanation: "כל החומרים הליטיים הם גם סידיים (הורגים), אך לא כל החומרים הסידיים הם ליטיים. חומר ליטי גורם באופן ספציפי להרס המבנה הפיזי של התא (ליזיס)." },
+            { id: 'w9q12', question: "ריכוז אנטיביוטיקה שהורג 90% מהחיידקים בתרבית, אך לא 99.9%, הוא:", options: [ { text: "גבוה מ-MLC99.9", correct: false }, { text: "נמוך מ-MIC", correct: false }, { text: "שווה ל-MIC", correct: false }, { text: "גבוה מ-MIC אך עשוי להיות נמוך מ-MLC99.9", correct: true } ], explanation: "MLC מוגדר לרוב כהריגה של 99.9%. ריכוז שהורג 'רק' 90% הוא בהכרח מעל ה-MIC (שמעכב גידול) אך לא בהכרח מגיע לסף ה-MLC המחמיר יותר." },
+            { id: 'w9q13', question: "אלכוהול בריכוז 70% משמש בדרך כלל כ:", options: [ { text: "Sterilant", correct: false }, { text: "Antiseptic ו-Disinfectant", correct: true }, { text: "Sanitizer בלבד", correct: false }, { text: "אנטיביוטיקה רחבת טווח", correct: false } ], explanation: "אלכוהול (כמו אתנול או איזופרופנול) בריכוזים של 60-85% יעיל כנגד חיידקים וגטטיביים, פטריות ווירוסים מסוימים. הוא משמש לחיטוי העור (אנטיספטי) ולחיטוי משטחים וכלים קטנים (דיסאינפקטנט), אך אינו יעיל כנגד נבגים." },
+            { id: 'w9q14', question: "איזו מולקולה מהווה אתר מטרה ספציפי וחשוב לאנטיביוטיקות בטא-לקטם?", options: [ { text: "LPS", correct: false }, { text: "RNA פולימראז", correct: false }, { text: "טרנספפטידאז (PBP)", correct: true }, { text: "תת-יחידה 30S של הריבוזום", correct: false } ], explanation: "הדמיון המבני בין טבעת הבטא-לקטם למבנה ה-D-Ala-D-Ala שבקצה שרשרת הפפטיד בפפטידוגליקן מאפשר לאנטיביוטיקה להיקשר לאתר הפעיל של אנזים הטרנספפטידאז ולעכב אותו באופן בלתי הפיך." },
+            { id: 'w9q15', question: "מדוע תרופות סולפה יעילות בעיקר נגד חיידקים ולא נגד תאי אדם?", options: [ { text: "כי לתאי אדם אין ריבוזומים", correct: false }, { text: "כי תאי אדם אינם מסנתזים חומצה פולית אלא קולטים אותה מהמזון", correct: true }, { text: "כי לתאי אדם אין DNA gyrase", correct: false }, { text: "כי לתאי אדם יש דופן תא שונה", correct: false } ], explanation: "בני אדם, בניגוד לחיידקים רבים, אינם יכולים לסנתז בעצמם חומצה פולית וחייבים לקבל אותה (כויטמין) מהתזונה. לכן, עיכוב מסלול הסינתזה הזה על ידי תרופות סולפה פוגע בחיידקים באופן סלקטיבי." },
+            { id: 'w9q16', question: "כיצד משאבות Efflux תורמות לעמידות לאנטיביוטיקה?", options: [ { text: "הן מפרקות את האנטיביוטיקה מחוץ לתא", correct: false }, { text: "הן משנות את אתר המטרה של האנטיביוטיקה", correct: false }, { text: "הן שואבות באופן פעיל את האנטיביוטיקה אל מחוץ לתא החיידקי", correct: true }, { text: "הן מונעות את כניסת האנטיביוטיקה דרך פורינים", correct: false } ], explanation: "משאבות Efflux הן חלבוני ממברנה המוציאים באופן פעיל (תוך שימוש באנרגיה) מגוון חומרים, כולל אנטיביוטיקות, מתוך הציטופלסמה או הפריפלסמה אל מחוץ לתא, ובכך מורידים את ריכוז האנטיביוטיקה באתר המטרה." },
+            { id: 'w9q17', question: "מה פירוש המושג 'טווח פעולה רחב' (Broad-spectrum) של אנטיביוטיקה?", options: [ { text: "האנטיביוטיקה הורגת מהר מאוד", correct: false }, { text: "האנטיביוטיקה יעילה נגד מגוון רחב של חיידקים (גם גרם-חיוביים וגם גרם-שליליים)", correct: true }, { text: "האנטיביוטיקה פועלת רק נגד סוג ספציפי של חיידק", correct: false }, { text: "האנטיביוטיקה גורמת למעט תופעות לוואי", correct: false } ], explanation: "אנטיביוטיקה רחבת טווח יעילה כנגד קבוצות מגוונות של חיידקים, בניגוד לאנטיביוטיקה צרת טווח שפועלת רק נגד קבוצה מצומצמת או ספציפית." },
+            { id: 'w9q18', question: "ונקומיצין (Vancomycin) היא אנטיביוטיקה גדולה הפועלת נגד חיידקים גרם-חיוביים על ידי:", options: [ { text: "עיכוב RNA פולימראז", correct: false }, { text: "קישור לקצה D-Ala-D-Ala של הפפטיד בפפטידוגליקן וחסימת הטרנספפטידציה והטרנסגליקוזילציה", correct: true }, { text: "יצירת חורים בממברנה הציטופלסמית", correct: false }, { text: "עיכוב תחרותי של PABA", correct: false } ], explanation: "ונקומיצין נקשר לקצה שרשרת הפפטיד (D-Ala-D-Ala) ומונע פיזית את הגישה של אנזימי הטרנספפטידאז והטרנסגליקוזילאז, החיוניים ליצירת קשרי הצילוב והארכת שרשראות הפפטידוגליקן בדופן." },
+            { id: 'w9q19', question: "מדוע ונקומיצין אינה יעילה נגד רוב החיידקים הגרם-שליליים?", options: [ { text: "כי לחיידקים גרם-שליליים אין פפטידוגליקן", correct: false }, { text: "כי ונקומיצין היא מולקולה גדולה שאינה יכולה לחדור דרך הממברנה החיצונית", correct: true }, { text: "כי לחיידקים גרם-שליליים יש ריבוזומים שונים", correct: false }, { text: "כי חיידקים גרם-שליליים מייצרים בטא-לקטמאז", correct: false } ], explanation: "הממברנה החיצונית של חיידקים גרם-שליליים מהווה מחסום בפני מולקולות גדולות כמו ונקומיצין, ומונעת מהן להגיע לאתר המטרה (הפפטידוגליקן) בפריפלסמה." },
+            { id: 'w9q20', question: "חומר המשמיד פטריות נקרא:", options: [ { text: "Bactericide", correct: false }, { text: "Virucide", correct: false }, { text: "Fungicide", correct: true }, { text: "Sporicide", correct: false } ], explanation: "הסיומת '-cide' מציינת הרג. Fungicide הוא חומר שהורג פטריות (Fungi)." },
+            { id: 'w9q21', question: "איזה מנגנון פעולה *אינו* שייך לאנטיביוטיקות?", options: [ { text: "עיכוב סינתזת דופן התא", correct: false }, { text: "עיכוב סינתזת חלבון", correct: false }, { text: "פגיעה ישירה בליבת האנדוספורה", correct: true }, { text: "פגיעה בסינתזת חומצות גרעין", correct: false } ], explanation: "אנדוספורות הן רדומות ועמידות מאוד, ורוב האנטיביוטיקות פועלות על תהליכים מטבוליים פעילים בתאים וגטטיביים. פגיעה באנדוספורות דורשת לרוב חומרים מעקרים (sterilants) אגרסיביים יותר." },
+            { id: 'w9q22', question: "שימוש ממושך באנטיביוטיקה רחבת טווח עלול לגרום ל:", options: [ { text: "חיזוק מערכת החיסון", correct: false }, { text: "הרג חיידקים פתוגניים בלבד", correct: false }, { text: "פגיעה במיקרוביום הטבעי של הגוף והתפתחות זיהומי משנה (כמו קנדידה)", correct: true }, { text: "ירידה בסיכון לפתח עמידות לאנטיביוטיקה", correct: false } ], explanation: "אנטיביוטיקות רחבות טווח פוגעות לא רק בפתוגן אלא גם בחיידקים 'טובים' המהווים חלק מהפלורה הטבעית (המיקרוביום). דיכוי המיקרוביום עלול לאפשר שגשוג של אורגניזמים עמידים (כמו פטריות או חיידקים עמידים) ולגרום לזיהומים משניים." },
+            { id: 'w9q23', question: "תרכובות יוד משמשות לעיתים קרובות כ:", options: [ { text: "אנטיביוטיקה לבליעה", correct: false }, { text: "Antiseptic לחיטוי עור ופצעים", correct: true }, { text: "Sterilant לעיקור ציוד רפואי", correct: false }, { text: "חומר משמר במזון", correct: false } ], explanation: "יוד ותרכובותיו (כמו פובידון-יוד, 'פולידין') הם חומרים אנטיספטיים יעילים הפוגעים בחלבונים ובממברנות של מיקרואורגניזמים. הם משמשים לחיטוי עור לפני ניתוח ולטיפול בפצעים." },
+            { id: 'w9q24', question: "מהי הבעיה העיקרית בשימוש נרחב באנטיביוטיקה בחקלאות (למטרות עידוד גדילה)?", options: [ { text: "העלות הגבוהה של האנטיביוטיקות", correct: false }, { text: "הצטברות האנטיביוטיקה בבשר ובחלב", correct: false }, { text: "סלקציה והפצה של זני חיידקים עמידים לאנטיביוטיקה, העלולים לעבור לאדם", correct: true }, { text: "פגיעה באיכות המזון", correct: false } ], explanation: "שימוש קבוע במינונים נמוכים של אנטיביוטיקה במזון לבעלי חיים יוצר לחץ סלקציה חזק להתפתחות והפצת עמידות בקרב חיידקים (גם פתוגניים וגם קומנסליים) בבעלי החיים ובסביבה. חיידקים עמידים אלו ו/או הגנים לעמידות שלהם עלולים לעבור לאדם דרך שרשרת המזון או מגע ישיר." },
+            { id: 'w9q25', question: "איזה אתר מטרה הופך את פניצילין לפחות יעיל נגד חיידקי Mycoplasma?", options: [ { text: "הריבוזומים שלהם שונים", correct: false }, { text: "אין להם DNA gyrase", correct: false }, { text: "אין להם דופן תא המכיל פפטידוגליקן", correct: true }, { text: "הם מייצרים בטא-לקטמאז באופן טבעי", correct: false } ], explanation: "פניצילין פוגע בסינתזת הפפטידוגליקן. חיידקי מיקופלזמה הם ייחודיים בכך שאין להם דופן תא כלל, ולכן הם עמידים באופן טבעי לפניצילין ולשאר האנטיביוטיקות הפוגעות בדופן." },
+            { id: 'w9q26', question: "חיידק שפיתח מוטציה בגן המקודד לחלבון הריבוזומלי S12 עשוי להפוך עמיד ל:", options: [ { text: "פניצילין", correct: false }, { text: "סטרפטומיצין (אמינוגליקוזיד)", correct: true }, { text: "ונקומיצין", correct: false }, { text: "סולפונאמידים", correct: false } ], explanation: "סטרפטומיצין ושאר האמינוגליקוזידים נקשרים לתת-היחידה 30S של הריבוזום, הכוללת את החלבון S12. שינוי באתר הקישור כתוצאה ממוטציה בגן המקודד לחלבון זה הוא מנגנון עמידות ידוע." },
+            { id: 'w9q27', question: "איזה מהבאים הוא דוגמה לחומר סינתטי המשמש כאנטיביוטיקה?", options: [ { text: "פניצילין G", correct: false }, { text: "סטרפטומיצין", correct: false }, { text: "ציפרופלוקסצין (קווינולון)", correct: true }, { text: "אריתרומיצין", correct: false } ], explanation: "בעוד פניצילין, סטרפטומיצין ואריתרומיצין הם תוצרים טבעיים של מיקרואורגניזמים (עם אפשרות לשינויים סמי-סינתטיים), קווינולונים כמו ציפרופלוקסצין הם קבוצה של חומרים אנטי-בקטריאליים סינתטיים לחלוטין." },
+            { id: 'w9q28', question: "הגדרת אנטיביוטיקה במובן הקלאסי *אינה* כוללת:", options: [ { text: "חומר טבעי המיוצר על ידי מיקרואורגניזם", correct: false }, { text: "חומר הפעיל בריכוזים נמוכים", correct: false }, { text: "חומר הפוגע ספציפית בחיידקים", correct: false }, { text: "חומר סינתטי לחלוטין כמו תרופות סולפה", correct: true } ], explanation: "ההגדרה המקורית והמחמירה של אנטיביוטיקה מתייחסת לחומרים המיוצרים על ידי מיקרואורגניזמים (פטריות, חיידקים) הפוגעים במיקרואורגניזמים אחרים. חומרים סינתטיים לחלוטין, גם אם פועלים נגד חיידקים, אינם נכללים בהגדרה הקלאסית הזו, אם כי בשימוש יומיומי לעיתים מכנים גם אותם 'אנטיביוטיקות'." },
+            { id: 'w9q29', question: "מה היתרון הפוטנציאלי בשימוש בשילוב של שתי אנטיביוטיקות שונות (Combination therapy)?", options: [ { text: "הוזלת עלות הטיפול", correct: false }, { text: "השפעה סינרגיסטית (יעילות גבוהה מסכום היעילויות הבודדות) והפחתת הסיכון להתפתחות עמידות", correct: true }, { text: "הפחתת תופעות הלוואי באופן גורף", correct: false }, { text: "האפשרות לתת מינונים גבוהים יותר מכל תרופה", correct: false } ], explanation: "שילוב אנטיביוטיקות יכול להגביר את יעילות הטיפול (סינרגיה) אם הן פועלות במנגנונים שונים המשלימים זה את זה. בנוסף, קשה יותר לחיידק לפתח עמידות לשתי תרופות בו-זמנית, מה שיכול להאט את התפתחות העמידות." },
+            { id: 'w9q30', question: "מטופל מקבל אנטיביוטיקה בקטריוסטטית לטיפול בזיהום. הצלחת הטיפול תלויה במידה רבה ב:", options: [ { text: "משך הטיפול הקצר ביותר האפשרי", correct: false }, { text: "יכולת האנטיביוטיקה לגרום לליזיס מהיר", correct: false }, { text: "תפקוד תקין של מערכת החיסון של המטופל", correct: true }, { text: "היעדר מוחלט של תופעות לוואי", correct: false } ], explanation: "תרופות בקטריוסטטיות עוצרות את התרבות החיידקים, אך אינן מחסלות אותם ישירות. ה'ניקוי' הסופי של הזיהום מתבצע על ידי מערכת החיסון של המטופל (כמו פאגוציטים). לכן, יעילות הטיפול בחומר סטטי תלויה מאוד בכשירות מערכת החיסון." }
+        ];
+
+
+        // --- MCQ JavaScript Logic for Week 9 (Use unique names like _w9) ---
+         let currentMCQIndex_w9 = 0;
+         let score_w9 = 0;
+         let userAnswers_w9 = {};
+         let viewMode_w9 = 'single';
+         const mcqsContainer_w9 = document.getElementById('mcqs-container');
+         const resultsContainer_w9 = document.getElementById('results');
+         const mcqNav_w9 = document.getElementById('mcq-nav');
+         const mcqCounterElement_w9 = document.getElementById('mcq-counter');
+         const prevBtn_w9 = document.getElementById('prev-mcq-btn');
+         const nextBtn_w9 = document.getElementById('next-mcq-btn');
+         const viewToggleBtn_w9 = document.getElementById('view-toggle-btn');
+         let shuffledMCQs_w9 = [];
+
+         function shuffleArray(array) { /* ... */
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+         function renderMCQElement_w9(mcq, index) { /* ... */
+            let shuffledOptions = [...mcq.options];
+            shuffleArray(shuffledOptions);
+
+            let optionsHTML = '<ul class="options">';
+            shuffledOptions.forEach(option => {
+                const isSelected = userAnswers_w9[mcq.id] === option.text;
+                 optionsHTML += `<li data-correct="${option.correct}" class="${isSelected ? 'selected' : ''}">${option.text}</li>`;
+             });
+             optionsHTML += '</ul>';
+
+             const isAnswered = mcq.id in userAnswers_w9;
+             const correctOptionText = mcq.options.find(opt => opt.correct).text;
+             const userAnswer = userAnswers_w9[mcq.id];
+             const wasCorrect = isAnswered && userAnswer === correctOptionText;
+
+             const mcqElement = document.createElement('div');
+             mcqElement.classList.add('mcq');
+             mcqElement.id = `mcq-${mcq.id}`; // Unique ID
+             if (isAnswered) {
+                mcqElement.classList.add('mcq-answered');
+             }
+
+             mcqElement.innerHTML = `
+                 <p class="question-text">${index + 1}. ${mcq.question}</p>
+                 ${optionsHTML}
+                 <div class="feedback" style="display: ${isAnswered ? 'block' : 'none'};">
+                     ${isAnswered ? (wasCorrect ? 'נכון!' : 'לא נכון.') : ''}
+                 </div>
+                 <div class="explanation" style="display: ${isAnswered ? 'block' : 'none'};">
+                     ${mcq.explanation}
+                 </div>
+             `;
+
+            if (isAnswered) {
+                const optionsLi = mcqElement.querySelectorAll('.options li');
+                optionsLi.forEach(li => {
+                    li.classList.add('answered');
+                    if (li.textContent === userAnswer) {
+                        li.classList.add(wasCorrect ? 'correct' : 'incorrect');
+                    } else if (li.dataset.correct === 'true' && !wasCorrect) {
+                         li.classList.add('correct');
+                     }
+                 });
+                 const feedbackDiv = mcqElement.querySelector('.feedback');
+                 feedbackDiv.classList.add(wasCorrect ? 'correct' : 'incorrect');
+             }
+
+            if (!isAnswered) {
+                const optionsElements = mcqElement.querySelectorAll('.options li');
+                 optionsElements.forEach(optionEl => {
+                     optionEl.addEventListener('click', () => checkAnswer_w9(mcq.id, optionEl, mcqElement));
+                 });
+             }
+
+            return mcqElement;
+         }
+         function displayMCQs_w9() { /* ... */
+             mcqsContainer_w9.innerHTML = '';
+             resultsContainer_w9.style.display = 'none';
+
+             if (viewMode_w9 === 'single') {
+                 mcqNav_w9.style.display = 'flex';
+                 mcqCounterElement_w9.style.display = 'block';
+                 mcqCounterElement_w9.textContent = `שאלה ${currentMCQIndex_w9 + 1} מתוך ${shuffledMCQs_w9.length}`;
+                 const mcqElement = renderMCQElement_w9(shuffledMCQs_w9[currentMCQIndex_w9], currentMCQIndex_w9);
+                 mcqsContainer_w9.appendChild(mcqElement);
+                 updateNavButtons_w9();
+             } else { // 'all' mode
+                 mcqNav_w9.style.display = 'none';
+                 mcqCounterElement_w9.style.display = 'none';
+                 shuffledMCQs_w9.forEach((mcq, index) => {
+                     const mcqElement = renderMCQElement_w9(mcq, index);
+                     mcqsContainer_w9.appendChild(mcqElement);
+                 });
+                 updateResultsDisplay_w9();
+                 resultsContainer_w9.style.display = 'block';
+             }
+         }
+         function checkAnswer_w9(mcqId, selectedOptionEl, mcqElement) { /* ... */
+             if (userAnswers_w9[mcqId]) return;
+
+             const isCorrect = selectedOptionEl.getAttribute('data-correct') === 'true';
+             const feedbackEl = mcqElement.querySelector('.feedback');
+             const explanationEl = mcqElement.querySelector('.explanation');
+             const optionsUl = mcqElement.querySelector('.options');
+             const allOptions = optionsUl.querySelectorAll('li');
+
+             userAnswers_w9[mcqId] = selectedOptionEl.textContent;
+
+             mcqElement.classList.add('mcq-answered');
+             allOptions.forEach(opt => {
+                 opt.classList.add('answered');
+             });
+
+             if (isCorrect) {
+                 score_w9++;
+             }
+
+             selectedOptionEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+             feedbackEl.textContent = isCorrect ? 'נכון!' : 'לא נכון.';
+             feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+             feedbackEl.style.display = 'block';
+             explanationEl.style.display = 'block';
+
+             if (!isCorrect) {
+                 allOptions.forEach(opt => {
+                     if (opt.getAttribute('data-correct') === 'true') {
+                         opt.classList.add('correct');
+                     }
+                 });
+             }
+
+             if (viewMode_w9 === 'all') {
+                 updateResultsDisplay_w9();
+             }
+         }
+         function updateResultsDisplay_w9() { /* ... */
+            const answeredCount = Object.keys(userAnswers_w9).length;
+             resultsContainer_w9.innerHTML = `ענית על ${answeredCount} מתוך ${shuffledMCQs_w9.length}<br>ציון נוכחי: ${score_w9} מתוך ${answeredCount || 0}`;
+             resultsContainer_w9.style.display = 'block';
+         }
+         function updateNavButtons_w9() { /* ... */
+            prevBtn_w9.disabled = currentMCQIndex_w9 === 0;
+            nextBtn_w9.disabled = currentMCQIndex_w9 === shuffledMCQs_w9.length - 1;
+         }
+         function nextMCQ_w9() { /* ... */
+            if (currentMCQIndex_w9 < shuffledMCQs_w9.length - 1) {
+                 currentMCQIndex_w9++;
+                 displayMCQs_w9();
+             }
+             if(currentMCQIndex_w9 === shuffledMCQs_w9.length -1){
+                 updateResultsDisplay_w9();
+                 resultsContainer_w9.style.display = 'block';
+             }
+         }
+         function prevMCQ_w9() { /* ... */
+             if (currentMCQIndex_w9 > 0) {
+                 currentMCQIndex_w9--;
+                 resultsContainer_w9.style.display = 'none';
+                 displayMCQs_w9();
+             }
+         }
+         function toggleViewMode_w9() { /* ... */
+            if (viewMode_w9 === 'single') {
+                 viewMode_w9 = 'all';
+                 viewToggleBtn_w9.textContent = 'הצג שאלה בודדת';
+             } else {
+                 viewMode_w9 = 'single';
+                 viewToggleBtn_w9.textContent = 'הצג הכל';
+             }
+             displayMCQs_w9();
+         }
+
+        function initWeek9() { // Unique init function name for Week 9
+            shuffledMCQs_w9 = [...mcqData_w9];
+            shuffleArray(shuffledMCQs_w9);
+            userAnswers_w9 = {};
+            score_w9 = 0;
+            currentMCQIndex_w9 = 0;
+            viewMode_w9 = 'single';
+            viewToggleBtn_w9.textContent = 'הצג הכל';
+
+            displayMCQs_w9();
+
+            prevBtn_w9.addEventListener('click', prevMCQ_w9);
+            nextBtn_w9.addEventListener('click', nextMCQ_w9);
+            viewToggleBtn_w9.addEventListener('click', toggleViewMode_w9);
+        }
+
+        window.onload = initWeek9; // Initialize Week 9 logic
+
+    </script>
+
+</body>
+</html>

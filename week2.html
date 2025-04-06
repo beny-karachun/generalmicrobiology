@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מיקרוביולוגיה כללית - שבוע 2: מיון, זיהוי וגידול במעבדה</title>
+    <style>
+        /* CSS Styles are identical to the revised week1.html - Copy and paste the <style> block from revised week1.html here */
+         body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #eef5f3;
+            color: #333;
+            direction: rtl;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #006847; /* Dark green */
+            text-align: center;
+            border-bottom: 2px solid #8fbc8f; /* Dark Sea Green */
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        /* --- Flashcards Styles --- */
+        .flashcards-container {
+            perspective: 1000px;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-direction: column;
+        }
+        .flashcard {
+            width: 80%;
+            max-width: 400px;
+            height: 180px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 8px;
+            font-size: 1.2em;
+        }
+        .flashcard-front {
+            background-color: #c8e6c9;
+            color: #1b5e20;
+        }
+        .flashcard-back {
+            background-color: #a5d6a7;
+            color: #1b5e20;
+            transform: rotateY(180deg);
+            font-size: 1em;
+        }
+        .flashcard-nav {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .flashcard-nav button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .flashcard-nav button:hover {
+            background-color: #004d40;
+        }
+         #flashcard-counter {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        /* --- MCQ Styles --- */
+        .mcqs-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #view-toggle-btn {
+             padding: 6px 12px;
+             background-color: #6c757d;
+             color: white;
+             border: none;
+             border-radius: 4px;
+             cursor: pointer;
+             font-size: 0.9em;
+         }
+        #view-toggle-btn:hover {
+             background-color: #5a6268;
+         }
+
+        .mcq {
+            background-color: #ffffff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #004d40;
+        }
+        .options {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .options li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: 2px solid transparent; /* Add transparent border for layout consistency */
+        }
+        .options li:hover {
+            background-color: #ced4da;
+        }
+        /* Styles for answer states */
+        .options li.answered.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .options li.answered.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+         /* Style for selected but not yet confirmed answer (optional) */
+        .options li.selected {
+             border-color: #007bff;
+         }
+         /* Disable options after answering */
+        .mcq-answered .options li {
+            cursor: default;
+            pointer-events: none;
+             opacity: 0.8;
+        }
+        .mcq-answered .options li.correct,
+        .mcq-answered .options li.incorrect {
+            opacity: 1; /* Keep selected/correct ones fully visible */
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+             border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-right: 5px solid #8fbc8f;
+            font-size: 0.95em;
+            border-radius: 4px;
+        }
+        .mcq-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .mcq-navigation button {
+            padding: 10px 20px;
+            background-color: #00796b; /* Teal */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .mcq-navigation button:hover:not(:disabled) {
+            background-color: #004d40; /* Darker Teal */
+        }
+        .mcq-navigation button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #results {
+            text-align: center;
+            font-size: 1.4em;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e0f2f1;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            color: #00695c;
+        }
+         #mcq-counter {
+             text-align: center;
+             margin-bottom: 15px;
+             font-weight: bold;
+             color: #555;
+         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>שבוע 2: מיון, זיהוי וגידול במעבדה</h1>
+
+        <!-- Flashcards Section -->
+        <div class="section">
+             <h2>כרטיסיות לימוד</h2>
+             <div class="flashcards-container">
+                 <div class="flashcard" id="flashcard">
+                     <div class="flashcard-face flashcard-front">מונח</div>
+                     <div class="flashcard-face flashcard-back">הגדרה</div>
+                 </div>
+                 <div class="flashcard-nav">
+                     <button id="prev-card">הקודם</button>
+                     <button id="flip-card">הפוך</button>
+                     <button id="next-card">הבא</button>
+                 </div>
+                 <div id="flashcard-counter">כרטיס 1 מתוך X</div>
+             </div>
+        </div>
+
+        <!-- MCQs Section -->
+        <div class="section">
+             <div class="mcqs-section-header">
+                 <h2>שאלות חזרה (MCQs)</h2>
+                 <button id="view-toggle-btn">הצג הכל</button>
+             </div>
+             <div id="mcq-counter">שאלה 1 מתוך 30</div>
+             <div id="mcqs-container">
+                 <!-- MCQs will be loaded here by JavaScript -->
+             </div>
+             <div id="results" style="display: none;">
+                 תוצאה סופית תופיע כאן.
+             </div>
+             <div class="mcq-navigation" id="mcq-nav" style="display: none;">
+                 <button id="prev-mcq-btn" disabled>הקודם</button>
+                 <button id="next-mcq-btn">הבא</button>
+             </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Flashcard Data and Logic (Keep the existing flashcard JS - use unique names if needed) ---
+         const flashcardData_w2 = [
+             { term: "מיון (Classification)", definition: "ארגון שיטתי של אורגניזמים לקבוצות על בסיס קשרים אבולוציוניים ודמיון במאפיינים." },
+             { term: "טקסונומיה (Taxonomy)", definition: "המדע העוסק במיון, זיהוי ומתן שמות לאורגניזמים." },
+             { term: "דומיין (Domain)", definition: "הרמה הטקסונומית הגבוהה ביותר. קיימים שלושה דומיינים: Bacteria (חיידקים), Archaea (ארכאות), ו-Eukarya (אאוקריוטים)." },
+             { term: "ממלכה (Kingdom)", definition: "רמה טקסונומית מתחת לדומיין (נפוץ יותר במיון אאוקריוטים, למשל ממלכת הצמחים, ממלכת בעלי החיים)." },
+             { term: "מערכה (Phylum)", definition: "רמה טקסונומית מתחת לממלכה." },
+             { term: "מחלקה (Class)", definition: "רמה טקסונומית מתחת למערכה." },
+             { term: "סדרה (Order)", definition: "רמה טקסונומית מתחת למחלקה." },
+             { term: "משפחה (Family)", definition: "רמה טקסונומית מתחת לסדרה. שמות משפחות בחיידקים מסתיימים לרוב ב- 'aceae'." },
+             { term: "סוג (Genus)", definition: "רמה טקסונומית מתחת למשפחה. החלק הראשון בשם המדעי של אורגניזם (למשל, *Escherichia* ב- *Escherichia coli*)." },
+             { term: "מין (Species)", definition: "הרמה הטקסונומית הבסיסית ביותר. אוכלוסיית אורגניזמים בעלי מאפיינים דומים ויכולת להתרבות בינם לבין עצמם (הגדרה מורכבת יותר בפרוקריוטים). החלק השני בשם המדעי (למשל, *coli* ב- *Escherichia coli*)." },
+             { term: "זן (Strain)", definition: "תת-קבוצה בתוך מין, הנבדלת במאפיין אחד או יותר (למשל, E. coli O157:H7)." },
+             { term: "גידול מיקרואורגניזמים במעבדה", definition: "תהליך של יצירת תנאים מבוקרים (מזון, טמפ', חמצן) המאפשרים למיקרואורגניזמים להתרבות." },
+             { term: "מדיום גידול (Culture medium)", definition: "תערובת נוזלית או מוצקה המכילה את כל חומרי המזון הדרושים לגידול מיקרואורגניזמים." },
+             { term: "מדיום מוגדר (Defined medium / סינתטי)", definition: "מדיום גידול שכל מרכיביו הכימיים ידועים וכמותם מדויקת." },
+             { term: "מדיום מורכב (Complex medium / לא סינתטי)", definition: "מדיום גידול המכיל מרכיבים ממקור ביולוגי (כמו תמצית שמרים או בשר) שהרכבם הכימי המדויק אינו ידוע במלואו." },
+             { term: "מדיום העשרה (Enrichment medium)", definition: "מדיום המכיל מרכיבים ספציפיים המעודדים גידול של סוג מסוים של מיקרואורגניזם תוך דיכוי יחסי של אחרים." },
+             { term: "מדיום בררני (Selective medium)", definition: "מדיום גידול המכיל חומרים המעכבים גידול של מיקרואורגניזמים לא רצויים ומאפשרים גידול של הרצויים." },
+             { term: "מדיום מבחין (Differential medium)", definition: "מדיום גידול המאפשר להבחין בין סוגים שונים של מיקרואורגניזמים הגדלים עליו, לרוב על בסיס תכונה ביוכימית (למשל, פירוק סוכר הגורם לשינוי צבע)." },
+             { term: "תרבית טהורה (Pure culture)", definition: "תרבית המכילה רק סוג אחד (מין או זן) של מיקרואורגניזם." },
+             { term: "מושבה (Colony)", definition: "קבוצת תאים נראית לעין, שמקורה בדרך כלל מחלוקות חוזרות של תא מיקרואורגניזם בודד על פני מצע גידול מוצק." },
+             { term: "טכניקה אספטית (Aseptic technique)", definition: "מכלול שיטות עבודה שנועדו למנוע זיהום של תרביות, מצעי גידול, או אזורי עבודה סטריליים על ידי מיקרואורגניזמים לא רצויים מהסביבה." }
+         ];
+
+         let currentCardIndex_w2 = 0;
+         const flashcardElement_w2 = document.getElementById('flashcard');
+         const flashcardFront_w2 = flashcardElement_w2.querySelector('.flashcard-front');
+         const flashcardBack_w2 = flashcardElement_w2.querySelector('.flashcard-back');
+         const flipButton_w2 = document.getElementById('flip-card');
+         const nextButton_w2 = document.getElementById('next-card');
+         const prevButton_w2 = document.getElementById('prev-card');
+         const cardCounterElement_w2 = document.getElementById('flashcard-counter');
+
+         function displayCard_w2(index) {
+             if (!flashcardElement_w2) return;
+             const card = flashcardData_w2[index];
+             flashcardFront_w2.textContent = card.term;
+             flashcardBack_w2.textContent = card.definition;
+             flashcardElement_w2.classList.remove('is-flipped');
+             cardCounterElement_w2.textContent = `כרטיס ${index + 1} מתוך ${flashcardData_w2.length}`;
+         }
+         function flipCard_w2() { flashcardElement_w2.classList.toggle('is-flipped'); }
+         function nextCard_w2() { currentCardIndex_w2 = (currentCardIndex_w2 + 1) % flashcardData_w2.length; displayCard_w2(currentCardIndex_w2); }
+         function prevCard_w2() { currentCardIndex_w2 = (currentCardIndex_w2 - 1 + flashcardData_w2.length) % flashcardData_w2.length; displayCard_w2(currentCardIndex_w2); }
+
+         flipButton_w2.addEventListener('click', flipCard_w2);
+         nextButton_w2.addEventListener('click', nextCard_w2);
+         prevButton_w2.addEventListener('click', prevCard_w2);
+         if (flashcardData_w2.length > 0) displayCard_w2(currentCardIndex_w2);
+
+        // --- MCQ Data and Logic (Use unique names to avoid conflicts if running both pages' JS) ---
+        const mcqData_w2 = [
+            { id: 'w2q1', question: "מהי הרמה הטקסונומית הגבוהה ביותר המשמשת למיון כלל היצורים החיים?", options: [ { text: "ממלכה (Kingdom)", correct: false }, { text: "מערכה (Phylum)", correct: false }, { text: "דומיין (Domain)", correct: true }, { text: "סוג (Genus)", correct: false } ], explanation: "הדומיין (על-ממלכה) היא הרמה הטקסונומית הגבוהה ביותר, המחלקת את כלל היצורים החיים לשלוש קבוצות עיקריות: Bacteria, Archaea ו-Eukarya." },
+            { id: 'w2q2', question: "בכתיבת שם מדעי של חיידק, כמו *Escherichia coli*, מה מייצג החלק הראשון (Escherichia)?", options: [ { text: "את המין (Species)", correct: false }, { text: "את הסוג (Genus)", correct: true }, { text: "את המשפחה (Family)", correct: false }, { text: "את הזן (Strain)", correct: false } ], explanation: "השם המדעי מורכב משני חלקים (מינוח בינומי). החלק הראשון מציין את הסוג (Genus) ונכתב באות גדולה, והחלק השני מציין את המין (species) ונכתב באות קטנה. כל השם נכתב בכתב נטוי או עם קו תחתון." },
+            { id: 'w2q3', question: "מדיום גידול שמכיל תמצית שמרים ופפטון (תוצר פירוק חלבונים) נחשב ל:", options: [ { text: "מדיום מוגדר (סינתטי)", correct: false }, { text: "מדיום בררני בלבד", correct: false }, { text: "מדיום מורכב (לא סינתטי)", correct: true }, { text: "מדיום מבחין בלבד", correct: false } ], explanation: "מכיוון שתמצית שמרים ופפטון הם ממקור ביולוגי והרכבם הכימי המדויק אינו ידוע, המדיום נחשב למורכב. מדיום מוגדר מכיל רק רכיבים כימיים ידועים בכמויות מדויקות." },
+            { id: 'w2q4', question: "מהי המטרה העיקרית של שימוש במדיום בררני (selective medium)?", options: [ { text: "לאפשר גידול של כל סוגי החיידקים בדגימה", correct: false }, { text: "לזהות תכונות ביוכימיות של חיידקים", correct: false }, { text: "לעכב גידול של חיידקים לא רצויים ולאפשר גידול של הרצויים", correct: true }, { text: "לשמר חיידקים לטווח ארוך", correct: false } ], explanation: "מדיום בררני מכיל חומרים (כמו אנטיביוטיקה או מלחי מרה) המעכבים באופן סלקטיבי גידול של קבוצות מסוימות של מיקרואורגניזמים, ובכך 'בוררים' ומאפשרים גידול לקבוצות אחרות." },
+            { id: 'w2q5', question: "מצע MacConkey Agar מכיל מלחי מרה וקריסטל ויולט המעכבים חיידקי גרם חיוביים, וגם לקטוז ואינדיקטור pH המאפשרים להבחין בין חיידקים מפרקי לקטוז (ורודים) לאלו שאינם (חסרי צבע). כיצד ניתן לסווג מצע זה?", options: [ { text: "בררני בלבד", correct: false }, { text: "מבחין בלבד", correct: false }, { text: "גם בררני וגם מבחין", correct: true }, { text: "מצע העשרה", correct: false } ], explanation: "מצע MacConkey הוא גם בררני (מעכב גרם חיוביים) וגם מבחין (מבדיל בין מפרקי לקטוז לאלו שאינם על פי שינוי צבע המושבות)." },
+            { id: 'w2q6', question: "מושבה (colony) של חיידקים על מצע מוצק נוצרת כתוצאה מ:", options: [ { text: "התלכדות של מספר חיידקים שונים", correct: false }, { text: "חלוקות תא חוזרות ונשנות של חיידק בודד (או מספר קטן של תאים צמודים)", correct: true }, { text: "תנועה אקראית של חיידקים על פני המצע", correct: false }, { text: "יצירת נבגים על ידי החיידק", correct: false } ], explanation: "באופן אידיאלי, כל מושבה מתפתחת מחיידק בודד שהונח על המצע והתרבה פעמים רבות באותו מקום, עד ליצירת גוש תאים נראה לעין." },
+            { id: 'w2q7', question: "איזה מהבאים הוא עקרון מרכזי בטכניקה אספטית?", options: [ { text: "שימוש בכפפות לא סטריליות", correct: false }, { text: "עבודה ליד להבת בונזן ליצירת סביבת אוויר עולה סטרילית", correct: true }, { text: "פתיחת צלחות פטרי והשארתן חשופות לאוויר לזמן ממושך", correct: false }, { text: "שימוש באותה לולאת חיסון (inoculating loop) למספר תרביות ללא עיקור", correct: false } ], explanation: "עבודה בקרבת להבה יוצרת זרם אוויר חם עולה המרחיק מיקרואורגניזמים מהאוויר ויוצר אזור עבודה סטרילי יחסית, ובכך מפחיתה את הסיכון לזיהום." },
+            { id: 'w2q8', question: "מה ההבדל העיקרי בין מין (Species) לזן (Strain)?", options: [ { text: "זן הוא רמה טקסונומית גבוהה יותר ממין", correct: false }, { text: "מין מכיל מספר זנים הנבדלים בתכונות משניות", correct: true }, { text: "לכל מין יש רק זן אחד", correct: false }, { text: "זן מכיל מספר מינים שונים", correct: false } ], explanation: "מין הוא הקבוצה הכללית, ואילו זן הוא תת-קבוצה בתוך המין המציגה הבדלים קטנים יחסית, כמו רגישות שונה לאנטיביוטיקה, יכולת יצירת רעלן מסוים, או הבדלים אנטיגניים (כמו ב-E. coli O157:H7)." },
+            { id: 'w2q9', question: "מדוע חשוב לכתוב שמות מדעיים של מיקרואורגניזמים לפי כללים מוגדרים (למשל, *Genus species*)?", options: [ { text: "כדי שהשם יהיה קצר יותר", correct: false }, { text: "כדי לאפשר זיהוי חד-משמעי ותקשורת מדעית ברורה ברחבי העולם", correct: true }, { text: "כדי להסתיר את זהות האורגניזם", correct: false }, { text: "כדי שרק מומחים יוכלו להבין", correct: false } ], explanation: "שיטת המינוח הבינומי (שם סוג ושם מין) וכללי הכתיבה (כתב נטוי/קו תחתון, אות גדולה לסוג) יוצרים סטנדרט בינלאומי המונע בלבול ומאפשר למדענים מתרבויות ושפות שונות להתייחס לאותו אורגניזם בדיוק." },
+            { id: 'w2q10', question: "איזה סוג מדיום גידול היית בוחר אם מטרתך היא לגדל חיידק ספציפי שדורש תנאי גידול מאוד מדויקים ומיוחדים, שאינם ידועים במלואם?", options: [ { text: "מדיום מוגדר (סינתטי)", correct: false }, { text: "מדיום מורכב", correct: true }, { text: "מים מזוקקים בלבד", correct: false }, { text: "מדיום בררני המכיל אנטיביוטיקה", correct: false } ], explanation: "כאשר דרישות הגידול המדויקות אינן ידועות, או כאשר מנסים לגדל חיידק 'מפונק' (fastidious), מדיום מורכב (המכיל תמציות עשירות) מספק מגוון רחב של חומרי מזון ופקטורי גידול, ומגדיל את הסיכוי שהחיידק ימצא את כל הדרוש לו." },
+             { id: 'w2q11', question: "הדומיינים Bacteria ו-Archaea מורכבים מאורגניזמים:", options: [ { text: "אאוקריוטיים רב-תאיים", correct: false }, { text: "פרוקריוטיים", correct: true }, { text: "אאוקריוטיים חד-תאיים בלבד", correct: false }, { text: "וירוסים בלבד", correct: false } ], explanation: "שני הדומיינים, Bacteria (חיידקים) ו-Archaea (ארכאות), כוללים אורגניזמים פרוקריוטיים, כלומר תאים חסרי גרעין מוגדר." },
+             { id: 'w2q12', question: "תיאור צורת מושבה כ-'rhizoid' מתייחס למראה:", options: [ { text: "נקודה קטנה", correct: false }, { text: "מעגל מושלם עם שוליים חלקים", correct: false }, { text: "דמוי שורשים מסועפים", correct: true }, { text: "חוטי או סיבי", correct: false } ], explanation: "מושבה בעלת מראה 'rhizoid' מאופיינת בגדילה לא סדירה המתפשטת על פני המצע בצורה דמוית שורשים או קורים מסועפים." },
+             { id: 'w2q13', question: "מהי המטרה של קבלת תרבית טהורה (pure culture) במעבדה?", options: [ { text: "לגדל כמה שיותר סוגי חיידקים יחד", correct: false }, { text: "לחקור את המאפיינים של מיקרואורגניזם ספציפי ללא הפרעה מאחרים", correct: true }, { text: "למנוע לחלוטין גידול של חיידקים", correct: false }, { text: "לשמור את הדגימה המקורית כפי שהיא", correct: false } ], explanation: "תרבית טהורה חיונית כדי שנוכל לחקור את התכונות הפיזיולוגיות, הביוכימיות והגנטיות של מיקרואורגניזם מסוים מבלי שהתוצאות יושפעו מנוכחותם של מיקרואורגניזמים אחרים." },
+             { id: 'w2q14', question: "Agar, חומר מקריש נפוץ במצעי גידול מוצקים, מופק מ:", options: [ { text: "בעלי חיים", correct: false }, { text: "אצות ים", correct: true }, { text: "פטריות", correct: false }, { text: "חיידקים", correct: false } ], explanation: "אגר הוא פוליסכריד המופק מדפנות התא של אצות ים אדומות מסוימות. הוא משמש כחומר מקריש אידיאלי מכיוון שרוב החיידקים אינם יכולים לפרק אותו והוא נשאר מוצק בטמפרטורות הדגרה נפוצות." },
+             { id: 'w2q15', question: "מדוע חשוב לעקר (sterilize) מדיום גידול לפני השימוש?", options: [ { text: "כדי להוסיף לו צבע", correct: false }, { text: "כדי להרוג את כל המיקרואורגניזמים הקיימים בו ולמנוע זיהום", correct: true }, { text: "כדי לגרום לו להיות נוזלי", correct: false }, { text: "כדי להפוך אותו למזין יותר", correct: false } ], explanation: "עיקור מבטיח שמדיום הגידול נקי מכל מיקרואורגניזם חי לפני שזורעים עליו את התרבית הרצויה. ללא עיקור, חיידקים או פטריות מהסביבה עלולים לגדול ולזהם את התרבית." },
+             { id: 'w2q16', question: "תיאור שולי מושבה כ-'entire' פירושו:", options: [ { text: "שוליים משוננים", correct: false }, { text: "שוליים חוטיים", correct: false }, { text: "שוליים גליים", correct: false }, { text: "שוליים חלקים ועגולים", correct: true } ], explanation: "המונח 'entire' בתיאור מורפולוגיית מושבה מתייחס לשוליים חלקים, אחידים ועגולים, ללא בליטות או שינויים." },
+             { id: 'w2q17', question: "איזה סוג מדיום יוצר תנאים מועדפים לגידול חיידקים מסוימים הנמצאים בריכוז נמוך בדגימה מעורבת?", options: [ { text: "מדיום מבחין", correct: false }, { text: "מדיום העשרה", correct: true }, { text: "מדיום מורכב סטנדרטי", correct: false }, { text: "מדיום סינתטי מינימלי", correct: false } ], explanation: "מדיום העשרה נועד 'להעשיר' את האוכלוסייה בחיידקים מסוימים על ידי יצירת תנאים (למשל, חומר מזון ייחודי) המועדפים עליהם במיוחד, כך שהם יתרבו מהר יותר משאר החיידקים בדגימה." },
+             { id: 'w2q18', question: "הסיווג הטקסונומי של חיידקים מבוסס כיום בעיקר על:", options: [ { text: "צורת המושבה בלבד", correct: false }, { text: "השוואת רצפי DNA, במיוחד של גנים שמורים כמו 16S rRNA", correct: true }, { text: "סוג התנועה של החיידק", correct: false }, { text: "הצבע של החיידק", correct: false } ], explanation: "בעוד שתכונות פנוטיפיות (כמו מורפולוגיה וביוכימיה) עדיין משמשות לזיהוי, המיון המודרני והבנת הקשרים האבולוציוניים (פילוגנטיקה) מבוססים במידה רבה על השוואת רצפי DNA, כאשר הגן ל-16S rRNA הוא כלי מרכזי במיון חיידקים וארכאות." },
+             { id: 'w2q19', question: "מדיום גידול נוזלי שהפך עכור (turbid) לאחר הדגרה מעיד על:", options: [ { text: "כישלון הניסוי", correct: false }, { text: "גידול של מיקרואורגניזמים", correct: true }, { text: "שהמדיום סטרילי לחלוטין", correct: false }, { text: "שהטמפרטורה הייתה נמוכה מדי", correct: false } ], explanation: "עכירות במדיום נוזלי נגרמת כתוצאה מפיזור אור על ידי מספר רב של תאים מיקרוסקופיים (חיידקים, שמרים) שגדלו והתרבו במדיום." },
+             { id: 'w2q20', question: "מהי חשיבות הזיהוי של זן (strain) ספציפי של חיידק, מעבר לזיהוי המין?", options: [ { text: "אין לכך חשיבות מעשית", correct: false }, { text: "זנים שונים באותו מין יכולים להיות בעלי פתוגניות שונה או עמידות שונה לאנטיביוטיקה", correct: true }, { text: "כל הזנים של אותו מין זהים לחלוטין", correct: false }, { text: "זה חשוב רק לצורך מתן שם מדעי מלא", correct: false } ], explanation: "זיהוי הזן יכול להיות קריטי, במיוחד ברפואה ובאפידמיולוגיה. לדוגמה, זן E. coli O157:H7 הוא פתוגני מסוכן הגורם למחלות קשות, בעוד שרוב זני ה-E. coli אינם מזיקים ואף מועילים." },
+             { id: 'w2q21', question: "הדומיין Eukarya כולל:", options: [ { text: "חיידקים וארכאות בלבד", correct: false }, { text: "צמחים, בעלי חיים, פטריות ופרוטיסטים", correct: true }, { text: "וירוסים ובקטריופאג'ים", correct: false }, { text: "רק אורגניזמים חד-תאיים", correct: false } ], explanation: "הדומיין Eukarya מאגד את כל האורגניזמים בעלי תאים אאוקריוטיים (עם גרעין מוגדר), כולל יצורים חד-תאיים (כמו שמרים ואמבות) ויצורים רב-תאיים (צמחים ובעלי חיים)." },
+             { id: 'w2q22', question: "איזו שיטה משמשת להעברת כמות קטנה של תרבית חיידקים נוזלית למצע מוצק במטרה לקבל מושבות בודדות?", options: [ { text: "זריעת בידוד (Streak plate)", correct: true }, { text: "צביעת גרם", correct: false }, { text: "שימוש במדיום העשרה", correct: false }, { text: "מדידת עכירות", correct: false } ], explanation: "זריעת בידוד היא טכניקה שבה מורחים דגימה על פני צלחת אגר בסדרה של פסים, כאשר כל סדרת פסים מורידה את ריכוז החיידקים, במטרה שבשלב האחרון יתקבלו תאים בודדים שיתפתחו למושבות נפרדות." },
+             { id: 'w2q23', question: "מצע דם אגר (Blood agar) מכיל דם כבשים ומשמש לזיהוי חיידקים הגורמים להמוליזה (פירוק תאי דם אדומים). כיצד נסווג אותו?", options: [ { text: "מדיום בררני", correct: false }, { text: "מדיום מוגדר", correct: false }, { text: "מדיום מבחין", correct: true }, { text: "מדיום סינתטי", correct: false } ], explanation: "דם אגר מאפשר גידול של חיידקים רבים (אינו בררני במיוחד), אך הוא מבחין ביניהם על בסיס יכולתם לגרום להמוליזה (יצירת אזור בהיר סביב המושבה), ולכן הוא מדיום מבחין." },
+             { id: 'w2q24', question: "הסיבה העיקרית שרוב המיקרואורגניזמים בטבע אינם ניתנים לגידול במעבדה היא:", options: [ { text: "הם קטנים מדי", correct: false }, { text: "אין להם DNA", correct: false }, { text: "איננו יודעים את תנאי הגידול המדויקים או שיש תלות באורגניזמים אחרים", correct: true }, { text: "הם עמידים לכל סוגי המצעים", correct: false } ], explanation: "מיקרואורגניזמים רבים בטבע חיים באינטראקציות מורכבות ותלויים במטבוליטים או בתנאים ספציפיים שקשה לשחזר במעבדה. זהו אתגר מרכזי במיקרוביולוגיה המכונה 'The Great Plate Count Anomaly'." },
+             { id: 'w2q25', question: "שם המשפחה Enterobacteriaceae מרמז כי חיידקים אלו:", options: [ { text: "גדלים רק בטמפרטורות גבוהות", correct: false }, { text: "קשורים בדרך כלל למערכת העיכול (מעי - enteron)", correct: true }, { text: "גורמים תמיד למחלות נשימה", correct: false }, { text: "הם חסרי יכולת תנועה", correct: false } ], explanation: "השם Enterobacteriaceae נגזר מהמילה היוונית enteron (מעי), ומציין משפחה גדולה של חיידקי גרם-שליליים הנפוצים במערכת העיכול של בני אדם ובעלי חיים, אם כי ניתן למצוא אותם גם בסביבות אחרות." },
+             { id: 'w2q26', question: "איזה סוג מידע לא ניתן לקבל ישירות מהתבוננות במורפולוגיה של מושבה?", options: [ { text: "גודל המושבה", correct: false }, { text: "צבע המושבה", correct: false }, { text: "הרגישות של החיידק לאנטיביוטיקה", correct: true }, { text: "צורת שולי המושבה", correct: false } ], explanation: "מורפולוגיית המושבה מתארת מאפיינים חזותיים כמו גודל, צורה, צבע, מרקם ושוליים. קביעת הרגישות לאנטיביוטיקה דורשת מבחנים ספציפיים (כמו מבחן דיפוזיית דיסקיות)." },
+             { id: 'w2q27', question: "מיון פנוטיפי של חיידקים מתבסס על:", options: [ { text: "השוואת רצפי הגנום", correct: false }, { text: "תכונות נצפות ומדידות (מורפולוגיה, ביוכימיה, צביעה)", correct: true }, { text: "ניתוח האברונים התוך-תאיים", correct: false }, { text: "סוג הוירוסים התוקפים אותם", correct: false } ], explanation: "מיון פנוטיפי מסתמך על התכונות הניתנות לצפייה או למדידה של האורגניזם, בניגוד למיון גנוטיפי המבוסס על ניתוח החומר התורשתי." },
+             { id: 'w2q28', question: "במעבדה קלינית, מדוע לעיתים קרובות מגדלים דגימות על מספר סוגי מצעים במקביל?", options: [ { text: "כדי לחסוך במקום באינקובטור", correct: false }, { text: "כדי להגדיל את הסיכוי לבודד ולזהות פתוגנים אפשריים שונים בעלי דרישות גידול שונות", correct: true }, { text: "כדי לבדוק אם המצעים סטריליים", correct: false }, { text: "כי זה נראה יותר מרשים", correct: false } ], explanation: "דגימה קלינית (כמו דם או שתן) עשויה להכיל פתוגנים שונים עם דרישות גידול מגוונות. שימוש במצעים שונים (למשל, מצע כללי, מצע בררני לגרם-שליליים, מצע לגידול אנאירובי) מגדיל את הסיכוי לגלות את הפתוגן הרלוונטי." },
+             { id: 'w2q29', question: "מה משותף לכל שלושת הדומיינים (Bacteria, Archaea, Eukarya)?", options: [ { text: "כולם מכילים גרעין תא מוגדר", correct: false }, { text: "כולם מורכבים מתאים בעלי ריבוזומים לסינתזת חלבונים", correct: true }, { text: "כולם פתוגניים לאדם", correct: false }, { text: "כולם בעלי דופן תא מפפטידוגליקן", correct: false } ], explanation: "כל היצורים החיים, בכל שלושת הדומיינים, משתמשים בריבוזומים כדי לתרגם mRNA לחלבונים. מבנה הריבוזומים שונה מעט בין הדומיינים, אך התפקיד הבסיסי זהה." },
+             { id: 'w2q30', question: "מדיום נוזלי המשמש לגידול ראשוני של חיידקים מדגימה נקרא לעיתים:", options: [ { text: "אגר מוצק", correct: false }, { text: "מרק (Broth)", correct: true }, { text: "פלאק (Plaque)", correct: false }, { text: "ביופילם", correct: false } ], explanation: "מרק (broth) הוא המונח הנפוץ למדיום גידול נוזלי. הוא משמש לעיתים קרובות לגידול ראשוני כדי להגדיל את מספר החיידקים לפני זריעה על מצע מוצק או לביצוע בדיקות ביוכימיות." }
+        ];
+
+
+        // --- MCQ JavaScript Logic (Copy the entire JS block from revised week1.html,
+        //     then rename variables like mcqData_w1 to mcqData_w2, score_w1 to score_w2 etc.
+        //     to avoid potential conflicts if elements from both pages were ever loaded together,
+        //     though unlikely in this setup). ---
+
+         let currentMCQIndex_w2 = 0;
+         let score_w2 = 0;
+         let userAnswers_w2 = {}; // Store user answers { mcqId: selectedOptionText }
+         let viewMode_w2 = 'single'; // 'single' or 'all'
+         const mcqsContainer_w2 = document.getElementById('mcqs-container');
+         const resultsContainer_w2 = document.getElementById('results');
+         const mcqNav_w2 = document.getElementById('mcq-nav');
+         const mcqCounterElement_w2 = document.getElementById('mcq-counter');
+         const prevBtn_w2 = document.getElementById('prev-mcq-btn');
+         const nextBtn_w2 = document.getElementById('next-mcq-btn');
+         const viewToggleBtn_w2 = document.getElementById('view-toggle-btn');
+         let shuffledMCQs_w2 = [];
+
+         function shuffleArray(array) {
+             for (let i = array.length - 1; i > 0; i--) {
+                 const j = Math.floor(Math.random() * (i + 1));
+                 [array[i], array[j]] = [array[j], array[i]];
+             }
+         }
+
+          // Renders a single MCQ element (used in both single and all view)
+         function renderMCQElement_w2(mcq, index) {
+             let shuffledOptions = [...mcq.options];
+             shuffleArray(shuffledOptions);
+
+             let optionsHTML = '<ul class="options">';
+             shuffledOptions.forEach(option => {
+                 const isSelected = userAnswers_w2[mcq.id] === option.text;
+                  optionsHTML += `<li data-correct="${option.correct}" class="${isSelected ? 'selected' : ''}">${option.text}</li>`;
+              });
+              optionsHTML += '</ul>';
+
+              const isAnswered = mcq.id in userAnswers_w2;
+              const correctOptionText = mcq.options.find(opt => opt.correct).text;
+              const userAnswer = userAnswers_w2[mcq.id];
+              const wasCorrect = isAnswered && userAnswer === correctOptionText;
+
+              const mcqElement = document.createElement('div');
+              mcqElement.classList.add('mcq');
+              mcqElement.id = `mcq-${mcq.id}`; // Unique ID
+              if (isAnswered) {
+                 mcqElement.classList.add('mcq-answered');
+              }
+
+              mcqElement.innerHTML = `
+                  <p class="question-text">${index + 1}. ${mcq.question}</p>
+                  ${optionsHTML}
+                  <div class="feedback" style="display: ${isAnswered ? 'block' : 'none'};">
+                      ${isAnswered ? (wasCorrect ? 'נכון!' : 'לא נכון.') : ''}
+                  </div>
+                  <div class="explanation" style="display: ${isAnswered ? 'block' : 'none'};">
+                      ${mcq.explanation}
+                  </div>
+              `;
+
+             if (isAnswered) {
+                 const optionsLi = mcqElement.querySelectorAll('.options li');
+                 optionsLi.forEach(li => {
+                     li.classList.add('answered');
+                     if (li.textContent === userAnswer) {
+                         li.classList.add(wasCorrect ? 'correct' : 'incorrect');
+                     } else if (li.dataset.correct === 'true' && !wasCorrect) {
+                          li.classList.add('correct');
+                      }
+                  });
+                  const feedbackDiv = mcqElement.querySelector('.feedback');
+                  feedbackDiv.classList.add(wasCorrect ? 'correct' : 'incorrect');
+              }
+
+             if (!isAnswered) {
+                 const optionsElements = mcqElement.querySelectorAll('.options li');
+                  optionsElements.forEach(optionEl => {
+                      optionEl.addEventListener('click', () => checkAnswer_w2(mcq.id, optionEl, mcqElement));
+                  });
+              }
+
+             return mcqElement;
+          }
+
+          // Displays MCQs based on viewMode
+         function displayMCQs_w2() {
+             mcqsContainer_w2.innerHTML = '';
+              resultsContainer_w2.style.display = 'none';
+
+             if (viewMode_w2 === 'single') {
+                 mcqNav_w2.style.display = 'flex';
+                 mcqCounterElement_w2.style.display = 'block';
+                  mcqCounterElement_w2.textContent = `שאלה ${currentMCQIndex_w2 + 1} מתוך ${shuffledMCQs_w2.length}`;
+                 const mcqElement = renderMCQElement_w2(shuffledMCQs_w2[currentMCQIndex_w2], currentMCQIndex_w2);
+                 mcqsContainer_w2.appendChild(mcqElement);
+                 updateNavButtons_w2();
+             } else { // 'all' mode
+                 mcqNav_w2.style.display = 'none';
+                 mcqCounterElement_w2.style.display = 'none';
+                 shuffledMCQs_w2.forEach((mcq, index) => {
+                     const mcqElement = renderMCQElement_w2(mcq, index);
+                     mcqsContainer_w2.appendChild(mcqElement);
+                 });
+                  updateResultsDisplay_w2();
+                 resultsContainer_w2.style.display = 'block';
+              }
+          }
+
+         function checkAnswer_w2(mcqId, selectedOptionEl, mcqElement) {
+              if (userAnswers_w2[mcqId]) return;
+
+             const isCorrect = selectedOptionEl.getAttribute('data-correct') === 'true';
+              const feedbackEl = mcqElement.querySelector('.feedback');
+              const explanationEl = mcqElement.querySelector('.explanation');
+              const optionsUl = mcqElement.querySelector('.options');
+              const allOptions = optionsUl.querySelectorAll('li');
+
+             userAnswers_w2[mcqId] = selectedOptionEl.textContent;
+
+             mcqElement.classList.add('mcq-answered');
+             allOptions.forEach(opt => {
+                 opt.classList.add('answered');
+             });
+
+              if (isCorrect) {
+                 score_w2++;
+             }
+
+             selectedOptionEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+              feedbackEl.textContent = isCorrect ? 'נכון!' : 'לא נכון.';
+              feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+              feedbackEl.style.display = 'block';
+              explanationEl.style.display = 'block';
+
+              if (!isCorrect) {
+                  allOptions.forEach(opt => {
+                      if (opt.getAttribute('data-correct') === 'true') {
+                          opt.classList.add('correct');
+                      }
+                  });
+              }
+
+              if (viewMode_w2 === 'all') {
+                 updateResultsDisplay_w2();
+              }
+          }
+
+          function updateResultsDisplay_w2() {
+              const answeredCount = Object.keys(userAnswers_w2).length;
+              resultsContainer_w2.innerHTML = `ענית על ${answeredCount} מתוך ${shuffledMCQs_w2.length}<br>ציון נוכחי: ${score_w2} מתוך ${answeredCount || 0}`;
+               resultsContainer_w2.style.display = 'block';
+          }
+
+         function updateNavButtons_w2() {
+             prevBtn_w2.disabled = currentMCQIndex_w2 === 0;
+             nextBtn_w2.disabled = currentMCQIndex_w2 === shuffledMCQs_w2.length - 1;
+         }
+
+         function nextMCQ_w2() {
+             if (currentMCQIndex_w2 < shuffledMCQs_w2.length - 1) {
+                 currentMCQIndex_w2++;
+                 displayMCQs_w2();
+             }
+             if(currentMCQIndex_w2 === shuffledMCQs_w2.length -1){
+                 updateResultsDisplay_w2();
+                 resultsContainer_w2.style.display = 'block';
+             }
+         }
+
+         function prevMCQ_w2() {
+             if (currentMCQIndex_w2 > 0) {
+                 currentMCQIndex_w2--;
+                  resultsContainer_w2.style.display = 'none';
+                 displayMCQs_w2();
+             }
+         }
+
+          function toggleViewMode_w2() {
+             if (viewMode_w2 === 'single') {
+                 viewMode_w2 = 'all';
+                 viewToggleBtn_w2.textContent = 'הצג שאלה בודדת';
+             } else {
+                 viewMode_w2 = 'single';
+                 viewToggleBtn_w2.textContent = 'הצג הכל';
+             }
+             displayMCQs_w2();
+         }
+
+         function initWeek2() {
+             shuffledMCQs_w2 = [...mcqData_w2];
+             shuffleArray(shuffledMCQs_w2);
+             userAnswers_w2 = {};
+             score_w2 = 0;
+              currentMCQIndex_w2 = 0;
+              viewMode_w2 = 'single';
+              viewToggleBtn_w2.textContent = 'הצג הכל';
+
+             displayMCQs_w2();
+
+              prevBtn_w2.addEventListener('click', prevMCQ_w2);
+              nextBtn_w2.addEventListener('click', nextMCQ_w2);
+              viewToggleBtn_w2.addEventListener('click', toggleViewMode_w2);
+         }
+
+         window.onload = initWeek2; // Use a unique init function name
+
+    </script>
+
+</body>
+</html>

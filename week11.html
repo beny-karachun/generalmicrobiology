@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מיקרוביולוגיה כללית - שבוע 11: העברת חומר גנטי וסיסטמטיקה</title>
+    <style>
+        /* CSS Styles are identical to revised week1/2/8/9/10... etc. */
+         body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #eef5f3;
+            color: #333;
+            direction: rtl;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #006847; /* Dark green */
+            text-align: center;
+            border-bottom: 2px solid #8fbc8f; /* Dark Sea Green */
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        /* --- Flashcards Styles --- */
+        .flashcards-container {
+            perspective: 1000px;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-direction: column;
+        }
+        .flashcard {
+            width: 80%;
+            max-width: 400px;
+            height: 180px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 8px;
+            font-size: 1.2em;
+        }
+        .flashcard-front {
+            background-color: #c8e6c9;
+            color: #1b5e20;
+        }
+        .flashcard-back {
+            background-color: #a5d6a7;
+            color: #1b5e20;
+            transform: rotateY(180deg);
+            font-size: 1em;
+        }
+        .flashcard-nav {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .flashcard-nav button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .flashcard-nav button:hover {
+            background-color: #004d40;
+        }
+         #flashcard-counter {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        /* --- MCQ Styles --- */
+        .mcqs-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #view-toggle-btn {
+             padding: 6px 12px;
+             background-color: #6c757d;
+             color: white;
+             border: none;
+             border-radius: 4px;
+             cursor: pointer;
+             font-size: 0.9em;
+         }
+        #view-toggle-btn:hover {
+             background-color: #5a6268;
+         }
+
+        .mcq {
+            background-color: #ffffff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #004d40;
+        }
+        .options {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .options li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: 2px solid transparent; /* Add transparent border for layout consistency */
+        }
+        .options li:hover {
+            background-color: #ced4da;
+        }
+        /* Styles for answer states */
+        .options li.answered.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .options li.answered.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+         /* Style for selected but not yet confirmed answer (optional) */
+        .options li.selected {
+             border-color: #007bff;
+         }
+         /* Disable options after answering */
+        .mcq-answered .options li {
+            cursor: default;
+            pointer-events: none;
+             opacity: 0.8;
+        }
+        .mcq-answered .options li.correct,
+        .mcq-answered .options li.incorrect {
+            opacity: 1; /* Keep selected/correct ones fully visible */
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+             border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-right: 5px solid #8fbc8f;
+            font-size: 0.95em;
+            border-radius: 4px;
+        }
+        .mcq-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .mcq-navigation button {
+            padding: 10px 20px;
+            background-color: #00796b; /* Teal */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .mcq-navigation button:hover:not(:disabled) {
+            background-color: #004d40; /* Darker Teal */
+        }
+        .mcq-navigation button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #results {
+            text-align: center;
+            font-size: 1.4em;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e0f2f1;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            color: #00695c;
+        }
+         #mcq-counter {
+             text-align: center;
+             margin-bottom: 15px;
+             font-weight: bold;
+             color: #555;
+         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>שבוע 11: העברת חומר גנטי וסיסטמטיקה</h1>
+
+        <!-- Flashcards Section -->
+        <div class="section">
+             <h2>כרטיסיות לימוד</h2>
+             <div class="flashcards-container">
+                 <div class="flashcard" id="flashcard">
+                     <div class="flashcard-face flashcard-front">מונח</div>
+                     <div class="flashcard-face flashcard-back">הגדרה</div>
+                 </div>
+                 <div class="flashcard-nav">
+                     <button id="prev-card">הקודם</button>
+                     <button id="flip-card">הפוך</button>
+                     <button id="next-card">הבא</button>
+                 </div>
+                 <div id="flashcard-counter">כרטיס 1 מתוך X</div>
+             </div>
+        </div>
+
+        <!-- MCQs Section -->
+        <div class="section">
+             <div class="mcqs-section-header">
+                 <h2>שאלות חזרה (MCQs)</h2>
+                 <button id="view-toggle-btn">הצג הכל</button>
+             </div>
+             <div id="mcq-counter">שאלה 1 מתוך 30</div>
+             <div id="mcqs-container">
+                 <!-- MCQs will be loaded here by JavaScript -->
+             </div>
+             <div id="results" style="display: none;">
+                 תוצאה סופית תופיע כאן.
+             </div>
+             <div class="mcq-navigation" id="mcq-nav" style="display: none;">
+                 <button id="prev-mcq-btn" disabled>הקודם</button>
+                 <button id="next-mcq-btn">הבא</button>
+             </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Flashcard Data and Logic for Week 11 ---
+        const flashcardData_w11 = [
+            { term: "העברת גנים אופקית (Horizontal Gene Transfer - HGT)", definition: "העברת חומר גנטי מאורגניזם אחד לאחר שאינו צאצא שלו, בניגוד להעברה אנכית (מהורה לצאצא)." },
+            { term: "טרנספורמציה (Transformation)", definition: "תהליך שבו תא חיידקי קולט DNA חופשי (עירום) מהסביבה ומשלב אותו בגנום שלו." },
+            { term: "תא קומפטנטי (Competent cell)", definition: "תא חיידקי הנמצא במצב פיזיולוגי המאפשר לו לקלוט DNA חיצוני מהסביבה בתהליך טרנספורמציה." },
+            { term: "טרנסדוקציה (Transduction)", definition: "העברת חומר גנטי חיידקי מתא אחד לאחר באמצעות בקטריופאג' (וירוס של חיידקים)." },
+            { term: "טרנסדוקציה כללית (Generalized transduction)", definition: "תהליך שבו מקטע DNA חיידקי כלשהו נארז בטעות בקפסיד של פאג' ליטי במקום הגנום הנגיפי, ומועבר לתא חיידקי אחר." },
+            { term: "טרנסדוקציה ייחודית (Specialized transduction)", definition: "תהליך המתרחש עם פאג'ים מתונים (ליזוגניים), שבו רק גנים חיידקיים הסמוכים לאתר השילוב של הפרופאג' בכרומוזום מועברים לתא אחר, עקב שגיאה בחיתוך הפרופאג' מהגנום." },
+            { term: "קוניוגציה (Conjugation)", definition: "העברת חומר גנטי (לרוב פלסמיד או חלק מהכרומוזום) מחיידק תורם לחיידק מקבל באמצעות מגע פיזי ישיר, המתווך על ידי פילוס (pilus)." },
+            { term: "פלסמיד F (F plasmid)", definition: "פלסמיד קוניוגטיבי בחיידקי E. coli המכיל את הגנים הדרושים ליצירת הפילוס ולהעברת עותק של הפלסמיד לחיידק מקבל." },
+            { term: "תא F+", definition: "חיידק המכיל את פלסמיד F ומשמש כתורם בקוניוגציה." },
+            { term: "תא F-", definition: "חיידק שאינו מכיל את פלסמיד F ומשמש כמקבל בקוניוגציה." },
+            { term: "פילוס (Pilus / Sex pilus)", definition: "שלוחה חלבונית דקה וארוכה על פני חיידק F+, המשמשת ליצירת מגע עם חיידק F- ולהעברת ה-DNA במהלך קוניוגציה." },
+            { term: "תא Hfr (High frequency of recombination)", definition: "חיידק שבו פלסמיד F השתלב בכרומוזום החיידקי. תאים אלו יכולים להעביר חלקים מהכרומוזום שלהם לחיידקי F- בקוניוגציה בשכיחות גבוהה." },
+            { term: "פלסמיד F' (F-prime plasmid)", definition: "פלסמיד F שנוצר מתא Hfr עקב חיתוך לא מדויק מהכרומוזום, וכעת נושא גם מקטע של DNA כרומוזומלי חיידקי." },
+            { term: "אלמנטים ניידים (Mobile Genetic Elements - MGEs)", definition: "מקטעי DNA המסוגלים לנוע ממקום למקום בתוך הגנום או בין מולקולות DNA שונות." },
+            { term: "טרנספוזון (Transposon / Transposable element)", definition: "אלמנט גנטי נייד המסוגל 'לקפוץ' ממקום אחד בגנום למשנהו. מכיל לרוב גן לאנזים טרנספוזאז ולעיתים גנים נוספים (כמו עמידות לאנטיביוטיקה)." },
+            { term: "טרנספוזאז (Transposase)", definition: "האנזים המקודד על ידי הטרנספוזון ואחראי לחיתוך הטרנספוזון ממקומו ולהחדרתו לאתר חדש ב-DNA." },
+            { term: "אינטגרון (Integron)", definition: "אלמנט גנטי בחיידקים המכיל גן לאנזים אינטגראז ואתר שילוב (attI), ומסוגל ללכוד ולבטא קסטות גנים (gene cassettes), לעיתים קרובות גנים לעמידות לאנטיביוטיקה." },
+            { term: "סיסטמטיקה (Systematics)", definition: "חקר המגוון הביולוגי והקשרים האבולוציוניים בין אורגניזמים." },
+            { term: "טקסונומיה (Taxonomy)", definition: "ענף בביולוגיה העוסק בזיהוי, מיון ושיום (מתן שמות) של אורגניזמים." },
+            { term: "פילוגניה (Phylogeny)", definition: "ההיסטוריה האבולוציונית של קבוצת אורגניזמים והקשרים הגנטיים ביניהם, המיוצגת לרוב באמצעות עץ פילוגנטי." },
+            { term: "עץ פילוגנטי (Phylogenetic tree)", definition: "דיאגרמה דמוית עץ הממחישה את הקשרים האבולוציוניים המשוערים בין קבוצות אורגניזמים שונות, על בסיס דמיון ושוני במאפיינים מורפולוגיים, ביוכימיים או גנטיים." },
+            { term: "מולקולה הומולוגית", definition: "מולקולה (גן או חלבון) הנמצאת באורגניזמים שונים וחולקת מוצא אבולוציוני משותף. שינויים ברצף המולקולה משקפים את המרחק האבולוציוני." },
+            { term: "שעון מולקולרי (Molecular clock)", definition: "הנחה שקצב המוטציות במולקולה הומולוגית מסוימת קבוע יחסית לאורך זמן, ולכן מספר ההבדלים ברצף בין אורגניזמים שונים יכול לשמש להערכת הזמן שעבר מאז התפצלותם מאב קדמון משותף." },
+            { term: "rRNA (Ribosomal RNA)", definition: "חומצת גרעין ריבוזומלית, המהווה מרכיב מבני ותפקודי חיוני של הריבוזום." },
+            { term: "16S rRNA", definition: "מולקולת ה-rRNA המרכיבה את תת-היחידה הקטנה (30S) של הריבוזום הפרוקריוטי. הגן המקודד למולקולה זו משמש כלי מרכזי בקביעת פילוגניה ובזיהוי חיידקים וארכאות." },
+            { term: "אזורים שמורים (Conserved regions)", definition: "אזורים ברצף של גן (כמו 16S rRNA) המראים שונות נמוכה בין אורגניזמים שונים, ומשמשים לעיגון פריימרים או לזיהוי קבוצות טקסונומיות רחבות." },
+            { term: "אזורים משתנים (Variable regions)", definition: "אזורים ברצף של גן (כמו 16S rRNA) המראים שונות גבוהה יותר בין אורגניזמים קרובים, ומשמשים להבחנה בין מינים או זנים." },
+            { term: "OTU (Operational Taxonomic Unit)", definition: "יחידה טקסונומית תפעולית. הגדרה הנמצאת בשימוש במחקרים מבוססי רצף (כמו של 16S rRNA), שבה רצפים בעלי דמיון גבוה (למשל, מעל 97%) מקובצים יחד ומייצגים 'מין' או קבוצה דומה מבחינה פילוגנטית." },
+            { term: "היברידיזציית DNA-DNA (DNA-DNA hybridization)", definition: "שיטה מולקולרית להערכת הקרבה הגנטית הכוללת בין שני אורגניזמים, על ידי מדידת אחוז ה-DNA הדו-גדילי שנוצר מחדש (היבריד) לאחר דנטורציה ורה-נטורציה של תערובת ה-DNA שלהם." },
+            { term: "סיווג פוליפאזי (Polyphasic taxonomy)", definition: "גישה מודרנית לסיווג מיקרואורגניזמים המשלבת נתונים ממספר מקורות: פנוטיפיים (מורפולוגיה, ביוכימיה), גנוטיפיים (רצפי DNA) ופילוגנטיים (מבוססי rRNA וגנים נוספים)." }
+        ];
+
+
+        let currentCardIndex_w11 = 0;
+        // ... (rest of flashcard JS logic, using unique variable names like _w11)
+        const flashcardElement_w11 = document.getElementById('flashcard');
+        const flashcardFront_w11 = flashcardElement_w11.querySelector('.flashcard-front');
+        const flashcardBack_w11 = flashcardElement_w11.querySelector('.flashcard-back');
+        const flipButton_w11 = document.getElementById('flip-card');
+        const nextButton_w11 = document.getElementById('next-card');
+        const prevButton_w11 = document.getElementById('prev-card');
+        const cardCounterElement_w11 = document.getElementById('flashcard-counter');
+
+        function displayCard_w11(index) {
+            if (!flashcardElement_w11) return;
+            const card = flashcardData_w11[index];
+            flashcardFront_w11.textContent = card.term;
+            flashcardBack_w11.textContent = card.definition;
+            flashcardElement_w11.classList.remove('is-flipped');
+            cardCounterElement_w11.textContent = `כרטיס ${index + 1} מתוך ${flashcardData_w11.length}`;
+        }
+        function flipCard_w11() { flashcardElement_w11.classList.toggle('is-flipped'); }
+        function nextCard_w11() { currentCardIndex_w11 = (currentCardIndex_w11 + 1) % flashcardData_w11.length; displayCard_w11(currentCardIndex_w11); }
+        function prevCard_w11() { currentCardIndex_w11 = (currentCardIndex_w11 - 1 + flashcardData_w11.length) % flashcardData_w11.length; displayCard_w11(currentCardIndex_w11); }
+
+        flipButton_w11.addEventListener('click', flipCard_w11);
+        nextButton_w11.addEventListener('click', nextCard_w11);
+        prevButton_w11.addEventListener('click', prevCard_w11);
+        if (flashcardData_w11.length > 0) displayCard_w11(currentCardIndex_w11);
+
+
+        // --- MCQ Data and Logic for Week 11 ---
+        const mcqData_w11 = [
+             { id: 'w11q1', question: "מהי טרנספורמציה (Transformation) בחיידקים?", options: [ { text: "העברת DNA באמצעות וירוס (פאג')", correct: false }, { text: "קליטת DNA חופשי (עירום) מהסביבה", correct: true }, { text: "העברת DNA במגע ישיר בין חיידקים", correct: false }, { text: "שינוי ספונטני בחומר התורשתי (מוטציה)", correct: false } ], explanation: "טרנספורמציה היא אחד משלושת המנגנונים העיקריים של העברת גנים אופקית בחיידקים, ובה DNA שמקורו בתאים שמתו ו'התפוצצו' נקלט מהסביבה על ידי חיידק חי (קומפטנטי)." },
+             { id: 'w11q2', question: "תא חיידקי המסוגל לקלוט DNA חופשי מהסביבה נקרא:", options: [ { text: "תא F+", correct: false }, { text: "תא Hfr", correct: false }, { text: "תא קומפטנטי (Competent)", correct: true }, { text: "תא ליזוגני", correct: false } ], explanation: "קומפטנטיות היא מצב פיזיולוגי (טבעי או מושרה במעבדה) המאפשר לתא לקשור ולקלוט DNA חיצוני. לא כל החיידקים מסוגלים להפוך קומפטנטיים באופן טבעי." },
+             { id: 'w11q3', question: "טרנסדוקציה היא העברת DNA בין חיידקים באמצעות:", options: [ { text: "פלסמיד F", correct: false }, { text: "פילוס (Pilus)", correct: false }, { text: "בקטריופאג' (Phage)", correct: true }, { text: "DNA חופשי בסביבה", correct: false } ], explanation: "בטרנסדוקציה, בקטריופאג' משמש כ'שליח' המעביר מקטעי DNA מחיידק אחד (שממנו הוא 'ארז' את ה-DNA) לחיידק אחר (שאותו הוא מדביק)." },
+             { id: 'w11q4', question: "בטרנסדוקציה כללית (Generalized transduction), איזה חלק מה-DNA החיידקי יכול להיות מועבר?", options: [ { text: "רק גנים הסמוכים לאתר השילוב של הפאג'", correct: false }, { text: "רק פלסמידים", correct: false }, { text: "כל מקטע DNA כרומוזומלי או פלסמידי, באופן אקראי", correct: true }, { text: "רק גנים המקנים עמידות לאנטיביוטיקה", correct: false } ], explanation: "טרנסדוקציה כללית מתרחשת כאשר פאג' ליטי אורז בטעות מקטע אקראי של DNA חיידקי במקום את ה-DNA הנגיפי. לכן, כל גן חיידקי יכול, בתיאוריה, להיות מועבר בדרך זו." },
+             { id: 'w11q5', question: "קוניוגציה (Conjugation) דורשת:", options: [ { text: "נוכחות בקטריופאג'", correct: false }, { text: "DNA חופשי בסביבה", correct: false }, { text: "מגע ישיר בין התא התורם לתא המקבל", correct: true }, { text: "יכולת טרנספורמציה טבעית", correct: false } ], explanation: "קוניוגציה היא תהליך העברה המחייב יצירת קשר פיזי יציב בין החיידק התורם (לרוב F+) לחיידק המקבל (F-), בדרך כלל באמצעות פילוס מין (sex pilus)." },
+             { id: 'w11q6', question: "מהו תפקידו העיקרי של פלסמיד F בקוניוגציה?", options: [ { text: "לגרום לליזיס של התא המקבל", correct: false }, { text: "לשאת גנים לעמידות לאנטיביוטיקה", correct: false }, { text: "לקודד את החלבונים הדרושים ליצירת הפילוס ולהעברת ה-DNA", correct: true }, { text: "להשתלב תמיד בכרומוזום החיידקי", correct: false } ], explanation: "פלסמיד F מכיל את כל הגנים הדרושים לביצוע קוניוגציה, כולל הגנים ליצירת הפילוס (tra genes) ואתר התחלת ההעברה (oriT)." },
+             { id: 'w11q7', question: "כיצד נוצר תא Hfr?", options: [ { text: "על ידי קליטת DNA חופשי", correct: false }, { text: "על ידי הדבקה בפאג' ליזוגני", correct: false }, { text: "על ידי שילוב (אינטגרציה) של פלסמיד F לתוך הכרומוזום החיידקי", correct: true }, { text: "על ידי מוטציה ספונטנית", correct: false } ], explanation: "תא Hfr נוצר כאשר פלסמיד F, הנמצא בדרך כלל בציטופלסמה, משתלב באתר ספציפי בכרומוזום החיידקי באמצעות רקומבינציה הומולוגית או פעילות של אלמנטים ניידים." },
+             { id: 'w11q8', question: "בקוניוגציה בין תא Hfr לתא F-, מה מועבר בדרך כלל לתא המקבל?", options: [ { text: "עותק שלם של פלסמיד F", correct: false }, { text: "עותק שלם של הכרומוזום החיידקי", correct: false }, { text: "חלק מפלסמיד F וחלק מהכרומוזום החיידקי הסמוך לאתר השילוב", correct: true }, { text: "רק גנים לעמידות לאנטיביוטיקה", correct: false } ], explanation: "מכיוון שהכרומוזום גדול מאוד, תהליך הקוניוגציה בדרך כלל נקטע לפני שכל הכרומוזום מועבר. לכן, התא המקבל מקבל את החלק של פלסמיד F שנכנס ראשון, ואחריו מקטע מהכרומוזום החיידקי. התא המקבל נשאר לרוב F- כי לא קיבל את כל הגנים של פלסמיד F." },
+             { id: 'w11q9', question: "מהו טרנספוזון (Transposon)?", options: [ { text: "וירוס RNA קטן", correct: false }, { text: "מקטע DNA המסוגל לנוע ממקום למקום בגנום", correct: true }, { text: "חלבון המווסת ביטוי גנים", correct: false }, { text: "סוג של פלסמיד", correct: false } ], explanation: "טרנספוזונים הם 'גנים קופצים' - מקטעי DNA בעלי יכולת לנוע (לעבור טרנספוזיציה) לאתרים שונים בתוך אותו גנום או בין מולקולות DNA שונות באותו תא." },
+             { id: 'w11q10', question: "האנזים המרכזי המאפשר את תנועת הטרנספוזון הוא:", options: [ { text: "DNA פולימראז", correct: false }, { text: "טרנספוזאז (Transposase)", correct: true }, { text: "ליגאז (Ligase)", correct: false }, { text: "אינטגראז (Integrase)", correct: false } ], explanation: "טרנספוזאז הוא האנזים, המקודד לרוב על ידי הטרנספוזון עצמו, המזהה את קצוות הטרנספוזון, חותך אותו ממקומו (או יוצר עותק שלו) ומחדיר אותו לאתר מטרה חדש ב-DNA." },
+            { id: 'w11q11', question: "מהי פילוגניה?", options: [ { text: "שיטת זיהוי חיידקים על פי צורתם", correct: false }, { text: "חקר המבנה התלת-ממדי של חלבונים", correct: false }, { text: "חקר ההיסטוריה האבולוציונית והקרבה הגנטית בין אורגניזמים", correct: true }, { text: "תהליך העברת גנים בין חיידקים", correct: false } ], explanation: "פילוגניה עוסקת בשחזור הקשרים האבולוציוניים בין מינים או קבוצות אורגניזמים, ובייצוגם הגרפי באמצעות עץ פילוגנטי." },
+            { id: 'w11q12', question: "איזו מולקולה משמשת לרוב כ'שעון מולקולרי' לקביעת פילוגניה של פרוקריוטים?", options: [ { text: "חלבון פלג'לין", correct: false }, { text: "LPS", correct: false }, { text: "הגן המקודד ל-16S rRNA", correct: true }, { text: "DNA פולימראז III", correct: false } ], explanation: "הגן ל-16S rRNA נחשב לשעון מולקולרי טוב מכיוון שהוא קיים בכל הפרוקריוטים, תפקידו חיוני ושמור, והוא מכיל אזורים שמורים ואזורים משתנים המאפשרים השוואה ברמות טקסונומיות שונות. קצב השינוי שלו איטי יחסית." },
+            { id: 'w11q13', question: "מדוע חשוב להשתמש במולקולה הומולוגית לצורך בניית עץ פילוגנטי?", options: [ { text: "כי רק למולקולות הומולוגיות יש מבנה יציב", correct: false }, { text: "כי הדמיון ביניהן נובע ממוצא אבולוציוני משותף ולא מהתכנסות אבולוציונית", correct: true }, { text: "כי רק מולקולות הומולוגיות ניתנות לריצוף", correct: false }, { text: "כי רק הן מכילות מידע על כל תכונות האורגניזם", correct: false } ], explanation: "הומולוגיה משמעותה דמיון הנובע מאב קדמון משותף. השוואת מולקולות הומולוגיות מאפשרת לשחזר את ההיסטוריה האבולוציונית המשותפת. דמיון שאינו הומולוגי (אנלוגיה) נובע מהתאמה לתנאים דומים (אבולוציה מתכנסת) ואינו משקף קרבה גנטית." },
+            { id: 'w11q14', question: "מהו החיסרון העיקרי בשימוש ברצף 16S rRNA להבחנה בין זנים קרובים מאוד של חיידקים?", options: [ { text: "הגן אינו קיים בכל החיידקים", correct: false }, { text: "קצב השינוי שלו מהיר מדי", correct: false }, { text: "הרצף שלו שמור מדי (אינו משתנה מספיק) ברמה זו", correct: true }, { text: "קשה מאוד לרצף אותו", correct: false } ], explanation: "בעוד שרצף 16S rRNA מצוין להבחנה בין מינים וסוגים שונים, הוא שמור יחסית וקצב השינוי שלו איטי. לכן, ייתכן שלא יהיו מספיק הבדלים ברצף כדי להבחין באופן אמין בין זנים או תת-מינים קרובים מאוד, ויש צורך להשתמש בגנים נוספים המשתנים מהר יותר (MLST)." },
+            { id: 'w11q15', question: "היברידיזציית DNA-DNA מודדת:", options: [ { text: "את קצב השכפול של ה-DNA", correct: false }, { text: "את אחוז הדמיון הכולל בין הגנומים של שני אורגניזמים", correct: true }, { text: "את מספר הגנים המשותפים לשני אורגניזמים", correct: false }, { text: "את נוכחותם של פלסמידים", correct: false } ], explanation: "השיטה מבוססת על ההנחה שככל ששני הגנומים דומים יותר, כך תתאפשר יצירה מחדש (רה-נטורציה) של יותר DNA דו-גדילי היברידי (גדיל מאורגניזם א' וגדיל מאורגניזם ב') לאחר דנטורציה. אחוז ההיברידיזציה משקף את הדמיון הגנומי הכולל." },
+            { id: 'w11q16', question: "לפי הגדרה מקובלת, שני חיידקים שייכים לאותו מין (species) אם אחוז ההיברידיזציה של ה-DNA ביניהם הוא לפחות:", options: [ { text: "10%", correct: false }, { text: "50%", correct: false }, { text: "70%", correct: true }, { text: "97%", correct: false } ], explanation: "סף ה-70% בהיברידיזציית DNA-DNA מקובל כ'סטנדרט הזהב' להגדרת מין חיידקי. ערך זה מתואם בדרך כלל עם דמיון של כ-97% ברצף הגן 16S rRNA." },
+            { id: 'w11q17', question: "איזה מהבאים *אינו* אחד משלושת מנגנוני העברת הגנים האופקית העיקריים בחיידקים?", options: [ { text: "טרנספורמציה", correct: false }, { text: "טרנסדוקציה", correct: false }, { text: "חלוקה בינארית", correct: true }, { text: "קוניוגציה", correct: false } ], explanation: "חלוקה בינארית היא תהליך הרבייה של החיידק (העברת גנים אנכית מהורה לצאצא), בעוד שלושת האחרים הם מנגנונים להעברת גנים בין חיידקים שונים (העברה אופקית)." },
+            { id: 'w11q18', question: "כיצד פלסמיד F' יכול לתרום להפצה יעילה של גנים כרומוזומליים?", options: [ { text: "הוא תמיד גורם לליזיס של התא המקבל", correct: false }, { text: "הוא נושא גנים כרומוזומליים ומועבר ביעילות גבוהה בקוניוגציה כמו פלסמיד F רגיל", correct: true }, { text: "הוא משתמש בפאג'ים כדי לעבור בין תאים", correct: false }, { text: "הוא אינו יכול להשתכפל", correct: false } ], explanation: "פלסמיד F' הוא למעשה פלסמיד F ש'אסף' איתו גנים מהכרומוזום. הוא שומר על יכולת הקוניוגציה הגבוהה של פלסמיד F, ולכן מעביר את הגנים הכרומוזומליים שהוא נושא ביעילות רבה לתאי F-." },
+            { id: 'w11q19', question: "מה משותף לכל האלמנטים הניידים (כמו טרנספוזונים ואינטגרונים)?", options: [ { text: "הם תמיד מקנים עמידות לאנטיביוטיקה", correct: false }, { text: "הם מועברים רק על ידי פאג'ים", correct: false }, { text: "יש להם יכולת לנוע או לגרום לתנועה של מקטעי DNA", correct: true }, { text: "הם קיימים רק באאוקריוטים", correct: false } ], explanation: "המאפיין המגדיר של אלמנטים גנטיים ניידים הוא יכולתם לתווך את תנועתם (טרנספוזיציה) או תנועה של מקטעי DNA אחרים (כמו קסטות גנים באינטגרונים) בתוך הגנום או בין מולקולות DNA." },
+            { id: 'w11q20', question: "השימוש בריצוף הגן 16S rRNA נפוץ במיוחד ל:", options: [ { text: "אבחון מחלות ויראליות", correct: false }, { text: "זיהוי וסיווג של חיידקים וארכאות, כולל כאלה שקשה לגדל בתרבית", correct: true }, { text: "קביעת עמידות לאנטיביוטיקה", correct: false }, { text: "יצירת חיסונים", correct: false } ], explanation: "המאפיינים של הגן 16S rRNA (קיום אוניברסלי בפרוקריוטים, אזורים שמורים ומשתנים) הופכים אותו לכלי יעיל וסטנדרטי לזיהוי טקסונומי ובניית עצים פילוגנטיים של חיידקים וארכאות, במיוחד במחקרים של קהילות מיקרוביאליות מורכבות." },
+            { id: 'w11q21', question: "מהי רקומבינציה הומולוגית?", options: [ { text: "תהליך שילוב DNA זר לגנום המבוסס על דמיון רצפים", correct: true }, { text: "הכנסת טרנספוזון לאתר אקראי", correct: false }, { text: "תיקון שגיאות במהלך שכפול ה-DNA", correct: false }, { text: "יצירת פילוס בקוניוגציה", correct: false } ], explanation: "רקומבינציה הומולוגית היא תהליך תאי שבו מקטעי DNA מוחלפים בין שתי מולקולות DNA בעלות רצפים דומים (הומולוגיים). תהליך זה חיוני לשילוב יציב של DNA זר הנכנס בתהליכי HGT (כמו טרנספורמציה או קוניוגציה חלקית מ-Hfr) לתוך הכרומוזום המקבל." },
+            { id: 'w11q22', question: "איזה מהבאים מהווה דוגמה להעברת גנים אנכית?", options: [ { text: "חיידק מקבל פלסמיד עמידות בקוניוגציה", correct: false }, { text: "וירוס מעביר גן רעלן לחיידק", correct: false }, { text: "חיידק מתחלק לשני תאי בת, וכל תא בת מקבל עותק של הגנום", correct: true }, { text: "חיידק קולט DNA מרעלן ששוחרר מחיידק מת", correct: false } ], explanation: "העברה אנכית מתייחסת להעברת המידע התורשתי מהורה לצאצאיו הישירים, כפי שקורה בתהליך הרבייה (חלוקת תא בחיידקים)." },
+            { id: 'w11q23', question: "מדוע טרנסדוקציה ייחודית מוגבלת להעברת גנים ספציפיים בלבד?", options: [ { text: "כי הפאג' אורז רק DNA פלסמידי", correct: false }, { text: "כי רק גנים מסוימים יכולים להיכנס לקפסיד", correct: false }, { text: "כי היא תלויה בחיתוך שגוי של הפרופאג' מאתר השילוב הקבוע שלו בכרומוזום", correct: true }, { text: "כי היא דורשת מגע ישיר בין התאים", correct: false } ], explanation: "בטרנסדוקציה ייחודית, הטעות מתרחשת במהלך חיתוך הפרופאג' מאתר האינטגרציה הספציפי שלו. לכן, רק גנים חיידקיים הצמודים פיזית לאתר זה עשויים 'להיגרף' יחד עם ה-DNA הנגיפי ולהיארז בויריונים החדשים." },
+            { id: 'w11q24', question: "במהלך קוניוגציה בין F+ ל-F-, מה קורה לתא המקבל (F-)?", options: [ { text: "הוא הופך לתא Hfr", correct: false }, { text: "הוא עובר ליזיס", correct: false }, { text: "הוא הופך לתא F+ לאחר קבלת פלסמיד F", correct: true }, { text: "הוא נשאר F- אך מקבל גנים כרומוזומליים", correct: false } ], explanation: "בקוניוגציה סטנדרטית בין F+ ל-F-, מועבר עותק שלם של פלסמיד F לתא המקבל. כתוצאה מכך, התא המקבל (שהיה F-) הופך גם הוא לתא F+, המסוגל כעת לשמש כתורם." },
+            { id: 'w11q25', question: "מהו יתרון פוטנציאלי של היכולת לבצע טרנספורמציה טבעית עבור חיידק?", options: [ { text: "יצירת נבגים עמידים יותר", correct: false }, { text: "רכישת גנים חדשים (כמו עמידות או יכולות מטבוליות) ושימוש ב-DNA כמקור לנוקלאוטידים", correct: true }, { text: "הגנה מפני הדבקה ויראלית", correct: false }, { text: "ייצור מהיר יותר של ATP", correct: false } ], explanation: "טרנספורמציה מאפשרת לחיידק לרכוש תכונות גנטיות חדשות על ידי קליטת DNA מהסביבה, מה שיכול להקנות יתרון בתנאים משתנים. בנוסף, ה-DNA הנקלט יכול להתפרק ולשמש כמקור לחומרי בניין (נוקלאוטידים) לתא." },
+            { id: 'w11q26', question: "מדוע הגדרה פילוגנטית של מין חיידקי (למשל, על בסיס דמיון 16S rRNA) עדיפה לעיתים על הגדרה המבוססת על תכונות פנוטיפיות?", options: [ { text: "כי קל יותר לגדל את כל החיידקים במעבדה", correct: false }, { text: "כי תכונות פנוטיפיות יכולות להיות מושפעות מתנאי הגידול ואינן משקפות בהכרח קרבה אבולוציונית", correct: true }, { text: "כי עצים פילוגנטיים תמיד פשוטים יותר", correct: false }, { text: "כי אין קשר בין פנוטיפ לגנוטיפ בחיידקים", correct: false } ], explanation: "תכונות פנוטיפיות (כמו מורפולוגיה או יכולות ביוכימיות) יכולות להשתנות בהתאם לסביבה, ויכולות גם להתפתח באופן בלתי תלוי באבולוציה מתכנסת. סמנים מולקולריים כמו 16S rRNA משקפים בצורה ישירה יותר את הקרבה הגנטית וההיסטוריה האבולוציונית, וניתן להשתמש בהם גם עבור אורגניזמים שקשה לגדל." },
+            { id: 'w11q27', question: "הופעת זני MRSA (Methicillin-Resistant Staphylococcus aureus) היא דוגמה ל:", options: [ { text: "התפתחות עמידות לאנטיביוטיקה באמצעות מוטציות ו/או העברת גנים אופקית", correct: true }, { text: "זיהום ויראלי", correct: false }, { text: "יצירת אנדוספורות", correct: false }, { text: "טרנספורמציה סרטנית", correct: false } ], explanation: "MRSA הם זנים של Staphylococcus aureus שרכשו עמידות למתיצילין ולשאר אנטיביוטיקות בטא-לקטם, לרוב על ידי רכישת הגן mecA (המקודד ל-PBP חלופי) הנמצא על אלמנט גנטי נייד (SCCmec). זוהי דוגמה קלאסית לאבולוציה מהירה של עמידות בהשפעת לחץ סלקציה של אנטיביוטיקות." },
+            { id: 'w11q28', question: "שלושת ה'דומיינים' (על-ממלכות) של החיים, כפי שהוגדרו על ידי קארל ווז על בסיס ניתוח rRNA, הם:", options: [ { text: "חיידקים, פטריות וצמחים", correct: false }, { text: "פרוקריוטים, אאוקריוטים ווירוסים", correct: false }, { text: "Bacteria, Archaea, Eukarya", correct: true }, { text: "Monera, Protista, Fungi, Plantae, Animalia", correct: false } ], explanation: "ניתוח פילוגנטי של רצפי rRNA (בעיקר 16S/18S) הוביל לחלוקה המקובלת כיום של כלל היצורים החיים לשלוש על-ממלכות נפרדות: חיידקים (Bacteria), ארכאות (Archaea) ואאוקריוטים (Eukarya)." },
+            { id: 'w11q29', question: "מה נכון לגבי Vesiduction?", options: [ { text: "זהו שם נרדף לקוניוגציה", correct: false }, { text: "זהו תהליך העברת חומר גנטי (כולל DNA) באמצעות בועיות ממברנליות (EVs)", correct: true }, { text: "זה קורה רק באאוקריוטים", correct: false }, { text: "זה תמיד דורש נוכחות פאג'", correct: false } ], explanation: "Vesiduction הוא מנגנון שהתגלה יחסית לאחרונה להעברת גנים אופקית, שבו חומר גנטי (DNA, RNA) וחלבונים נארזים בבועיות קטנות המופרשות מהתא (Extracellular Vesicles - EVs) ויכולים להתאחות עם תאים אחרים ולהעביר את תוכנם." },
+            { id: 'w11q30', question: "איזה תהליך של העברת גנים אופקית סביר ביותר שיושפע מנוכחות אנזימי DNase (המפרקים DNA) בסביבה החיצונית?", options: [ { text: "קוניוגציה", correct: false }, { text: "טרנסדוקציה", correct: false }, { text: "טרנספורמציה", correct: true }, { text: "Vesiduction", correct: false } ], explanation: "טרנספורמציה תלויה בקליטת DNA חופשי (עירום) הנמצא בסביבה החיצונית. אנזימי DNase המופרשים לסביבה יכולים לפרק את ה-DNA החופשי לפני שהוא מספיק להיקלט על ידי תא קומפטנטי, ובכך לעכב את התהליך." }
+        ];
+
+
+        // --- MCQ JavaScript Logic for Week 11 (Use unique names like _w11) ---
+         let currentMCQIndex_w11 = 0;
+         let score_w11 = 0;
+         let userAnswers_w11 = {};
+         let viewMode_w11 = 'single';
+         const mcqsContainer_w11 = document.getElementById('mcqs-container');
+         const resultsContainer_w11 = document.getElementById('results');
+         const mcqNav_w11 = document.getElementById('mcq-nav');
+         const mcqCounterElement_w11 = document.getElementById('mcq-counter');
+         const prevBtn_w11 = document.getElementById('prev-mcq-btn');
+         const nextBtn_w11 = document.getElementById('next-mcq-btn');
+         const viewToggleBtn_w11 = document.getElementById('view-toggle-btn');
+         let shuffledMCQs_w11 = [];
+
+         function shuffleArray(array) { /* ... */
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+         function renderMCQElement_w11(mcq, index) { /* ... */
+            let shuffledOptions = [...mcq.options];
+            shuffleArray(shuffledOptions);
+
+            let optionsHTML = '<ul class="options">';
+            shuffledOptions.forEach(option => {
+                const isSelected = userAnswers_w11[mcq.id] === option.text;
+                 optionsHTML += `<li data-correct="${option.correct}" class="${isSelected ? 'selected' : ''}">${option.text}</li>`;
+             });
+             optionsHTML += '</ul>';
+
+             const isAnswered = mcq.id in userAnswers_w11;
+             const correctOptionText = mcq.options.find(opt => opt.correct).text;
+             const userAnswer = userAnswers_w11[mcq.id];
+             const wasCorrect = isAnswered && userAnswer === correctOptionText;
+
+             const mcqElement = document.createElement('div');
+             mcqElement.classList.add('mcq');
+             mcqElement.id = `mcq-${mcq.id}`; // Unique ID
+             if (isAnswered) {
+                mcqElement.classList.add('mcq-answered');
+             }
+
+             mcqElement.innerHTML = `
+                 <p class="question-text">${index + 1}. ${mcq.question}</p>
+                 ${optionsHTML}
+                 <div class="feedback" style="display: ${isAnswered ? 'block' : 'none'};">
+                     ${isAnswered ? (wasCorrect ? 'נכון!' : 'לא נכון.') : ''}
+                 </div>
+                 <div class="explanation" style="display: ${isAnswered ? 'block' : 'none'};">
+                     ${mcq.explanation}
+                 </div>
+             `;
+
+            if (isAnswered) {
+                const optionsLi = mcqElement.querySelectorAll('.options li');
+                optionsLi.forEach(li => {
+                    li.classList.add('answered');
+                    if (li.textContent === userAnswer) {
+                        li.classList.add(wasCorrect ? 'correct' : 'incorrect');
+                    } else if (li.dataset.correct === 'true' && !wasCorrect) {
+                         li.classList.add('correct');
+                     }
+                 });
+                 const feedbackDiv = mcqElement.querySelector('.feedback');
+                 feedbackDiv.classList.add(wasCorrect ? 'correct' : 'incorrect');
+             }
+
+            if (!isAnswered) {
+                const optionsElements = mcqElement.querySelectorAll('.options li');
+                 optionsElements.forEach(optionEl => {
+                     optionEl.addEventListener('click', () => checkAnswer_w11(mcq.id, optionEl, mcqElement));
+                 });
+             }
+
+            return mcqElement;
+         }
+         function displayMCQs_w11() { /* ... */
+             mcqsContainer_w11.innerHTML = '';
+             resultsContainer_w11.style.display = 'none';
+
+             if (viewMode_w11 === 'single') {
+                 mcqNav_w11.style.display = 'flex';
+                 mcqCounterElement_w11.style.display = 'block';
+                 mcqCounterElement_w11.textContent = `שאלה ${currentMCQIndex_w11 + 1} מתוך ${shuffledMCQs_w11.length}`;
+                 const mcqElement = renderMCQElement_w11(shuffledMCQs_w11[currentMCQIndex_w11], currentMCQIndex_w11);
+                 mcqsContainer_w11.appendChild(mcqElement);
+                 updateNavButtons_w11();
+             } else { // 'all' mode
+                 mcqNav_w11.style.display = 'none';
+                 mcqCounterElement_w11.style.display = 'none';
+                 shuffledMCQs_w11.forEach((mcq, index) => {
+                     const mcqElement = renderMCQElement_w11(mcq, index);
+                     mcqsContainer_w11.appendChild(mcqElement);
+                 });
+                 updateResultsDisplay_w11();
+                 resultsContainer_w11.style.display = 'block';
+             }
+         }
+         function checkAnswer_w11(mcqId, selectedOptionEl, mcqElement) { /* ... */
+             if (userAnswers_w11[mcqId]) return;
+
+             const isCorrect = selectedOptionEl.getAttribute('data-correct') === 'true';
+             const feedbackEl = mcqElement.querySelector('.feedback');
+             const explanationEl = mcqElement.querySelector('.explanation');
+             const optionsUl = mcqElement.querySelector('.options');
+             const allOptions = optionsUl.querySelectorAll('li');
+
+             userAnswers_w11[mcqId] = selectedOptionEl.textContent;
+
+             mcqElement.classList.add('mcq-answered');
+             allOptions.forEach(opt => {
+                 opt.classList.add('answered');
+             });
+
+             if (isCorrect) {
+                 score_w11++;
+             }
+
+             selectedOptionEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+             feedbackEl.textContent = isCorrect ? 'נכון!' : 'לא נכון.';
+             feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+             feedbackEl.style.display = 'block';
+             explanationEl.style.display = 'block';
+
+             if (!isCorrect) {
+                 allOptions.forEach(opt => {
+                     if (opt.getAttribute('data-correct') === 'true') {
+                         opt.classList.add('correct');
+                     }
+                 });
+             }
+
+             if (viewMode_w11 === 'all') {
+                 updateResultsDisplay_w11();
+             }
+         }
+         function updateResultsDisplay_w11() { /* ... */
+            const answeredCount = Object.keys(userAnswers_w11).length;
+             resultsContainer_w11.innerHTML = `ענית על ${answeredCount} מתוך ${shuffledMCQs_w11.length}<br>ציון נוכחי: ${score_w11} מתוך ${answeredCount || 0}`;
+             resultsContainer_w11.style.display = 'block';
+         }
+         function updateNavButtons_w11() { /* ... */
+            prevBtn_w11.disabled = currentMCQIndex_w11 === 0;
+            nextBtn_w11.disabled = currentMCQIndex_w11 === shuffledMCQs_w11.length - 1;
+         }
+         function nextMCQ_w11() { /* ... */
+            if (currentMCQIndex_w11 < shuffledMCQs_w11.length - 1) {
+                 currentMCQIndex_w11++;
+                 displayMCQs_w11();
+             }
+             if(currentMCQIndex_w11 === shuffledMCQs_w11.length -1){
+                 updateResultsDisplay_w11();
+                 resultsContainer_w11.style.display = 'block';
+             }
+         }
+         function prevMCQ_w11() { /* ... */
+             if (currentMCQIndex_w11 > 0) {
+                 currentMCQIndex_w11--;
+                 resultsContainer_w11.style.display = 'none';
+                 displayMCQs_w11();
+             }
+         }
+         function toggleViewMode_w11() { /* ... */
+            if (viewMode_w11 === 'single') {
+                 viewMode_w11 = 'all';
+                 viewToggleBtn_w11.textContent = 'הצג שאלה בודדת';
+             } else {
+                 viewMode_w11 = 'single';
+                 viewToggleBtn_w11.textContent = 'הצג הכל';
+             }
+             displayMCQs_w11();
+         }
+
+        function initWeek11() { // Unique init function name for Week 11
+            shuffledMCQs_w11 = [...mcqData_w11];
+            shuffleArray(shuffledMCQs_w11);
+            userAnswers_w11 = {};
+            score_w11 = 0;
+            currentMCQIndex_w11 = 0;
+            viewMode_w11 = 'single';
+            viewToggleBtn_w11.textContent = 'הצג הכל';
+
+            displayMCQs_w11();
+
+            prevBtn_w11.addEventListener('click', prevMCQ_w11);
+            nextBtn_w11.addEventListener('click', nextMCQ_w11);
+            viewToggleBtn_w11.addEventListener('click', toggleViewMode_w11);
+        }
+
+        window.onload = initWeek11; // Initialize Week 11 logic
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מיקרוביולוגיה כללית - שבוע 1: מבוא ומושגי יסוד</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #eef5f3;
+            color: #333;
+            direction: rtl;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #006847; /* Dark green */
+            text-align: center;
+            border-bottom: 2px solid #8fbc8f; /* Dark Sea Green */
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        /* --- Flashcards Styles --- */
+        .flashcards-container {
+            perspective: 1000px;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-direction: column;
+        }
+        .flashcard {
+            width: 80%;
+            max-width: 400px;
+            height: 180px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 8px;
+            font-size: 1.2em;
+        }
+        .flashcard-front {
+            background-color: #c8e6c9;
+            color: #1b5e20;
+        }
+        .flashcard-back {
+            background-color: #a5d6a7;
+            color: #1b5e20;
+            transform: rotateY(180deg);
+            font-size: 1em;
+        }
+        .flashcard-nav {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .flashcard-nav button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .flashcard-nav button:hover {
+            background-color: #004d40;
+        }
+         #flashcard-counter {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        /* --- MCQ Styles --- */
+        .mcqs-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #view-toggle-btn {
+             padding: 6px 12px;
+             background-color: #6c757d;
+             color: white;
+             border: none;
+             border-radius: 4px;
+             cursor: pointer;
+             font-size: 0.9em;
+         }
+        #view-toggle-btn:hover {
+             background-color: #5a6268;
+         }
+
+        .mcq {
+            background-color: #ffffff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #004d40;
+        }
+        .options {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .options li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: 2px solid transparent; /* Add transparent border for layout consistency */
+        }
+        .options li:hover {
+            background-color: #ced4da;
+        }
+        /* Styles for answer states */
+        .options li.answered.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .options li.answered.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+         /* Style for selected but not yet confirmed answer (optional) */
+        .options li.selected {
+             border-color: #007bff;
+         }
+         /* Disable options after answering */
+        .mcq-answered .options li {
+            cursor: default;
+            pointer-events: none;
+             opacity: 0.8;
+        }
+        .mcq-answered .options li.correct,
+        .mcq-answered .options li.incorrect {
+            opacity: 1; /* Keep selected/correct ones fully visible */
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+             border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-right: 5px solid #8fbc8f;
+            font-size: 0.95em;
+            border-radius: 4px;
+        }
+        .mcq-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .mcq-navigation button {
+            padding: 10px 20px;
+            background-color: #00796b; /* Teal */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .mcq-navigation button:hover:not(:disabled) {
+            background-color: #004d40; /* Darker Teal */
+        }
+        .mcq-navigation button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #results {
+            text-align: center;
+            font-size: 1.4em;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e0f2f1;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            color: #00695c;
+        }
+         #mcq-counter {
+             text-align: center;
+             margin-bottom: 15px;
+             font-weight: bold;
+             color: #555;
+         }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>שבוע 1: מבוא ומושגי יסוד</h1>
+
+        <!-- Flashcards Section -->
+        <div class="section">
+            <h2>כרטיסיות לימוד</h2>
+             <div class="flashcards-container">
+                 <div class="flashcard" id="flashcard">
+                     <div class="flashcard-face flashcard-front">מונח</div>
+                     <div class="flashcard-face flashcard-back">הגדרה</div>
+                 </div>
+                 <div class="flashcard-nav">
+                     <button id="prev-card">הקודם</button>
+                     <button id="flip-card">הפוך</button>
+                     <button id="next-card">הבא</button>
+                 </div>
+                  <div id="flashcard-counter">כרטיס 1 מתוך X</div>
+             </div>
+        </div>
+
+        <!-- MCQs Section -->
+        <div class="section">
+             <div class="mcqs-section-header">
+                <h2>שאלות חזרה (MCQs)</h2>
+                <button id="view-toggle-btn">הצג הכל</button>
+            </div>
+            <div id="mcq-counter">שאלה 1 מתוך 30</div>
+            <div id="mcqs-container">
+                <!-- MCQs will be loaded here by JavaScript -->
+            </div>
+            <div id="results" style="display: none;">
+                תוצאה סופית תופיע כאן.
+            </div>
+             <div class="mcq-navigation" id="mcq-nav" style="display: none;">
+                 <button id="prev-mcq-btn" disabled>הקודם</button>
+                 <button id="next-mcq-btn">הבא</button>
+             </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Flashcard Data and Logic (Keep the existing flashcard JS from the previous version) ---
+        const flashcardData_w1 = [
+             { term: "מיקרוביולוגיה", definition: "מדע העוסק בחקר מיקרואורגניזמים - יצורים חיים קטנים מכדי לראותם בעין בלתי מזוינת (חיידקים, ארכאות, פטריות, פרוטוזואה, וירוסים)." },
+             { term: "מורפולוגיה (של חיידקים)", definition: "חקר הצורה והמבנה של תאי חיידקים. צורות נפוצות כוללות Coccus (נקד), Bacillus (מתג), Spirillum (סלילון)." },
+             { term: "Coccus (קוקוס/נקד)", definition: "חיידק בעל צורה כדורית או אליפטית." },
+             { term: "Bacillus (בצילוס/מתג)", definition: "חיידק בעל צורה גלילית, דמוית מקל. הקצוות יכולים להיות ישרים או מעוגלים." },
+             { term: "Spirillum (ספירילום)", definition: "חיידק בעל צורה סלילית או בורגית, קשיח יחסית." },
+             { term: "Spirochete (ספירוכטה)", definition: "חיידק בעל צורה סלילית גמישה, בעל תנועה ייחודית." },
+             { term: "סידור חיידקים במרחב", definition: "האופן בו חיידקים מסתדרים לאחר חלוקת התא, למשל: בודדים, זוגות (diplo), שרשראות (strepto), אשכולות (staphylo)." },
+             { term: "תנועה (במיקרוביולוגיה)", definition: "יכולת של מיקרואורגניזמים לנוע, לעיתים קרובות באמצעות שוטונים (flagella) או מנגנונים אחרים." },
+             { term: "שוטון (Flagellum)", definition: "אברון דמוי שוט המשמש לתנועה בחיידקים רבים." },
+             { term: "וירוס (נגיף)", definition: "גורם זיהומי תת-מיקרוסקופי, טפיל מוחלט שאינו יכול להתרבות מחוץ לתא מאכסן חי. מורכב מחומר גנטי (DNA או RNA) ומעטפת חלבונית (קפסיד)." },
+             { term: "Prokaryote (פרוקריוט)", definition: "אורגניזם חד-תאי חסר גרעין תא מוגדר ואברונים קשורים לממברנה. כולל חיידקים (Bacteria) וארכאות (Archaea)." },
+             { term: "Eukaryote (אאוקריוט)", definition: "אורגניזם שתאיו מכילים גרעין מוגדר ואברונים קשורים לממברנה (כמו מיטוכונדריה). כולל בעלי חיים, צמחים, פטריות ופרוטיסטים." },
+             { term: "חשיבות המיקרוביולוגיה", definition: "תחומי השפעה רחבים: רפואה (מחלות, מיקרוביום), חקלאות (מחזור חנקן, הדברה), תעשיית מזון (תסיסה, קלקול), סביבה (פירוק, ביופילם), ביוטכנולוגיה (ייצור אנזימים, תרופות)." }
+         ];
+
+         let currentCardIndex_w1 = 0;
+         const flashcardElement_w1 = document.getElementById('flashcard');
+         const flashcardFront_w1 = flashcardElement_w1.querySelector('.flashcard-front');
+         const flashcardBack_w1 = flashcardElement_w1.querySelector('.flashcard-back');
+         const flipButton_w1 = document.getElementById('flip-card');
+         const nextButton_w1 = document.getElementById('next-card');
+         const prevButton_w1 = document.getElementById('prev-card');
+         const cardCounterElement_w1 = document.getElementById('flashcard-counter');
+
+         function displayCard_w1(index) {
+             if (!flashcardElement_w1) return; // Exit if element not found
+             const card = flashcardData_w1[index];
+             flashcardFront_w1.textContent = card.term;
+             flashcardBack_w1.textContent = card.definition;
+             flashcardElement_w1.classList.remove('is-flipped');
+             cardCounterElement_w1.textContent = `כרטיס ${index + 1} מתוך ${flashcardData_w1.length}`;
+         }
+         function flipCard_w1() { flashcardElement_w1.classList.toggle('is-flipped'); }
+         function nextCard_w1() { currentCardIndex_w1 = (currentCardIndex_w1 + 1) % flashcardData_w1.length; displayCard_w1(currentCardIndex_w1); }
+         function prevCard_w1() { currentCardIndex_w1 = (currentCardIndex_w1 - 1 + flashcardData_w1.length) % flashcardData_w1.length; displayCard_w1(currentCardIndex_w1); }
+
+         flipButton_w1.addEventListener('click', flipCard_w1);
+         nextButton_w1.addEventListener('click', nextCard_w1);
+         prevButton_w1.addEventListener('click', prevCard_w1);
+         if (flashcardData_w1.length > 0) displayCard_w1(currentCardIndex_w1);
+
+
+        // --- MCQ Data and Logic ---
+        const mcqData_w1 = [
+              { id: 'w1q1', question: "איזו מהצורות המורפולוגיות הבאות מאפיינת חיידקים בעלי צורה כדורית?", options: [ { text: "Coccus (קוקוס)", correct: true }, { text: "Bacillus (בצילוס)", correct: false }, { text: "Spirillum (ספירילום)", correct: false }, { text: "Spirochete (ספירוכטה)", correct: false } ], explanation: "המונח 'קוקוס' (Coccus) מתאר חיידקים בעלי צורה כדורית. 'בצילוס' מתאר צורת מתג, ו'ספירילום' ו'ספירוכטה' מתארים צורות סליליות." },
+             { id: 'w1q2', question: "חיידקים המסודרים בשרשראות ארוכות נקראים:", options: [ { text: "Diplococci", correct: false }, { text: "Staphylococci", correct: false }, { text: "Streptococci", correct: true }, { text: "Sarcinae", correct: false } ], explanation: "הקידומת 'סטרפטו' (Strepto) מציינת סידור בשרשראות. 'דיפלו' מציין זוגות, 'סטפילו' מציין אשכולות, ו'סרצינה' מציינת מבנה דמוי קובייה." },
+             { id: 'w1q3', question: "מהו המאפיין המרכזי המבדיל בין תא פרוקריוטי לתא אאוקריוטי?", options: [ { text: "נוכחות ריבוזומים", correct: false }, { text: "נוכחות ממברנת תא", correct: false }, { text: "היעדר גרעין תא מוגדר בפרוקריוטים", correct: true }, { text: "יכולת תנועה", correct: false } ], explanation: "ההבדל המהותי ביותר הוא היעדר גרעין תא מוגדר ואברונים קשורים לממברנה בתאים פרוקריוטיים, בעוד שתאים אאוקריוטיים מכילים אותם." },
+             { id: 'w1q4', question: "איזה מהבאים אינו נחשב למיקרואורגניזם?", options: [ { text: "חיידק מסוג E. coli", correct: false }, { text: "שמר (Yeast) מסוג Saccharomyces", correct: false }, { text: "נמלה", correct: true }, { text: "וירוס השפעת", correct: false } ], explanation: "מיקרואורגניזמים הם יצורים קטנים מדי לראייה בעין. נמלה היא חרק רב-תאי הנראה בבירור בעין, ולכן אינה מיקרואורגניזם. חיידקים, שמרים ווירוסים נחקרים במסגרת המיקרוביולוגיה." },
+             { id: 'w1q5', question: "היכולת של חיידקים מסוימים לנוע באמצעות שוטונים מסייעת להם בעיקר ב:", options: [ { text: "התרבות מהירה יותר", correct: false }, { text: "מציאת מזון או הימנעות מחומרים מזיקים", correct: true }, { text: "הגנה מפני מערכת החיסון", correct: false }, { text: "ייצור אנרגיה באמצעות פוטוסינתזה", correct: false } ], explanation: "תנועה מכוונת (כמו כימוטקסיס) מאפשרת לחיידקים לנוע לעבר ריכוזים גבוהים של חומרי מזון (attractants) או להתרחק מחומרים רעילים (repellents), ובכך לשפר את סיכויי הישרדותם." },
+             { id: 'w1q6', question: "וירוסים נחשבים טפילים מוחלטים (obligate parasites) מכיוון ש:", options: [ { text: "הם גדולים יותר מתאי המאכסן שלהם", correct: false }, { text: "הם חסרי חומר גנטי", correct: false }, { text: "הם זקוקים למנגנוני הרבייה של התא המאכסן כדי להתרבות", correct: true }, { text: "הם מייצרים את האנרגיה שלהם בעצמם", correct: false } ], explanation: "לוירוסים אין את המנגנונים המטבוליים והאנזימים הדרושים להכפלת החומר הגנטי שלהם ולייצור חלבונים באופן עצמאי. הם חייבים 'להשתלט' על מנגנוני התא המאכסן כדי להתרבות." },
+             { id: 'w1q7', question: "איזו צורה מורפולוגית מתארת חיידק דמוי פסיק?", options: [ { text: "Coccus", correct: false }, { text: "Vibrio", correct: true }, { text: "Spirillum", correct: false }, { text: "Bacillus", correct: false } ], explanation: "Vibrio הוא חיידק בעל צורת מתג מעוקלת, הדומה לפסיק. זוהי צורה ייחודית המאפיינת, לדוגמה, את חיידק הכולרה." },
+             { id: 'w1q8', question: "תחום המיקרוביולוגיה אינו עוסק ישירות בחקר:", options: [ { text: "מחזור החנקן בקרקע", correct: false }, { text: "ייצור יוגורט", correct: false }, { text: "מבנה השלד של יונקים", correct: true }, { text: "מנגנוני עמידות לאנטיביוטיקה", correct: false } ], explanation: "מיקרוביולוגיה עוסקת במיקרואורגניזמים. מחזור החנקן, ייצור יוגורט (תסיסה) ועמידות לאנטיביוטיקה קשורים ישירות לפעילות חיידקים. מבנה השלד שייך לתחום האנטומיה והזואולוגיה." },
+             { id: 'w1q9', question: "מהי המטרה העיקרית של הבנת המורפולוגיה של חיידקים?", options: [ { text: "לקבוע אם החיידק חי או מת", correct: false }, { text: "לסייע בזיהוי ומיון ראשוני של חיידקים", correct: true }, { text: "למדוד את מהירות התנועה שלהם", correct: false }, { text: "לקבוע את סוג הנשימה התאית", correct: false } ], explanation: "צורת התא (קוקוס, מתג, סליל) והסידור המרחבי (בודד, זוגות, שרשראות, אשכולות) הם מאפיינים חשובים המשמשים ככלי עזר ראשוני בזיהוי ומיון של חיידקים שונים." },
+             { id: 'w1q10', question: "איזה מהאורגניזמים הבאים שייך לקבוצת הארכאות (Archaea)?", options: [ { text: "Escherichia coli", correct: false }, { text: "Saccharomyces cerevisiae (שמר אפייה)", correct: false }, { text: "Methanococcus jannaschii", correct: true }, { text: "Amoeba proteus", correct: false } ], explanation: "ארכאות הן דומיין (על-ממלכה) נפרד של יצורים פרוקריוטיים. Methanococcus הוא סוג ידוע של ארכאה המייצרת מתאן. E. coli הוא חיידק, Saccharomyces הוא שמר (אאוקריוט), ו-Amoeba היא פרוטיסט (אאוקריוט)." },
+             { id: 'w1q11', question: "מי מהבאים מתאר בצורה הטובה ביותר סידור של חיידקים בצורת אשכול ענבים?", options: [ { text: "Streptococcus", correct: false }, { text: "Staphylococcus", correct: true }, { text: "Diplococcus", correct: false }, { text: "Bacillus", correct: false } ], explanation: "הקידומת 'סטפילו' (Staphylo) מציינת סידור באשכולות, הדומה לאשכול ענבים. מאפיין לדוגמה את חיידקי Staphylococcus aureus." },
+             { id: 'w1q12', question: "איזה תחום מדעי תרם רבות להבנה כי מיקרואורגניזמים גורמים למחלות?", options: [ { text: "אסטרונומיה", correct: false }, { text: "גאולוגיה", correct: false }, { text: "מיקרוביולוגיה רפואית", correct: true }, { text: "בוטניקה", correct: false } ], explanation: "המיקרוביולוגיה הרפואית היא התחום שהתמקד בחקר הקשר בין מיקרואורגניזמים למחלות, והוביל לגילויים כמו תאוריית החיידקים כגורמי מחלות." },
+             { id: 'w1q13', question: "גודלם הקטן של וירוסים מאפשר להם:", options: [ { text: "לייצר אנרגיה ביעילות גבוהה", correct: false }, { text: "לעבור אבולוציה מהירה יחסית", correct: true }, { text: "להיות עמידים לכל סוגי האנטיביוטיקה", correct: false }, { text: "לנוע באופן אקטיבי בסביבה מימית", correct: false } ], explanation: "הגודל הקטן, יחד עם קצב שכפול מהיר (בתוך התא המאכסן), מאפשר לוירוסים לצבור מוטציות ולהשתנות במהירות, מה שמקנה להם יתרון אבולוציוני בהתאמה לסביבה ולמאכסנים." },
+             { id: 'w1q14', question: "היכן נמצא רוב החומר התורשתי (DNA) בתא פרוקריוטי?", options: [ { text: "בגרעין התא", correct: false }, { text: "במיטוכונדריה", correct: false }, { text: "באזור הנוקלאואיד בציטופלזמה", correct: true }, { text: "בקפסיד", correct: false } ], explanation: "לתאים פרוקריוטיים אין גרעין תא מוגדר. ה-DNA הכרומוזומלי שלהם, לרוב מולקולה מעגלית אחת, מרוכז באזור בציטופלזמה הנקרא נוקלאואיד." },
+             { id: 'w1q15', question: "תנועה באמצעות החלקה (gliding motility) מאפיינת:", options: [ { text: "את כל סוגי החיידקים", correct: false }, { text: "רק וירוסים", correct: false }, { text: "חיידקים מסוימים שאינם משתמשים בשוטונים", correct: true }, { text: "תאים אאוקריוטיים בלבד", correct: false } ], explanation: "תנועת החלקה היא מנגנון תנועה הנמצא בחיידקים מסוימים, שאינו תלוי בשוטונים. המנגנון המדויק משתנה בין מינים שונים." },
+             { id: 'w1q16', question: "מהי התרומה העיקרית של חיידקים במערכות אקולוגיות?", options: [ { text: "הם הטורפים העיקריים", correct: false }, { text: "הם ממלאים תפקידי מפתח במחזורים ביוגיאוכימיים (כמו פירוק וקיבוע)", correct: true }, { text: "הם מייצרים את רוב החמצן באטמוספירה", correct: false }, { text: "הם אינם משפיעים כלל על הסביבה", correct: false } ], explanation: "לחיידקים תפקידים חיוניים במערכות אקולוגיות, כולל פירוק חומר אורגני מת, מחזור חנקן, פחמן וגופרית, והפיכת חומרים בלתי זמינים לצורות זמינות ליצורים אחרים." },
+             { id: 'w1q17', question: "חיידק בצורת מתג יכול להיות מסווג כ:", options: [ { text: "Coccus בלבד", correct: false }, { text: "Spirillum בלבד", correct: false }, { text: "Bacillus", correct: true }, { text: "Vibrio בלבד", correct: false } ], explanation: "המונח 'בצילוס' (Bacillus) מתאר חיידקים בעלי צורת מתג או מקל." },
+             { id: 'w1q18', question: "ההבנה שמספר החיידקים בגוף האדם עולה על מספר תאי האדם מדגישה את:", options: [ { text: "הסכנה המתמדת מזיהומים", correct: false }, { text: "החשיבות של המיקרוביום לבריאות האדם", correct: true }, { text: "הצורך בפיתוח אנטיביוטיקות חדשות", correct: false }, { text: "היעילות הנמוכה של מערכת החיסון", correct: false } ], explanation: "המיקרוביום, אוכלוסיית המיקרואורגניזמים החיה בגופנו, ממלא תפקידים חיוניים בעיכול, ייצור ויטמינים, והגנה מפני פתוגנים. ההבנה הזו מדגישה את חשיבותו לבריאות." },
+             { id: 'w1q19', question: "איזה מאפיין של וירוסים מקשה על פיתוח תרופות אנטי-ויראליות יעילות?", options: [ { text: "הם בעלי דופן תא עבה", correct: false }, { text: "הם משתמשים במנגנוני התא המאכסן לצורך שכפולם", correct: true }, { text: "הם בעלי מטבוליזם עצמאי מורכב", correct: false }, { text: "הם גדולים מאוד ומורכבים", correct: false } ], explanation: "מכיוון שוירוסים משתמשים במנגנונים של התא המאכסן (כמו ריבוזומים ואנזימי שכפול), קשה למצוא תרופות שיפגעו בוירוס מבלי לפגוע גם בתאי המאכסן." },
+             { id: 'w1q20', question: "היכולת של מיקרואורגניזמים לחיות בתנאי סביבה קיצוניים (טמפ', pH) נחקרת בעיקר בקרב:", options: [ { text: "וירוסים", correct: false }, { text: "ארכאות וחיידקים מסוימים", correct: true }, { text: "פטריות רב-תאיות", correct: false }, { text: "פרוטוזואה", correct: false } ], explanation: "ארכאות ידועות ביכולתן לשרוד בסביבות קיצוניות (אקסטרמופילים), אך גם חיידקים מסוימים פיתחו התאמות לתנאים קשים של טמפרטורה, חומציות, מליחות וכו'." },
+             { id: 'w1q21', question: "איזו מהבאות היא דוגמה לסידור 'דיפלו' (diplo)?", options: [ { text: "חיידקים בודדים", correct: false }, { text: "זוג חיידקים צמודים", correct: true }, { text: "שרשרת ארוכה של חיידקים", correct: false }, { text: "אשכול חיידקים לא מסודר", correct: false } ], explanation: "הקידומת 'דיפלו' מציינת סידור בזוגות, הנוצר כאשר חיידקים נשארים צמודים לאחר חלוקת התא." },
+             { id: 'w1q22', question: "איזה תחום יישומי של מיקרוביולוגיה עוסק בשימוש בחיידקים לפירוק מזהמים סביבתיים?", options: [ { text: "מיקרוביולוגיה רפואית", correct: false }, { text: "ביוטכנולוגיה סביבתית (Bioremediation)", correct: true }, { text: "מיקרוביולוגיה של מזון", correct: false }, { text: "וירולוגיה", correct: false } ], explanation: "ביורמדיאציה היא שימוש במיקרואורגניזמים (בעיקר חיידקים ופטריות) או באנזימים שלהם כדי לפרק או לנטרל מזהמים בסביבה, כגון נפט או חומרי הדברה." },
+             { id: 'w1q23', question: "מהי הצורה הנפוצה ביותר של חומר תורשתי בוירוסים?", options: [ { text: "DNA דו-גדילי בלבד", correct: false }, { text: "RNA חד-גדילי בלבד", correct: false }, { text: "DNA או RNA, חד-גדילי או דו-גדילי", correct: true }, { text: "חלבונים בלבד", correct: false } ], explanation: "לוירוסים יש מגוון רחב של גנומים. החומר התורשתי יכול להיות DNA או RNA, והוא יכול להיות חד-גדילי או דו-גדילי, לינארי או מעגלי." },
+             { id: 'w1q24', question: "Staphylococcus aureus הוא דוגמה לחיידק שסידורו האופייני הוא:", options: [ { text: "שרשראות (Strepto)", correct: false }, { text: "אשכולות (Staphylo)", correct: true }, { text: "זוגות (Diplo)", correct: false }, { text: "מתגים בודדים", correct: false } ], explanation: "השם 'Staphylococcus' מרמז על סידור באשכולות (מיוונית: staphyle - אשכול ענבים, kokkos - גרגר/כדור)." },
+             { id: 'w1q25', question: "מיקרואורגניזמים המשתתפים בתהליך התסיסה לייצור יין ובירה הם בעיקר:", options: [ { text: "חיידקים", correct: false }, { text: "וירוסים", correct: false }, { text: "שמרים (פטריות חד-תאיות)", correct: true }, { text: "ארכאות", correct: false } ], explanation: "שמרים, כגון Saccharomyces cerevisiae, הם הפטריות החד-תאיות האחראיות לתסיסה הכוהלית, תהליך המפתח בייצור יין, בירה ומשקאות אלכוהוליים אחרים." },
+             { id: 'w1q26', question: "מהי ההגדרה הטובה ביותר למונח 'מיקרוביום'?", options: [ { text: "כל החיידקים הפתוגניים", correct: false }, { text: "סך כל המיקרואורגניזמים החיים בסביבה מסוימת (כמו גוף האדם)", correct: true }, { text: "החומר התורשתי של וירוס", correct: false }, { text: "היכולת של חיידק לנוע", correct: false } ], explanation: "המיקרוביום מתייחס לקהילת המיקרואורגניזמים (חיידקים, ארכאות, פטריות, וירוסים) המאכלסת סביבה מסוימת, ובפרט את גוף האדם (למשל, מיקרוביום המעי)." },
+             { id: 'w1q27', question: "איזה מהבאים הוא תא אאוקריוטי?", options: [ { text: "חיידק E. coli", correct: false }, { text: "ארכאה מתנוגנית", correct: false }, { text: "תא צמח", correct: true }, { text: "בקטריופאג' T4", correct: false } ], explanation: "תאי צמח הם תאים אאוקריוטיים, המאופיינים בגרעין מוגדר, דופן תא תאיתי, כלורופלסטים ואברונים נוספים. E. coli וארכאה הם פרוקריוטים, ובקטריופאג' הוא וירוס." },
+             { id: 'w1q28', question: "מה נכון לגבי הגודל היחסי של מיקרואורגניזמים?", options: [ { text: "וירוסים גדולים מחיידקים", correct: false }, { text: "חיידקים גדולים משמרים", correct: false }, { text: "וירוסים קטנים משמעותית מחיידקים", correct: true }, { text: "כל המיקרואורגניזמים באותו הגודל", correct: false } ], explanation: "באופן כללי, וירוסים קטנים בסדרי גודל מחיידקים (נמדדים בננומטרים לעומת מיקרומטרים), וחיידקים קטנים מתאים אאוקריוטיים כמו שמרים או פרוטוזואה." },
+             { id: 'w1q29', question: "העיסוק בחיידקים הגורמים לקלקול מזון שייך לתחום:", options: [ { text: "מיקרוביולוגיה של מזון", correct: true }, { text: "וירולוגיה", correct: false }, { text: "מיקולוגיה (חקר פטריות)", correct: false }, { text: "פרזיטולוגיה", correct: false } ], explanation: "מיקרוביולוגיה של מזון חוקרת את תפקידם של מיקרואורגניזמים במזון, הן בהיבטים חיוביים (תסיסה, ייצור) והן בהיבטים שליליים (קלקול, מחלות המועברות במזון)." },
+             { id: 'w1q30', question: "היכולת של מיקרואורגניזם מסוים לגרום למחלה נקראת:", options: [ { text: "מורפולוגיה", correct: false }, { text: "פתוגניות (Pathogenicity)", correct: true }, { text: "טקסונומיה", correct: false }, { text: "פוטוסינתזה", correct: false } ], explanation: "פתוגניות היא היכולת של מיקרואורגניזם (פתוגן) לגרום למחלה במאכסן רגיש. מידת הפתוגניות נקראת אלימות (virulence)." }
+        ];
+
+
+        let currentMCQIndex_w1 = 0;
+        let score_w1 = 0;
+        let userAnswers_w1 = {}; // Store user answers { mcqId: selectedOptionText }
+        let viewMode_w1 = 'single'; // 'single' or 'all'
+        const mcqsContainer_w1 = document.getElementById('mcqs-container');
+        const resultsContainer_w1 = document.getElementById('results');
+        const mcqNav_w1 = document.getElementById('mcq-nav');
+        const mcqCounterElement_w1 = document.getElementById('mcq-counter');
+        const prevBtn_w1 = document.getElementById('prev-mcq-btn');
+        const nextBtn_w1 = document.getElementById('next-mcq-btn');
+        const viewToggleBtn_w1 = document.getElementById('view-toggle-btn');
+        let shuffledMCQs_w1 = [];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+         // Renders a single MCQ element (used in both single and all view)
+        function renderMCQElement(mcq, index) {
+            let shuffledOptions = [...mcq.options];
+            shuffleArray(shuffledOptions);
+
+            let optionsHTML = '<ul class="options">';
+            shuffledOptions.forEach(option => {
+                // Check if this option was previously selected by the user for this question
+                const isSelected = userAnswers_w1[mcq.id] === option.text;
+                 optionsHTML += `<li data-correct="${option.correct}" class="${isSelected ? 'selected' : ''}">${option.text}</li>`;
+             });
+             optionsHTML += '</ul>';
+
+             const isAnswered = mcq.id in userAnswers_w1;
+             const correctOptionText = mcq.options.find(opt => opt.correct).text;
+             const userAnswer = userAnswers_w1[mcq.id];
+             const wasCorrect = isAnswered && userAnswer === correctOptionText;
+
+             const mcqElement = document.createElement('div');
+             mcqElement.classList.add('mcq');
+             mcqElement.id = `mcq-${mcq.id}`; // Unique ID for each MCQ container
+             if (isAnswered) {
+                mcqElement.classList.add('mcq-answered'); // Add class if answered
+             }
+
+             mcqElement.innerHTML = `
+                 <p class="question-text">${index + 1}. ${mcq.question}</p>
+                 ${optionsHTML}
+                 <div class="feedback" style="display: ${isAnswered ? 'block' : 'none'};">
+                     ${isAnswered ? (wasCorrect ? 'נכון!' : 'לא נכון.') : ''}
+                 </div>
+                 <div class="explanation" style="display: ${isAnswered ? 'block' : 'none'};">
+                     ${mcq.explanation}
+                 </div>
+             `;
+
+            // Apply correct/incorrect styles if already answered
+             if (isAnswered) {
+                const optionsLi = mcqElement.querySelectorAll('.options li');
+                optionsLi.forEach(li => {
+                    li.classList.add('answered'); // Mark options as answered visually
+                    if (li.textContent === userAnswer) {
+                        li.classList.add(wasCorrect ? 'correct' : 'incorrect');
+                    } else if (li.dataset.correct === 'true') {
+                        // Also show correct answer if user was wrong
+                         if (!wasCorrect) li.classList.add('correct');
+                     }
+                 });
+                 const feedbackDiv = mcqElement.querySelector('.feedback');
+                 feedbackDiv.classList.add(wasCorrect ? 'correct' : 'incorrect');
+             }
+
+
+             // Add event listeners only if not already answered
+             if (!isAnswered) {
+                const optionsElements = mcqElement.querySelectorAll('.options li');
+                 optionsElements.forEach(optionEl => {
+                     optionEl.addEventListener('click', () => checkAnswer(mcq.id, optionEl, mcqElement));
+                 });
+             }
+
+            return mcqElement;
+         }
+
+         // Displays MCQs based on viewMode
+        function displayMCQs() {
+            mcqsContainer_w1.innerHTML = ''; // Clear previous content
+             resultsContainer_w1.style.display = 'none'; // Hide results initially
+
+            if (viewMode_w1 === 'single') {
+                mcqNav_w1.style.display = 'flex';
+                mcqCounterElement_w1.style.display = 'block';
+                 mcqCounterElement_w1.textContent = `שאלה ${currentMCQIndex_w1 + 1} מתוך ${shuffledMCQs_w1.length}`;
+                const mcqElement = renderMCQElement(shuffledMCQs_w1[currentMCQIndex_w1], currentMCQIndex_w1);
+                mcqsContainer_w1.appendChild(mcqElement);
+                updateNavButtons();
+            } else { // 'all' mode
+                mcqNav_w1.style.display = 'none';
+                mcqCounterElement_w1.style.display = 'none';
+                shuffledMCQs_w1.forEach((mcq, index) => {
+                    const mcqElement = renderMCQElement(mcq, index);
+                    mcqsContainer_w1.appendChild(mcqElement);
+                });
+                 updateResultsDisplay(); // Show results immediately in 'all' mode
+                resultsContainer_w1.style.display = 'block';
+             }
+         }
+
+
+        function checkAnswer(mcqId, selectedOptionEl, mcqElement) {
+             if (userAnswers_w1[mcqId]) return; // Already answered
+
+            const isCorrect = selectedOptionEl.getAttribute('data-correct') === 'true';
+             const feedbackEl = mcqElement.querySelector('.feedback');
+             const explanationEl = mcqElement.querySelector('.explanation');
+             const optionsUl = mcqElement.querySelector('.options');
+             const allOptions = optionsUl.querySelectorAll('li');
+
+            userAnswers_w1[mcqId] = selectedOptionEl.textContent; // Store the selected text
+
+            // Disable options and mark MCQ as answered
+            mcqElement.classList.add('mcq-answered');
+            allOptions.forEach(opt => {
+                opt.classList.add('answered'); // Visually mark as answered
+                // opt.style.pointerEvents = 'none'; // Alternative disabling
+                 // opt.style.cursor = 'default';
+            });
+
+            // Update score
+             if (isCorrect) {
+                score_w1++;
+            }
+
+            // Apply styles and show feedback/explanation
+            selectedOptionEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+             feedbackEl.textContent = isCorrect ? 'נכון!' : 'לא נכון.';
+             feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`; // Set class
+             feedbackEl.style.display = 'block';
+             explanationEl.style.display = 'block';
+
+             // If wrong, also highlight the correct answer
+             if (!isCorrect) {
+                 allOptions.forEach(opt => {
+                     if (opt.getAttribute('data-correct') === 'true') {
+                         opt.classList.add('correct');
+                     }
+                 });
+             }
+
+            // Update results display if in 'all' mode
+             if (viewMode_w1 === 'all') {
+                updateResultsDisplay();
+             }
+         }
+
+         function updateResultsDisplay() {
+             const answeredCount = Object.keys(userAnswers_w1).length;
+             resultsContainer_w1.innerHTML = `ענית על ${answeredCount} מתוך ${shuffledMCQs_w1.length}<br>ציון נוכחי: ${score_w1} מתוך ${answeredCount || 0}`;
+              resultsContainer_w1.style.display = 'block';
+         }
+
+        function updateNavButtons() {
+            prevBtn_w1.disabled = currentMCQIndex_w1 === 0;
+            nextBtn_w1.disabled = currentMCQIndex_w1 === shuffledMCQs_w1.length - 1;
+        }
+
+        function nextMCQ() {
+            if (currentMCQIndex_w1 < shuffledMCQs_w1.length - 1) {
+                currentMCQIndex_w1++;
+                displayMCQs();
+            }
+             // Optionally show final score if last question was just displayed
+            if(currentMCQIndex_w1 === shuffledMCQs_w1.length -1){
+                updateResultsDisplay();
+                resultsContainer_w1.style.display = 'block';
+            }
+        }
+
+        function prevMCQ() {
+            if (currentMCQIndex_w1 > 0) {
+                currentMCQIndex_w1--;
+                 resultsContainer_w1.style.display = 'none'; // Hide results when moving back
+                displayMCQs();
+            }
+        }
+
+         function toggleViewMode() {
+            if (viewMode_w1 === 'single') {
+                viewMode_w1 = 'all';
+                viewToggleBtn_w1.textContent = 'הצג שאלה בודדת';
+            } else {
+                viewMode_w1 = 'single';
+                viewToggleBtn_w1.textContent = 'הצג הכל';
+            }
+            displayMCQs(); // Re-render based on the new mode
+        }
+
+        function initWeek1() {
+            shuffledMCQs_w1 = [...mcqData_w1];
+            shuffleArray(shuffledMCQs_w1);
+            userAnswers_w1 = {}; // Reset answers
+            score_w1 = 0; // Reset score
+             currentMCQIndex_w1 = 0; // Reset index
+             viewMode_w1 = 'single'; // Start in single mode
+             viewToggleBtn_w1.textContent = 'הצג הכל'; // Set initial button text
+
+            displayMCQs();
+
+            // Add event listeners for navigation
+             prevBtn_w1.addEventListener('click', prevMCQ);
+             nextBtn_w1.addEventListener('click', nextMCQ);
+             viewToggleBtn_w1.addEventListener('click', toggleViewMode);
+
+        }
+
+        window.onload = initWeek1;
+
+    </script>
+
+</body>
+</html>

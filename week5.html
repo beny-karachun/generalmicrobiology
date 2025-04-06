@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מיקרוביולוגיה כללית - שבוע 5: מבנה התא הפרוקריוטי ג' - מעטפות חיצוניות</title>
+    <style>
+        /* CSS Styles are identical to revised week1/2/3/4.html */
+         body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #eef5f3;
+            color: #333;
+            direction: rtl;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #006847; /* Dark green */
+            text-align: center;
+            border-bottom: 2px solid #8fbc8f; /* Dark Sea Green */
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        /* --- Flashcards Styles --- */
+        .flashcards-container {
+            perspective: 1000px;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-direction: column;
+        }
+        .flashcard {
+            width: 80%;
+            max-width: 400px;
+            height: 180px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 8px;
+            font-size: 1.2em;
+        }
+        .flashcard-front {
+            background-color: #c8e6c9;
+            color: #1b5e20;
+        }
+        .flashcard-back {
+            background-color: #a5d6a7;
+            color: #1b5e20;
+            transform: rotateY(180deg);
+            font-size: 1em;
+        }
+        .flashcard-nav {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .flashcard-nav button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .flashcard-nav button:hover {
+            background-color: #004d40;
+        }
+         #flashcard-counter {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        /* --- MCQ Styles --- */
+        .mcqs-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #view-toggle-btn {
+             padding: 6px 12px;
+             background-color: #6c757d;
+             color: white;
+             border: none;
+             border-radius: 4px;
+             cursor: pointer;
+             font-size: 0.9em;
+         }
+        #view-toggle-btn:hover {
+             background-color: #5a6268;
+         }
+
+        .mcq {
+            background-color: #ffffff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #004d40;
+        }
+        .options {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .options li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: 2px solid transparent; /* Add transparent border for layout consistency */
+        }
+        .options li:hover {
+            background-color: #ced4da;
+        }
+        /* Styles for answer states */
+        .options li.answered.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .options li.answered.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+         /* Style for selected but not yet confirmed answer (optional) */
+        .options li.selected {
+             border-color: #007bff;
+         }
+         /* Disable options after answering */
+        .mcq-answered .options li {
+            cursor: default;
+            pointer-events: none;
+             opacity: 0.8;
+        }
+        .mcq-answered .options li.correct,
+        .mcq-answered .options li.incorrect {
+            opacity: 1; /* Keep selected/correct ones fully visible */
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+             border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-right: 5px solid #8fbc8f;
+            font-size: 0.95em;
+            border-radius: 4px;
+        }
+        .mcq-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .mcq-navigation button {
+            padding: 10px 20px;
+            background-color: #00796b; /* Teal */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .mcq-navigation button:hover:not(:disabled) {
+            background-color: #004d40; /* Darker Teal */
+        }
+        .mcq-navigation button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #results {
+            text-align: center;
+            font-size: 1.4em;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e0f2f1;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            color: #00695c;
+        }
+         #mcq-counter {
+             text-align: center;
+             margin-bottom: 15px;
+             font-weight: bold;
+             color: #555;
+         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>שבוע 5: מבנה התא הפרוקריוטי ג' - מעטפות חיצוניות</h1>
+
+        <!-- Flashcards Section -->
+        <div class="section">
+             <h2>כרטיסיות לימוד</h2>
+             <div class="flashcards-container">
+                 <div class="flashcard" id="flashcard">
+                     <div class="flashcard-face flashcard-front">מונח</div>
+                     <div class="flashcard-face flashcard-back">הגדרה</div>
+                 </div>
+                 <div class="flashcard-nav">
+                     <button id="prev-card">הקודם</button>
+                     <button id="flip-card">הפוך</button>
+                     <button id="next-card">הבא</button>
+                 </div>
+                 <div id="flashcard-counter">כרטיס 1 מתוך X</div>
+             </div>
+        </div>
+
+        <!-- MCQs Section -->
+        <div class="section">
+             <div class="mcqs-section-header">
+                 <h2>שאלות חזרה (MCQs)</h2>
+                 <button id="view-toggle-btn">הצג הכל</button>
+             </div>
+             <div id="mcq-counter">שאלה 1 מתוך 30</div>
+             <div id="mcqs-container">
+                 <!-- MCQs will be loaded here by JavaScript -->
+             </div>
+             <div id="results" style="display: none;">
+                 תוצאה סופית תופיע כאן.
+             </div>
+             <div class="mcq-navigation" id="mcq-nav" style="display: none;">
+                 <button id="prev-mcq-btn" disabled>הקודם</button>
+                 <button id="next-mcq-btn">הבא</button>
+             </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Flashcard Data and Logic ---
+        const flashcardData_w5 = [
+             { term: "מעטפת התא גרם-שלילית (Gram-negative cell envelope)", definition: "מבנה מעטפת מורכב הכולל: ממברנה ציטופלסמית, שכבה דקה של פפטידוגליקן בחלל הפריפלסמטי, וממברנה חיצונית." },
+             { term: "ממברנה חיצונית (Outer membrane - OM)", definition: "שכבה ליפידית דו-שכבתית ייחודית לחיידקים גרם-שליליים, הנמצאת מחוץ לפפטידוגליקן. השכבה החיצונית שלה מכילה ליפופוליסכריד (LPS)." },
+             { term: "ליפופוליסכריד (Lipopolysaccharide - LPS)", definition: "מולקולה מורכבת המהווה מרכיב עיקרי בשכבה החיצונית של הממברנה החיצונית בגרם-שליליים. מורכבת מליפיד A, סוכר ליבה (core) ואנטיגן O." },
+             { term: "ליפיד A (Lipid A)", definition: "החלק השומני, ההידרופובי של ה-LPS, המעוגן בממברנה החיצונית. אחראי לפעילות הרעלנית (אנדוטוקסין) של ה-LPS." },
+             { term: "אנדוטוקסין (Endotoxin)", definition: "רעלן המהווה חלק אינטגרלי ממבנה תא החיידק (בניגוד לאקסוטוקסין המופרש החוצה). ליפיד A של ה-LPS הוא האנדוטוקסין הקלאסי של חיידקים גרם-שליליים." },
+             { term: "סוכר הליבה (Core polysaccharide)", definition: "החלק הסוכרי המרכזי ב-LPS, המחבר בין ליפיד A לאנטיגן O. הרכבו שמור יחסית בתוך משפחות חיידקים." },
+             { term: "אנטיגן O (O-antigen)", definition: "החלק הסוכרי החיצוני והמשתנה ביותר ב-LPS. שרשרת פוליסכרידית ארוכה הבולטת מפני החיידק. השונות באנטיגן O משמשת לסיווג זנים (serotyping)." },
+             { term: "פריפלסמה (Periplasm)", definition: "החלל הנמצא בין הממברנה הציטופלסמית לממברנה החיצונית בחיידקים גרם-שליליים. מכיל את שכבת הפפטידוגליקן הדקה ומגוון חלבונים ואנזימים." },
+             { term: "פורינים (Porins)", definition: "חלבונים היוצרים תעלות בממברנה החיצונית של חיידקים גרם-שליליים, המאפשרות מעבר פסיבי של מולקולות הידרופיליות קטנות (עד כ-600 דלתון)." },
+             { term: "קפסולה (Capsule)", definition: "שכבה רירית, מאורגנת היטב וצמודה לדופן התא, המורכבת בדרך כלל מפוליסכרידים (ולעיתים רחוקות מחלבונים). קשה להסרה." },
+             { term: "שכבת ריר (Slime layer)", definition: "שכבה רירית, פחות מאורגנת ופחות צמודה לדופן התא בהשוואה לקפסולה. קלה יותר להסרה." },
+             { term: "גליקוקליקס (Glycocalyx)", definition: "מונח כללי המתאר שכבות חיצוניות סוכריות (פוליסכרידים) המקיפות תאים, כולל קפסולות ושכבות ריר." },
+             { term: "צביעה שלילית (Negative staining)", definition: "שיטת צביעה מיקרוסקופית שבה צובעים את הרקע ולא את התא עצמו. משמשת להדגמת מבנים חיצוניים עדינים כמו קפסולות, שנשארות שקופות על רקע צבוע." },
+             { term: "ביופילם (Biofilm)", definition: "קהילה מורכבת של מיקרואורגניזמים הצמודים למשטח כלשהו (חי או דומם) ועטופים במטריצה חוץ-תאית שהם מייצרים בעצמם." },
+             { term: "מטריצה חוץ-תאית (Extracellular matrix)", definition: "החומר (לרוב פוליסכרידים, חלבונים ו-DNA) המקיף ומדביק את התאים בביופילם, ומגן עליהם." },
+             { term: "חישת מניין (Quorum sensing)", definition: "מערכת תקשורת בין חיידקים המאפשרת להם לחוש את צפיפות האוכלוסייה סביבם ולווסת ביטוי גנים (כמו יצירת ביופילם או פקטורי אלימות) בהתאם." }
+        ];
+
+
+        let currentCardIndex_w5 = 0;
+        // ... (rest of flashcard JS logic, using unique variable names like _w5)
+         const flashcardElement_w5 = document.getElementById('flashcard');
+         const flashcardFront_w5 = flashcardElement_w5.querySelector('.flashcard-front');
+         const flashcardBack_w5 = flashcardElement_w5.querySelector('.flashcard-back');
+         const flipButton_w5 = document.getElementById('flip-card');
+         const nextButton_w5 = document.getElementById('next-card');
+         const prevButton_w5 = document.getElementById('prev-card');
+         const cardCounterElement_w5 = document.getElementById('flashcard-counter');
+
+         function displayCard_w5(index) {
+             if (!flashcardElement_w5) return;
+             const card = flashcardData_w5[index];
+             flashcardFront_w5.textContent = card.term;
+             flashcardBack_w5.textContent = card.definition;
+             flashcardElement_w5.classList.remove('is-flipped');
+             cardCounterElement_w5.textContent = `כרטיס ${index + 1} מתוך ${flashcardData_w5.length}`;
+         }
+         function flipCard_w5() { flashcardElement_w5.classList.toggle('is-flipped'); }
+         function nextCard_w5() { currentCardIndex_w5 = (currentCardIndex_w5 + 1) % flashcardData_w5.length; displayCard_w5(currentCardIndex_w5); }
+         function prevCard_w5() { currentCardIndex_w5 = (currentCardIndex_w5 - 1 + flashcardData_w5.length) % flashcardData_w5.length; displayCard_w5(currentCardIndex_w5); }
+
+         flipButton_w5.addEventListener('click', flipCard_w5);
+         nextButton_w5.addEventListener('click', nextCard_w5);
+         prevButton_w5.addEventListener('click', prevCard_w5);
+         if (flashcardData_w5.length > 0) displayCard_w5(currentCardIndex_w5);
+
+        // --- MCQ Data and Logic ---
+        const mcqData_w5 = [
+            { id: 'w5q1', question: "איזו שכבה ייחודית קיימת במעטפת התא של חיידקים גרם-שליליים אך אינה קיימת בגרם-חיוביים?", options: [ { text: "ממברנה ציטופלסמית", correct: false }, { text: "פפטידוגליקן", correct: false }, { text: "ממברנה חיצונית (Outer membrane)", correct: true }, { text: "קפסולה", correct: false } ], explanation: "הממברנה החיצונית היא מאפיין מבני ייחודי למעטפת התא של חיידקים גרם-שליליים, הנמצאת מחוץ לשכבת הפפטידוגליקן הדקה." },
+            { id: 'w5q2', question: "המרכיב העיקרי בשכבה החיצונית של הממברנה החיצונית בגרם-שליליים הוא:", options: [ { text: "פפטידוגליקן", correct: false }, { text: "ליפופוליסכריד (LPS)", correct: true }, { text: "חומצות טכואיות", correct: false }, { text: "פוספוליפידים רגילים", correct: false } ], explanation: "בעוד שהשכבה הפנימית של הממברנה החיצונית מורכבת מפוספוליפידים, השכבה החיצונית שלה מורכבת בעיקר מ-LPS, מולקולה ייחודית לגרם-שליליים." },
+            { id: 'w5q3', question: "איזה חלק של מולקולת ה-LPS אחראי לפעילות האנדוטוקסינית (רעלנית)?", options: [ { text: "אנטיגן O", correct: false }, { text: "סוכר הליבה (Core)", correct: false }, { text: "ליפיד A", correct: true }, { text: "הקשר בין סוכר הליבה לליפיד A", correct: false } ], explanation: "ליפיד A, החלק השומני המעוגן בממברנה, הוא הרכיב הגורם לתגובה הדלקתית החזקה המאפיינת פעילות אנדוטוקסין כאשר החיידק מתפרק ומשחרר LPS." },
+            { id: 'w5q4', question: "החלל הפריפלסמטי (periplasm) בחיידקים גרם-שליליים נמצא בין:", options: [ { text: "הממברנה הציטופלסמית לדופן הפפטידוגליקן", correct: true }, { text: "הממברנה החיצונית לקפסולה", correct: false }, { text: "דופן הפפטידוגליקן לממברנה החיצונית", correct: true }, { text: "שתי האפשרויות הראשונות נכונות, למעשה זה כל האזור ביניהן", correct: true } ], explanation: "הפריפלסמה היא האזור המוגדר בין הממברנה הציטופלסמית (הפנימית) לממברנה החיצונית. אזור זה מכיל את שכבת הפפטידוגליקן הדקה ומגוון חלבונים ואנזימים." },
+            { id: 'w5q5', question: "מה תפקידם של הפורינים (porins) בממברנה החיצונית?", options: [ { text: "להעביר באופן אקטיבי מולקולות גדולות", correct: false }, { text: "לאפשר מעבר פסיבי של מולקולות הידרופיליות קטנות", correct: true }, { text: "לייצב את מבנה ה-LPS", correct: false }, { text: "לשמש כאתר היקשרות לבקטריופאג'ים", correct: false } ], explanation: "הפורינים יוצרים תעלות המאפשרות מעבר בדיפוזיה של מולקולות קטנות ומסיסות במים (כמו סוכרים פשוטים, חומצות אמינו, יונים) דרך הממברנה החיצונית, שבלעדיהן הייתה אטומה לחומרים אלו." },
+            { id: 'w5q6', question: "מה ההבדל העיקרי בין קפסולה (capsule) לשכבת ריר (slime layer)?", options: [ { text: "קפסולה עשויה מחלבונים, שכבת ריר מפוליסכרידים", correct: false }, { text: "קפסולה מאורגנת היטב וצמודה לתא, שכבת ריר פחות מאורגנת ופחות צמודה", correct: true }, { text: "שכבת ריר מגינה מפני פאגוציטוזה, קפסולה לא", correct: false }, { text: "קפסולה קיימת רק בגרם-חיוביים, שכבת ריר רק בגרם-שליליים", correct: false } ], explanation: "ההבחנה העיקרית היא ברמת הארגון וההיצמדות לתא. קפסולה היא שכבה מוגדרת וקשה להסרה, בעוד שכבת ריר היא רופפת יותר וניתנת לשטיפה." },
+            { id: 'w5q7', question: "איזו שיטת צביעה משמשת בדרך כלל להדגמת קפסולות?", options: [ { text: "צביעת גרם", correct: false }, { text: "צביעה יציבת חומצה (Acid-fast)", correct: false }, { text: "צביעה שלילית", correct: true }, { text: "צביעת נבגים", correct: false } ], explanation: "בצביעה שלילית, צובעים את הרקע (למשל עם India ink). הקפסולה, שאינה סופחת את הצבע, נראית כאזור בהיר (הילה) סביב התא החיידקי, שגם הוא עשוי להיראות לא צבוע או צבוע קלות בצבע אחר." },
+            { id: 'w5q8', question: "איזה מהבאים מהווה תפקיד אפשרי של קפסולה או שכבת ריר?", options: [ { text: "הגנה מפני התייבשות", correct: true }, { text: "הגנה מפני פאגוציטוזה על ידי תאי מערכת החיסון", correct: true }, { text: "סיוע בהיצמדות למשטחים וביצירת ביופילם", correct: true }, { text: "כל התשובות נכונות", correct: true } ], explanation: "שכבות הגליקוקליקס מספקות יתרונות רבים לחיידק, כולל שמירה על לחות, התחמקות ממערכת החיסון (הקפסולה מקשה על הבליעה), והיצמדות למשטחים או לתאים אחרים." },
+            { id: 'w5q9', question: "מהו ביופילם (biofilm)?", options: [ { text: "תרבית נוזלית של חיידקים", correct: false }, { text: "סוג מיוחד של נבג חיידקי", correct: false }, { text: "קהילת מיקרואורגניזמים הצמודה למשטח ועטופה במטריצה", correct: true }, { text: "הממברנה החיצונית של חיידק גרם-שלילי", correct: false } ], explanation: "ביופילם הוא מבנה מורכב שבו מיקרואורגניזמים (לאו דווקא חיידקים בלבד) גדלים כקהילה המאורגנת במטריצה דביקה שהם מייצרים, והיא צמודה למשטח." },
+            { id: 'w5q10', question: "הימצאות בתוך ביופילם מקנה לחיידקים יתרון של:", options: [ { text: "רגישות מוגברת לאנטיביוטיקה", correct: false }, { text: "הגנה מוגברת מפני חומרים אנטימיקרוביאליים ומערכת החיסון", correct: true }, { text: "קצב חלוקה מהיר יותר", correct: false }, { text: "יכולת תנועה משופרת", correct: false } ], explanation: "המטריצה של הביופילם מהווה מחסום פיזי וכימי המקשה על חדירת אנטיביוטיקות וחומרי חיטוי, ומגן על החיידקים מפני תאי מערכת החיסון. בנוסף, חיידקים בתוך ביופילם נמצאים לעיתים קרובות במצב מטבולי איטי יותר, מה שמפחית את רגישותם לאנטיביוטיקות מסוימות." },
+            { id: 'w5q11', question: "החומר העיקרי המרכיב את המטריצה החוץ-תאית ברוב הביופילמים הוא:", options: [ { text: "חלבונים בלבד", correct: false }, { text: "DNA חוץ-תאי (eDNA) בלבד", correct: false }, { text: "פוליסכרידים", correct: true }, { text: "ליפידים בלבד", correct: false } ], explanation: "למרות שהמטריצה מכילה גם חלבונים, ליפידים ו-eDNA, המרכיב העיקרי והשלד המבני שלה ברוב המקרים הוא פוליסכרידים שהחיידקים מפרישים." },
+            { id: 'w5q12', question: "איזה מרכיב במעטפת החיידק הגרם-שלילי מהווה מחסום בפני חומרים הידרופוביים מסוימים (כמו אנטיביוטיקות מסוימות או מלחי מרה)?", options: [ { text: "הממברנה הציטופלסמית", correct: false }, { text: "שכבת הפפטידוגליקן", correct: false }, { text: "הממברנה החיצונית (ובפרט ה-LPS)", correct: true }, { text: "הפריפלסמה", correct: false } ], explanation: "הממברנה החיצונית, ובמיוחד השכבה החיצונית שלה העשירה ב-LPS הטעון וההידרופילי יחסית, מהווה מחסום יעיל בפני חדירת מולקולות הידרופוביות גדולות, ובכך תורמת לעמידות הטבעית של חיידקים גרם-שליליים לחומרים מסוימים." },
+            { id: 'w5q13', question: "ליפופרוטאינים (Lipoproteins) בחיידקים גרם-שליליים מחברים בין:", options: [ { text: "הממברנה הציטופלסמית לפפטידוגליקן", correct: false }, { text: "הפפטידוגליקן לממברנה החיצונית", correct: true }, { text: "הממברנה החיצונית לקפסולה", correct: false }, { text: "ליפיד A לאנטיגן O", correct: false } ], explanation: "ליפופרוטאינים (כמו ה-Braun's lipoprotein) הם חלבונים בעלי קצה ליפידי המעוגן בממברנה החיצונית וקצה חלבוני הקשור קוולנטית לפפטידוגליקן, ובכך הם מייצבים את הקשר בין שתי השכבות." },
+            { id: 'w5q14', question: "איזו תכונה של LPS תורמת לשונות האנטיגנית בין זנים שונים של חיידקים גרם-שליליים?", options: [ { text: "השונות במבנה ליפיד A", correct: false }, { text: "השונות ברצף אנטיגן O", correct: true }, { text: "ההרכב הקבוע של סוכר הליבה", correct: false }, { text: "הקישור לפורינים", correct: false } ], explanation: "שרשרת אנטיגן O היא החלק המשתנה ביותר של ה-LPS. ההרכב והסידור של יחידות הסוכר החוזרות באנטיגן O שונים בין זנים שונים, ומשמשים בסיס לסיווג סרולוגי (serotyping)." },
+            { id: 'w5q15', question: "שחרור מסיבי של אנדוטוקסין (LPS) למחזור הדם עלול לגרום ל:", options: [ { text: "שיפור מיידי בבריאות המאכסן", correct: false }, { text: "שוק ספטי (Septic shock), קריסת מערכות ומוות", correct: true }, { text: "הפיכת החיידק לגרם-חיובי", correct: false }, { text: "יצירת נבגים על ידי החיידק", correct: false } ], explanation: "LPS בריכוזים גבוהים מפעיל תגובה דלקתית מערכתית חזקה מאוד, הכוללת שחרור ציטוקינים, ירידת לחץ דם, קרישת דם מפושטת ופגיעה רב-מערכתית, מצב מסכן חיים המכונה שוק ספטי." },
+            { id: 'w5q16', question: "חיידק היוצר קפסולה עשוי להיות בעל יתרון ב:", options: [ { text: "סביבה יבשה", correct: true }, { text: "התמודדות עם מערכת החיסון של המאכסן", correct: true }, { text: "יצירת ביופילם", correct: true }, { text: "כל התשובות נכונות", correct: true } ], explanation: "הקפסולה מגנה מהתייבשות, מקשה על פאגוציטוזה (בולענות) על ידי תאי מערכת החיסון, ומסייעת בהיצמדות למשטחים - כולם יתרונות משמעותיים בסביבות שונות." },
+            { id: 'w5q17', question: "מה נכון לגבי תפקיד הפריפלסמה?", options: [ { text: "היא מכילה את ה-DNA הכרומוזומלי", correct: false }, { text: "היא מכילה אנזימים לפירוק ראשוני של נוטריינטים וחלבונים לקישור והובלה", correct: true }, { text: "היא אחראית לסינתזת ה-LPS", correct: false }, { text: "היא אינה מכילה כלל חלבונים", correct: false } ], explanation: "הפריפלסמה היא אזור פעיל מבחינה מטבולית, המכיל אנזימים הידרוליטיים (כמו פוספטאזות, נוקלאזות), חלבוני קישור (binding proteins) המסייעים בהכנסת נוטריינטים, ואנזימים המעורבים בבניית הדופן." },
+            { id: 'w5q18', question: "ביופילמים מהווים בעיה משמעותית ברפואה מכיוון ש:", options: [ { text: "קשה לאבחן אותם", correct: false }, { text: "הם נוטים להתפתח על שתלים וצנתרים ולהיות עמידים לטיפול אנטיביוטי", correct: true }, { text: "הם נגרמים רק על ידי וירוסים", correct: false }, { text: "הם גדלים רק מחוץ לגוף", correct: false } ], explanation: "ביופילמים יכולים להתפתח על משטחים רפואיים מושתלים (מסתמי לב, מפרקים מלאכותיים, צנתרים) וברקמות. החיידקים בתוכם מוגנים מאנטיביוטיקה וממערכת החיסון, מה שהופך את הזיהומים הללו לקשים מאוד לטיפול." },
+            { id: 'w5q19', question: "כיצד חיידקים בביופילם מתקשרים ביניהם ומתאמים את התנהגותם?", options: [ { text: "באמצעות גלי קול", correct: false }, { text: "באמצעות מערכת 'חישת מניין' (Quorum sensing) המבוססת על מולקולות איתות", correct: true }, { text: "הם אינם מתקשרים כלל", correct: false }, { text: "באמצעות קשרים חשמליים ישירים", correct: false } ], explanation: "מערכות חישת מניין מאפשרות לחיידקים 'לחוש' את צפיפותם על ידי הפרשה וקליטה של מולקולות איתות קטנות (autoinducers). כאשר הריכוז מגיע לסף מסוים, מופעל ביטוי גנים מתואם בקהילה כולה." },
+            { id: 'w5q20', question: "איזה מהמבנים הבאים אינו חלק ממעטפת התא של חיידק גרם-שלילי טיפוסי?", options: [ { text: "ממברנה ציטופלסמית", correct: false }, { text: "ממברנה חיצונית", correct: false }, { text: "שכבה עבה של פפטידוגליקן", correct: true }, { text: "פריפלסמה", correct: false } ], explanation: "חיידקים גרם-שליליים מאופיינים בשכבה דקה של פפטידוגליקן, הנמצאת בתוך הפריפלסמה. שכבה עבה היא מאפיין של חיידקים גרם-חיוביים." },
+             { id: 'w5q21', question: "המעבר דרך פורינים הוא בדרך כלל:", options: [ { text: "הובלה אקטיבית הדורשת ATP", correct: false }, { text: "דיפוזיה פסיבית המוגבלת על ידי גודל המולקולה", correct: true }, { text: "מעבר ספציפי לחלבונים גדולים", correct: false }, { text: "מנגנון להוצאת רעלנים מהתא", correct: false } ], explanation: "פורינים יוצרים תעלות מלאות מים המאפשרות מעבר פסיבי (ללא השקעת אנרגיה) של מולקולות קטנות ומסיסות במים על פי מפל הריכוזים. הגודל המקסימלי שיכול לעבור נקבע על ידי קוטר התעלה." },
+             { id: 'w5q22', question: "קפסולה המורכבת מחומצה היאלורונית (כמו ב-Streptococcus pyogenes) מהווה יתרון לחיידק מכיוון ש:", options: [ { text: "היא רעילה ישירות לתאי המאכסן", correct: false }, { text: "היא מסווה את החיידק ומונעת זיהוי על ידי מערכת החיסון (מכיוון שחומצה היאלורונית מצויה גם ברקמות המאכסן)", correct: true }, { text: "היא מאפשרת תנועה מהירה במיוחד", correct: false }, { text: "היא מקנה עמידות לחום גבוה", correct: false } ], explanation: "כאשר הקפסולה מורכבת ממולקולה המצויה גם בגוף המאכסן, מערכת החיסון מתקשה לזהות אותה כ'זרה' ולהגיב נגדה, מה שמאפשר לחיידק 'להתחבא'." },
+             { id: 'w5q23', question: "איזה חלק של מעטפת התא הגרם-שלילית חשוף ישירות לסביבה החיצונית?", options: [ { text: "הממברנה הציטופלסמית", correct: false }, { text: "הפפטידוגליקן", correct: false }, { text: "הממברנה החיצונית (ובפרט ה-LPS ואנטיגן O)", correct: true }, { text: "הפריפלסמה", correct: false } ], explanation: "הממברנה החיצונית, ובמיוחד שרשראות אנטיגן O הבולטות ממנה, היא השכבה החיצונית ביותר הבאה במגע ישיר עם סביבת החיידק." },
+             { id: 'w5q24', question: "דוגמה נפוצה לביופילם בסביבה יומיומית היא:", options: [ { text: "אבק על רהיטים", correct: false }, { text: "הרובד החיידקי (פלאק) על השיניים", correct: true }, { text: "ענן בשמיים", correct: false }, { text: "בועת סבון", correct: false } ], explanation: "פלאק השיניים הוא דוגמה קלאסית לביופילם מורכב, המכיל מגוון מיני חיידקים הצמודים לשן ועטופים במטריצה." },
+             { id: 'w5q25', question: "היכולת של LPS לעורר תגובה חיסונית חזקה הופכת אותו ל:", options: [ { text: "אנטיגן יעיל ליצירת חיסונים", correct: true }, { text: "מולקולה שקטה שאינה מזוהה כלל", correct: false }, { text: "חומר המדכא את מערכת החיסון", correct: false }, { text: "אנטיביוטיקה טבעית", correct: false } ], explanation: "למרות פעילותו הרעלנית, היכולת של LPS לעורר תגובה חיסונית (אימונוגניות) חזקה, במיוחד של אנטיגן O, מנוצלת לעיתים בפיתוח חיסונים כנגד חיידקים גרם-שליליים מסוימים." },
+             { id: 'w5q26', question: "חיידק גרם-שלילי איבד את היכולת לייצר פורינים תקינים. מה תהיה ההשפעה הסבירה ביותר?", options: [ { text: "קצב הגידול שלו יואץ משמעותית", correct: false }, { text: "הוא יהפוך לרגיש יותר למלחי מרה", correct: false }, { text: "קליטת נוטריינטים הידרופיליים קטנים מהסביבה תהיה איטית ופחות יעילה", correct: true }, { text: "הוא יתחיל לייצר קפסולה עבה במיוחד", correct: false } ], explanation: "ללא פורינים תקינים, המעבר של נוטריינטים חיוניים קטנים (כמו סוכרים, חומצות אמינו) דרך הממברנה החיצונית יהיה מוגבל מאוד, מה שיפגע ביכולת החיידק לגדול, במיוחד בסביבות דלות מזון." },
+             { id: 'w5q27', question: "צביעה שלילית מדגימה את הקפסולה כ:", options: [ { text: "אזור צבוע כהה סביב התא", correct: false }, { text: "אזור בהיר או שקוף (הילה) סביב התא על רקע צבוע", correct: true }, { text: "גרגירים קטנים בתוך התא", correct: false }, { text: "צביעה אחידה של כל התא והרקע", correct: false } ], explanation: "הצבע בצביעה שלילית אינו חודר לקפסולה (וגם לא לתא עצמו). לכן, על רקע השדה הצבוע, הקפסולה נראית כאזור נקי מצבע המקיף את התא." },
+             { id: 'w5q28', question: "התפתחות ביופילם מתחילה בדרך כלל ב:", options: [ { text: "מוות המוני של חיידקים פלנקטוניים", correct: false }, { text: "היצמדות ראשונית, הפיכה, של חיידקים בודדים למשטח", correct: true }, { text: "יצירת נבגים על המשטח", correct: false }, { text: "שחרור רעלנים חזקים", correct: false } ], explanation: "השלב הראשון ביצירת ביופילם הוא היצמדות רופפת והפיכה של חיידקים חופשיים (פלנקטוניים) למשטח. לאחר מכן ההיצמדות מתחזקת, החיידקים מתרבים ומתחילים לייצר את המטריצה." },
+             { id: 'w5q29', question: "היכן לא סביר למצוא ביופילם?", options: [ { text: "על צינורות מים", correct: false }, { text: "על קטטר שהוחדר לגוף", correct: false }, { text: "על סלעים בנחל", correct: false }, { text: "באוויר סטרילי לחלוטין", correct: true } ], explanation: "ביופילמים דורשים משטח להיצמד אליו וסביבה לחה. אוויר סטרילי אינו מספק את התנאים הללו." },
+             { id: 'w5q30', question: "בנוסף להגנה פיזית, כיצד המטריצה של הביופילם יכולה להגן מפני אנטיביוטיקה?", options: [ { text: "היא מייצרת אנטיביוטיקות נגדיות", correct: false }, { text: "היא יכולה לקשור או לנטרל כימית את האנטיביוטיקה", correct: true }, { text: "היא הופכת את החיידקים לוירוסים עמידים", correct: false }, { text: "היא גורמת לאנטיביוטיקה להתאדות", correct: false } ], explanation: "חלק מהמרכיבים במטריצה, כמו פוליסכרידים מסוימים או אנזימים חוץ-תאיים, יכולים לקשור מולקולות אנטיביוטיקה או לפרק אותן, ובכך להפחית את הריכוז האפקטיבי שמגיע לחיידקים שבתוך הביופילם." }
+        ];
+
+
+        // --- MCQ JavaScript Logic (Use unique names like _w5) ---
+         let currentMCQIndex_w5 = 0;
+         let score_w5 = 0;
+         let userAnswers_w5 = {};
+         let viewMode_w5 = 'single';
+         const mcqsContainer_w5 = document.getElementById('mcqs-container');
+         const resultsContainer_w5 = document.getElementById('results');
+         const mcqNav_w5 = document.getElementById('mcq-nav');
+         const mcqCounterElement_w5 = document.getElementById('mcq-counter');
+         const prevBtn_w5 = document.getElementById('prev-mcq-btn');
+         const nextBtn_w5 = document.getElementById('next-mcq-btn');
+         const viewToggleBtn_w5 = document.getElementById('view-toggle-btn');
+         let shuffledMCQs_w5 = [];
+
+         function shuffleArray(array) { /* ... */
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+         function renderMCQElement_w5(mcq, index) { /* ... */
+             let shuffledOptions = [...mcq.options];
+             shuffleArray(shuffledOptions);
+
+             let optionsHTML = '<ul class="options">';
+             shuffledOptions.forEach(option => {
+                 const isSelected = userAnswers_w5[mcq.id] === option.text;
+                  optionsHTML += `<li data-correct="${option.correct}" class="${isSelected ? 'selected' : ''}">${option.text}</li>`;
+              });
+              optionsHTML += '</ul>';
+
+              const isAnswered = mcq.id in userAnswers_w5;
+              const correctOptionText = mcq.options.find(opt => opt.correct).text;
+              const userAnswer = userAnswers_w5[mcq.id];
+              const wasCorrect = isAnswered && userAnswer === correctOptionText;
+
+              const mcqElement = document.createElement('div');
+              mcqElement.classList.add('mcq');
+              mcqElement.id = `mcq-${mcq.id}`; // Unique ID
+              if (isAnswered) {
+                 mcqElement.classList.add('mcq-answered');
+              }
+
+              mcqElement.innerHTML = `
+                  <p class="question-text">${index + 1}. ${mcq.question}</p>
+                  ${optionsHTML}
+                  <div class="feedback" style="display: ${isAnswered ? 'block' : 'none'};">
+                      ${isAnswered ? (wasCorrect ? 'נכון!' : 'לא נכון.') : ''}
+                  </div>
+                  <div class="explanation" style="display: ${isAnswered ? 'block' : 'none'};">
+                      ${mcq.explanation}
+                  </div>
+              `;
+
+             if (isAnswered) {
+                 const optionsLi = mcqElement.querySelectorAll('.options li');
+                 optionsLi.forEach(li => {
+                     li.classList.add('answered');
+                     if (li.textContent === userAnswer) {
+                         li.classList.add(wasCorrect ? 'correct' : 'incorrect');
+                     } else if (li.dataset.correct === 'true' && !wasCorrect) {
+                          li.classList.add('correct');
+                      }
+                  });
+                  const feedbackDiv = mcqElement.querySelector('.feedback');
+                  feedbackDiv.classList.add(wasCorrect ? 'correct' : 'incorrect');
+              }
+
+             if (!isAnswered) {
+                 const optionsElements = mcqElement.querySelectorAll('.options li');
+                  optionsElements.forEach(optionEl => {
+                      optionEl.addEventListener('click', () => checkAnswer_w5(mcq.id, optionEl, mcqElement));
+                  });
+              }
+
+             return mcqElement;
+          }
+         function displayMCQs_w5() { /* ... */
+             mcqsContainer_w5.innerHTML = '';
+              resultsContainer_w5.style.display = 'none';
+
+             if (viewMode_w5 === 'single') {
+                 mcqNav_w5.style.display = 'flex';
+                 mcqCounterElement_w5.style.display = 'block';
+                  mcqCounterElement_w5.textContent = `שאלה ${currentMCQIndex_w5 + 1} מתוך ${shuffledMCQs_w5.length}`;
+                 const mcqElement = renderMCQElement_w5(shuffledMCQs_w5[currentMCQIndex_w5], currentMCQIndex_w5);
+                 mcqsContainer_w5.appendChild(mcqElement);
+                 updateNavButtons_w5();
+             } else { // 'all' mode
+                 mcqNav_w5.style.display = 'none';
+                 mcqCounterElement_w5.style.display = 'none';
+                 shuffledMCQs_w5.forEach((mcq, index) => {
+                     const mcqElement = renderMCQElement_w5(mcq, index);
+                     mcqsContainer_w5.appendChild(mcqElement);
+                 });
+                  updateResultsDisplay_w5();
+                 resultsContainer_w5.style.display = 'block';
+              }
+         }
+         function checkAnswer_w5(mcqId, selectedOptionEl, mcqElement) { /* ... */
+              if (userAnswers_w5[mcqId]) return;
+
+             const isCorrect = selectedOptionEl.getAttribute('data-correct') === 'true';
+              const feedbackEl = mcqElement.querySelector('.feedback');
+              const explanationEl = mcqElement.querySelector('.explanation');
+              const optionsUl = mcqElement.querySelector('.options');
+              const allOptions = optionsUl.querySelectorAll('li');
+
+             userAnswers_w5[mcqId] = selectedOptionEl.textContent;
+
+             mcqElement.classList.add('mcq-answered');
+             allOptions.forEach(opt => {
+                 opt.classList.add('answered');
+             });
+
+              if (isCorrect) {
+                 score_w5++;
+             }
+
+             selectedOptionEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+              feedbackEl.textContent = isCorrect ? 'נכון!' : 'לא נכון.';
+              feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+              feedbackEl.style.display = 'block';
+              explanationEl.style.display = 'block';
+
+              if (!isCorrect) {
+                  allOptions.forEach(opt => {
+                      if (opt.getAttribute('data-correct') === 'true') {
+                          opt.classList.add('correct');
+                      }
+                  });
+              }
+
+              if (viewMode_w5 === 'all') {
+                 updateResultsDisplay_w5();
+              }
+         }
+         function updateResultsDisplay_w5() { /* ... */
+             const answeredCount = Object.keys(userAnswers_w5).length;
+              resultsContainer_w5.innerHTML = `ענית על ${answeredCount} מתוך ${shuffledMCQs_w5.length}<br>ציון נוכחי: ${score_w5} מתוך ${answeredCount || 0}`;
+               resultsContainer_w5.style.display = 'block';
+         }
+         function updateNavButtons_w5() { /* ... */
+             prevBtn_w5.disabled = currentMCQIndex_w5 === 0;
+             nextBtn_w5.disabled = currentMCQIndex_w5 === shuffledMCQs_w5.length - 1;
+         }
+         function nextMCQ_w5() { /* ... */
+            if (currentMCQIndex_w5 < shuffledMCQs_w5.length - 1) {
+                 currentMCQIndex_w5++;
+                 displayMCQs_w5();
+             }
+             if(currentMCQIndex_w5 === shuffledMCQs_w5.length -1){
+                 updateResultsDisplay_w5();
+                 resultsContainer_w5.style.display = 'block';
+             }
+         }
+         function prevMCQ_w5() { /* ... */
+              if (currentMCQIndex_w5 > 0) {
+                 currentMCQIndex_w5--;
+                  resultsContainer_w5.style.display = 'none';
+                 displayMCQs_w5();
+             }
+         }
+         function toggleViewMode_w5() { /* ... */
+            if (viewMode_w5 === 'single') {
+                 viewMode_w5 = 'all';
+                 viewToggleBtn_w5.textContent = 'הצג שאלה בודדת';
+             } else {
+                 viewMode_w5 = 'single';
+                 viewToggleBtn_w5.textContent = 'הצג הכל';
+             }
+             displayMCQs_w5();
+         }
+
+        function initWeek5() { // Unique init function name
+            shuffledMCQs_w5 = [...mcqData_w5];
+            shuffleArray(shuffledMCQs_w5);
+            userAnswers_w5 = {};
+            score_w5 = 0;
+            currentMCQIndex_w5 = 0;
+            viewMode_w5 = 'single';
+            viewToggleBtn_w5.textContent = 'הצג הכל';
+
+            displayMCQs_w5();
+
+            prevBtn_w5.addEventListener('click', prevMCQ_w5);
+            nextBtn_w5.addEventListener('click', nextMCQ_w5);
+            viewToggleBtn_w5.addEventListener('click', toggleViewMode_w5);
+        }
+
+        window.onload = initWeek5;
+
+    </script>
+
+</body>
+</html>

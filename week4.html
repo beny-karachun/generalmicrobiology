@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מיקרוביולוגיה כללית - שבוע 4: מבנה התא הפרוקריוטי ב' - דופן</title>
+    <style>
+        /* CSS Styles are identical to revised week1.html/week2.html/week3.html */
+         body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #eef5f3;
+            color: #333;
+            direction: rtl;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #006847; /* Dark green */
+            text-align: center;
+            border-bottom: 2px solid #8fbc8f; /* Dark Sea Green */
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        /* --- Flashcards Styles --- */
+        .flashcards-container {
+            perspective: 1000px;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-direction: column;
+        }
+        .flashcard {
+            width: 80%;
+            max-width: 400px;
+            height: 180px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 8px;
+            font-size: 1.2em;
+        }
+        .flashcard-front {
+            background-color: #c8e6c9;
+            color: #1b5e20;
+        }
+        .flashcard-back {
+            background-color: #a5d6a7;
+            color: #1b5e20;
+            transform: rotateY(180deg);
+            font-size: 1em;
+        }
+        .flashcard-nav {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .flashcard-nav button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .flashcard-nav button:hover {
+            background-color: #004d40;
+        }
+         #flashcard-counter {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        /* --- MCQ Styles --- */
+        .mcqs-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #view-toggle-btn {
+             padding: 6px 12px;
+             background-color: #6c757d;
+             color: white;
+             border: none;
+             border-radius: 4px;
+             cursor: pointer;
+             font-size: 0.9em;
+         }
+        #view-toggle-btn:hover {
+             background-color: #5a6268;
+         }
+
+        .mcq {
+            background-color: #ffffff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #004d40;
+        }
+        .options {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .options li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: 2px solid transparent; /* Add transparent border for layout consistency */
+        }
+        .options li:hover {
+            background-color: #ced4da;
+        }
+        /* Styles for answer states */
+        .options li.answered.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .options li.answered.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+         /* Style for selected but not yet confirmed answer (optional) */
+        .options li.selected {
+             border-color: #007bff;
+         }
+         /* Disable options after answering */
+        .mcq-answered .options li {
+            cursor: default;
+            pointer-events: none;
+             opacity: 0.8;
+        }
+        .mcq-answered .options li.correct,
+        .mcq-answered .options li.incorrect {
+            opacity: 1; /* Keep selected/correct ones fully visible */
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+             border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-right: 5px solid #8fbc8f;
+            font-size: 0.95em;
+            border-radius: 4px;
+        }
+        .mcq-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .mcq-navigation button {
+            padding: 10px 20px;
+            background-color: #00796b; /* Teal */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .mcq-navigation button:hover:not(:disabled) {
+            background-color: #004d40; /* Darker Teal */
+        }
+        .mcq-navigation button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #results {
+            text-align: center;
+            font-size: 1.4em;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e0f2f1;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            color: #00695c;
+        }
+         #mcq-counter {
+             text-align: center;
+             margin-bottom: 15px;
+             font-weight: bold;
+             color: #555;
+         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>שבוע 4: מבנה התא הפרוקריוטי ב' - דופן</h1>
+
+        <!-- Flashcards Section -->
+        <div class="section">
+             <h2>כרטיסיות לימוד</h2>
+             <div class="flashcards-container">
+                 <div class="flashcard" id="flashcard">
+                     <div class="flashcard-face flashcard-front">מונח</div>
+                     <div class="flashcard-face flashcard-back">הגדרה</div>
+                 </div>
+                 <div class="flashcard-nav">
+                     <button id="prev-card">הקודם</button>
+                     <button id="flip-card">הפוך</button>
+                     <button id="next-card">הבא</button>
+                 </div>
+                 <div id="flashcard-counter">כרטיס 1 מתוך X</div>
+             </div>
+        </div>
+
+        <!-- MCQs Section -->
+        <div class="section">
+             <div class="mcqs-section-header">
+                 <h2>שאלות חזרה (MCQs)</h2>
+                 <button id="view-toggle-btn">הצג הכל</button>
+             </div>
+             <div id="mcq-counter">שאלה 1 מתוך 30</div>
+             <div id="mcqs-container">
+                 <!-- MCQs will be loaded here by JavaScript -->
+             </div>
+             <div id="results" style="display: none;">
+                 תוצאה סופית תופיע כאן.
+             </div>
+             <div class="mcq-navigation" id="mcq-nav" style="display: none;">
+                 <button id="prev-mcq-btn" disabled>הקודם</button>
+                 <button id="next-mcq-btn">הבא</button>
+             </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Flashcard Data and Logic ---
+        const flashcardData_w4 = [
+             { term: "דופן התא (Cell wall)", definition: "שכבה קשיחה הנמצאת מחוץ לממברנה הציטופלסמית ברוב החיידקים והארכאות (וגם בצמחים ופטריות). מקנה צורה והגנה מכאנית ואוסמוטית." },
+             { term: "לחץ אוסמוטי (Osmotic pressure)", definition: "הלחץ הנוצר כתוצאה ממעבר מים דרך ממברנה חדירה למחצה, מריכוז מומסים נמוך לגבוה. דופן התא מונעת התפוצצות (ליזיס) בתנאים היפוטוניים." },
+             { term: "פפטידוגליקן (Peptidoglycan)", definition: "פולימר ייחודי לדופן התא של חיידקים (Bacteria), המורכב משרשראות סוכרים (NAG ו-NAM) המקושרות ביניהן בגשרים פפטידיים." },
+             { term: "NAG (N-acetylglucosamine)", definition: "אחד משני האמינו-סוכרים החוזרים שמרכיבים את שלד הפפטידוגליקן." },
+             { term: "NAM (N-acetylmuramic acid)", definition: "האמינו-סוכר השני המרכיב את שלד הפפטידוגליקן. ל-NAM קשורה שרשרת פפטידית קצרה." },
+             { term: "קשר גליקוזידי β(1-4)", definition: "הקשר הכימי המחבר בין יחידות NAG ו-NAM בשרשרת הסוכרית של הפפטידוגליקן. אנזים ליזוזים מסוגל לפרק קשר זה." },
+             { term: "גשר פפטידי (Peptide cross-link)", definition: "הקשרים הקוולנטיים המחברים בין השרשראות הפפטידיות הקשורות ל-NAM בשרשראות סוכר סמוכות, ויוצרים מבנה רשתי תלת-ממדי חזק." },
+             { term: "טרנספפטידאז (Transpeptidase)", definition: "האנזים האחראי ליצירת הגשרים הפפטידיים בפפטידוגליקן. אנזים זה הוא אתר המטרה של אנטיביוטיקות ממשפחת הפניצילין (β-Lactams)." },
+             { term: "D-חומצות אמינו", definition: "איזומרים 'ימניים' של חומצות אמינו הנמצאים בשרשרת הפפטידית של הפפטידוגליקן (כמו D-alanine, D-glutamic acid), בניגוד לחומצות האמינו בחלבוני התא שהן מסוג L. מגנות מפני פירוק על ידי פרוטאזות." },
+             { term: "צביעת גרם (Gram stain)", definition: "שיטת צביעה מבחינה (דיפרנציאלית) המחלקת חיידקים לשתי קבוצות עיקריות (גרם-חיוביים וגרם-שליליים) על בסיס הבדלים במבנה דופן התא." },
+             { term: "חיידקים גרם-חיוביים (Gram-positive)", definition: "חיידקים הנצבעים בסגול בצביעת גרם. בעלי דופן תא עבה המורכבת בעיקר מפפטידוגליקן ושכבות רבות שלו." },
+             { term: "חיידקים גרם-שליליים (Gram-negative)", definition: "חיידקים הנצבעים בוורוד/אדום בצביעת גרם. בעלי דופן תא דקה מפפטידוגליקן, ומעליה ממברנה חיצונית נוספת." },
+             { term: "חומצות טכואיות (Teichoic acids)", definition: "פולימרים טעונים שלילית (של גליצרול-פוספט או ריביטול-פוספט) המשובצים בדופן התא העבה של חיידקים גרם-חיוביים. תורמות למבנה ולקשירת יונים." },
+             { term: "חומצות ליפוטכואיות (Lipoteichoic acids)", definition: "חומצות טכואיות המעוגנות לממברנה הציטופלסמית באמצעות קצה ליפידי." },
+             { term: "פסאודופפטידוגליקן (Pseudopeptidoglycan)", definition: "פולימר דמוי פפטידוגליקן המצוי בדופן של חלק מהארכאות. מכיל NAG ו-N-acetyltalosaminuronic acid (במקום NAM) וקשרים גליקוזידיים מסוג β(1-3)." },
+             { term: "Mycoplasma", definition: "סוג של חיידקים חסרי דופן תא באופן טבעי. הממברנה הציטופלסמית שלהם מכילה סטרולים ליציבות." }
+        ];
+
+
+        let currentCardIndex_w4 = 0;
+        // ... (rest of flashcard JS logic, using unique variable names like _w4)
+        const flashcardElement_w4 = document.getElementById('flashcard');
+        const flashcardFront_w4 = flashcardElement_w4.querySelector('.flashcard-front');
+        const flashcardBack_w4 = flashcardElement_w4.querySelector('.flashcard-back');
+        const flipButton_w4 = document.getElementById('flip-card');
+        const nextButton_w4 = document.getElementById('next-card');
+        const prevButton_w4 = document.getElementById('prev-card');
+        const cardCounterElement_w4 = document.getElementById('flashcard-counter');
+
+        function displayCard_w4(index) {
+            if (!flashcardElement_w4) return;
+            const card = flashcardData_w4[index];
+            flashcardFront_w4.textContent = card.term;
+            flashcardBack_w4.textContent = card.definition;
+            flashcardElement_w4.classList.remove('is-flipped');
+            cardCounterElement_w4.textContent = `כרטיס ${index + 1} מתוך ${flashcardData_w4.length}`;
+        }
+        function flipCard_w4() { flashcardElement_w4.classList.toggle('is-flipped'); }
+        function nextCard_w4() { currentCardIndex_w4 = (currentCardIndex_w4 + 1) % flashcardData_w4.length; displayCard_w4(currentCardIndex_w4); }
+        function prevCard_w4() { currentCardIndex_w4 = (currentCardIndex_w4 - 1 + flashcardData_w4.length) % flashcardData_w4.length; displayCard_w4(currentCardIndex_w4); }
+
+        flipButton_w4.addEventListener('click', flipCard_w4);
+        nextButton_w4.addEventListener('click', nextCard_w4);
+        prevButton_w4.addEventListener('click', prevCard_w4);
+        if (flashcardData_w4.length > 0) displayCard_w4(currentCardIndex_w4);
+
+
+        // --- MCQ Data and Logic ---
+        const mcqData_w4 = [
+             { id: 'w4q1', question: "מהו התפקיד העיקרי של דופן התא בחיידקים?", options: [ { text: "אגירת חומרי מזון", correct: false }, { text: "שמירה על צורת התא והגנה מפני לחץ אוסמוטי", correct: true }, { text: "ביצוע פוטוסינתזה", correct: false }, { text: "שכפול החומר התורשתי", correct: false } ], explanation: "דופן התא מספקת שלד חיצוני קשיח המקנה לחיידק את צורתו האופיינית ומונעת ממנו להתפוצץ (ליזיס) כאשר הוא נמצא בסביבה היפוטונית (ריכוז מומסים נמוך מהתא)." },
+             { id: 'w4q2', question: "הפולימר הייחודי המרכיב את דופן התא של רוב החיידקים (Bacteria) נקרא:", options: [ { text: "תאית (Cellulose)", correct: false }, { text: "כיטין (Chitin)", correct: false }, { text: "פפטידוגליקן (Peptidoglycan)", correct: true }, { text: "קולגן (Collagen)", correct: false } ], explanation: "פפטידוגליקן הוא המרכיב המרכזי והייחודי לדופן התא החיידקית. תאית מרכיבה דופן צמחים, כיטין מרכיב דופן פטריות, וקולגן הוא חלבון מבני בבעלי חיים." },
+             { id: 'w4q3', question: "מהם שני האמינו-סוכרים המרכיבים את שרשרת הפוליסכריד בפפטידוגליקן?", options: [ { text: "גלוקוז ופרוקטוז", correct: false }, { text: "NAG ו-NAM", correct: true }, { text: "ריבוז ודיאוקסיריבוז", correct: false }, { text: "גלקטוז ולקטוז", correct: false } ], explanation: "שלד הפפטידוגליקן מורכב מיחידות חוזרות של שני סוכרים: N-acetylglucosamine (NAG) ו-N-acetylmuramic acid (NAM)." },
+             { id: 'w4q4', question: "הקשרים המחברים בין שרשראות סוכר סמוכות בפפטידוגליקן ויוצרים מבנה רשתי הם:", options: [ { text: "קשרי מימן", correct: false }, { text: "קשרים גליקוזידיים", correct: false }, { text: "גשרים פפטידיים (Peptide cross-links)", correct: true }, { text: "קשרים יוניים", correct: false } ], explanation: "הגשרים הפפטידיים, הנוצרים בין השרשראות הפפטידיות הקצרות הקשורות ל-NAM, הם אלו שמחברים את שרשראות הסוכר זו לזו ומקנים לדופן את חוזקה התלת-ממדי." },
+             { id: 'w4q5', question: "איזה אנזים אחראי ליצירת הגשרים הפפטידיים בפפטידוגליקן ומהווה מטרה לאנטיביוטיקות מסוג פניצילין?", options: [ { text: "ליזוזים", correct: false }, { text: "טרנספפטידאז", correct: true }, { text: "DNA פולימראז", correct: false }, { text: "ATP סינתאז", correct: false } ], explanation: "טרנספפטידאז הוא האנזים היוצר את קשרי הצילוב הפפטידיים. פניצילין ואנטיביוטיקות דומות (בטא-לקטמים) נקשרות לאנזים זה ומעכבות את פעילותו, ובכך פוגעות בבניית הדופן." },
+             { id: 'w4q6', question: "מהו ההבדל העיקרי בדופן התא המסביר את התוצאות השונות בצביעת גרם?", options: [ { text: "נוכחות או היעדר ממברנה ציטופלסמית", correct: false }, { text: "עובי שכבת הפפטידוגליקן והימצאות ממברנה חיצונית", correct: true }, { text: "סוג השוטונים", correct: false }, { text: "צורת החיידק (קוקוס או מתג)", correct: false } ], explanation: "לחיידקים גרם-חיוביים דופן עבה של פפטידוגליקן ה'כולאת' את צבע הקריסטל ויולט-יוד בשלב השטיפה באלכוהול. לחיידקים גרם-שליליים דופן דקה וממברנה חיצונית שהאלכוהול פוגע בה, ומאפשר שטיפה של הצבע הסגול." },
+             { id: 'w4q7', question: "חיידק הנצבע בסגול בצביעת גרם הוא:", options: [ { text: "גרם-שלילי", correct: false }, { text: "חסר דופן", correct: false }, { text: "גרם-חיובי", correct: true }, { text: "ארכאה", correct: false } ], explanation: "הצבע הסגול (קריסטל ויולט) נשאר בתאים גרם-חיוביים לאחר שלב הדה-קולוריזציה (שטיפה באלכוהול)." },
+             { id: 'w4q8', question: "מה תפקידן של חומצות טכואיות וליפוטכואיות בדופן של חיידקים גרם-חיוביים?", options: [ { text: "להעניק תנועה לתא", correct: false }, { text: "לתרום למטען השלילי של הדופן, לייצב אותה ולקשור יונים", correct: true }, { text: "לפרק אנטיביוטיקות", correct: false }, { text: "ליצור ATP", correct: false } ], explanation: "חומצות אלו הן פולימרים טעונים שלילית התורמים למטען הכללי של פני התא, מייצבים את שכבת הפפטידוגליקן העבה ומסייעים בקישור יונים חיוביים כמו מגנזיום וסידן." },
+             { id: 'w4q9', question: "איזה שלב בצביעת גרם הוא הקריטי להבחנה בין חיידקים גרם-חיוביים לשליליים?", options: [ { text: "צביעה ראשונית בקריסטל ויולט", correct: false }, { text: "הוספת יוד (מורדנט)", correct: false }, { text: "שטיפה באלכוהול (דה-קולוריזציה)", correct: true }, { text: "צביעת ניגוד בספרנין", correct: false } ], explanation: "שלב הדה-קולוריזציה באלכוהול הוא השלב המבחין: הוא מסיר את צבע הקריסטל ויולט-יוד מהתאים הגרם-שליליים (בעלי הדופן הדקה והממברנה החיצונית), אך לא מהגרם-חיוביים (בעלי הדופן העבה)." },
+             { id: 'w4q10', question: "חיידקי Mycoplasma הם ייחודיים מכיוון ש:", options: [ { text: "הם בעלי דופן תא עבה במיוחד", correct: false }, { text: "הם חסרי דופן תא", correct: true }, { text: "הם חיידקי גרם-שליליים טיפוסיים", correct: false }, { text: "הם שייכים לארכאות", correct: false } ], explanation: "מיקופלזמה הם קבוצת חיידקים שאיבדה במהלך האבולוציה את היכולת לייצר דופן תא. כדי לשרוד ללא הגנה זו, הם לרוב חיים בסביבות מוגנות (כמו גוף המאכסן) וממברנת התא שלהם מחוזקת בסטרולים." },
+            { id: 'w4q11', question: "מהו ההבדל העיקרי בין פפטידוגליקן לפסאודופפטידוגליקן?", options: [ { text: "בפסאודופפטידוגליקן אין סוכרים", correct: false }, { text: "פסאודופפטידוגליקן מכיל NAM במקום NAG", correct: false }, { text: "פסאודופפטידוגליקן מכיל סוכר אחר במקום NAM וקשרים גליקוזידיים שונים (β-1,3)", correct: true }, { text: "פפטידוגליקן מצוי בארכאות ופסאודופפטידוגליקן בחיידקים", correct: false } ], explanation: "פסאודופפטידוגליקן, המצוי בארכאות מסוימות, דומה במבנה הכללי אך שונה בהרכב הכימי: הוא מכיל N-acetyltalosaminuronic acid במקום NAM, וקשרי הסוכר הם מסוג β(1-3) במקום β(1-4), מה שהופך אותו לעמיד בפני ליזוזים." },
+            { id: 'w4q12', question: "הימצאות של D-חומצות אמינו בפפטידוגליקן תורמת ל:", options: [ { text: "מסיסות גבוהה במים", correct: false }, { text: "קשירת חמצן", correct: false }, { text: "עמידות בפני פירוק על ידי פרוטאזות של המאכסן", correct: true }, { text: "יכולת תנועה מהירה", correct: false } ], explanation: "רוב הפרוטאזות (אנזימים מפרקי חלבונים) בגוף המאכסן ובסביבה מותאמות לפרק פפטידים המורכבים מ-L-חומצות אמינו. נוכחות ה-D-איזומרים בפפטידוגליקן מקשה על פירוקו." },
+            { id: 'w4q13', question: "מדוע תאים גרם-שליליים נצבעים בצבע הניגוד (ספרנין) בסוף צביעת גרם?", options: [ { text: "כי דופן התא שלהם עבה וסופגת את הספרנין", correct: false }, { text: "כי הצבע הראשוני (קריסטל ויולט) נשטף מהם בשלב האלכוהול, והם נשארים חסרי צבע", correct: true }, { text: "כי הם הורגים את התאים הגרם-חיוביים ולוקחים מהם את הצבע", correct: false }, { text: "כי ספרנין הוא הצבע היחיד שיכול לחדור את הממברנה החיצונית שלהם", correct: false } ], explanation: "לאחר שטיפה באלכוהול, התאים הגרם-שליליים הופכים שקופים (חסרי צבע). צבע הניגוד האדום/ורוד (ספרנין) צובע אותם ומאפשר לראותם במיקרוסקופ." },
+            { id: 'w4q14', question: "ליזוזים (Lysozyme), אנזים המצוי בדמעות וברוק, פוגע בחיידקים על ידי:", options: [ { text: "פירוק הממברנה הציטופלסמית", correct: false }, { text: "פירוק הקשרים הגליקוזידיים β(1-4) בפפטידוגליקן", correct: true }, { text: "עיכוב סינתזת חלבונים", correct: false }, { text: "פירוק ה-DNA החיידקי", correct: false } ], explanation: "ליזוזים הוא אנזים המפרק את הקשר הספציפי בין NAG ל-NAM בפפטידוגליקן, ובכך מחליש את דופן התא ויכול לגרום לליזיס של החיידק, במיוחד בתנאים היפוטוניים." },
+            { id: 'w4q15', question: "מה עלול לקרות לחיידק גרם-חיובי בסביבה היפוטונית אם דופן התא שלו תיפגע על ידי פניצילין?", options: [ { text: "הוא יתחלק מהר יותר", correct: false }, { text: "הוא יתחיל לייצר נבגים", correct: false }, { text: "הוא עלול לעבור ליזיס (התפוצצות) עקב כניסת מים", correct: true }, { text: "הוא יהפוך לגרם-שלילי", correct: false } ], explanation: "פניצילין מעכב את יצירת הגשרים הפפטידיים, מה שמחליש את הדופן. בסביבה היפוטונית, מים ייכנסו לתא באוסמוזה. ללא דופן חזקה שתעמוד בלחץ הטורגור, התא יתנפח ויתפוצץ." },
+            { id: 'w4q16', question: "באיזה מהמצבים הבאים דופן התא אינה חיונית להישרדות החיידק?", options: [ { text: "בסביבה היפרטונית (מליחות גבוהה)", correct: false }, { text: "בתוך תא מאכסן (סביבה איזוטונית מוגנת)", correct: true }, { text: "בסביבה היפוטונית (כמו מים מתוקים)", correct: false }, { text: "בנוכחות אנטיביוטיקה הפוגעת בממברנה", correct: false } ], explanation: "בסביבה איזוטונית, כמו הציטופלזמה של תא מאכסן, אין הפרש לחצים אוסמוטי משמעותי בין פנים התא לחוץ. במצב כזה, גם חיידק ללא דופן (כמו מיקופלזמה) או חיידק שדופנו נפגעה יכול לשרוד." },
+            { id: 'w4q17', question: "ארכאות רבות חסרות פפטידוגליקן. מה עשוי להרכיב את דופן התא שלהן במקום זאת?", options: [ { text: "פסאודופפטידוגליקן", correct: true }, { text: "שכבת S (חלבונים או גליקופרוטאינים המסודרים במבנה גבישי)", correct: true }, { text: "פוליסכרידים אחרים", correct: true }, { text: "כל התשובות נכונות", correct: true } ], explanation: "לארכאות יש מגוון רחב של מבני דופן. חלקן מכילות פסאודופפטידוגליקן, רבות מכילות שכבת S (S-layer) כמבנה הדופן העיקרי או היחיד, ואחרות מכילות פוליסכרידים מורכבים אחרים. פפטידוגליקן אינו מצוי בארכאות." },
+            { id: 'w4q18', question: "מדוע צביעת גרם אינה שיטה יעילה לזיהוי מיקופלזמה?", options: [ { text: "כי למיקופלזמה אין דופן תא שעליה מתבססת הצביעה", correct: true }, { text: "כי מיקופלזמה נצבעת תמיד בסגול", correct: false }, { text: "כי מיקופלזמה נצבעת תמיד בוורוד", correct: false }, { text: "כי מיקופלזמה גדולה מדי לצביעה", correct: false } ], explanation: "צביעת גרם מבחינה בין חיידקים על בסיס ההבדלים במבנה ובעובי דופן הפפטידוגליקן. מכיוון שלמיקופלזמה אין כלל דופן תא, הצביעה אינה רלוונטית לגביה." },
+            { id: 'w4q19', question: "היכן מתרחשת סינתזת הפפטידוגליקן בתא החיידק?", options: [ { text: "בציטופלזמה בלבד", correct: false }, { text: "על פני הממברנה החיצונית", correct: false }, { text: "יחידות הבניין מסונתזות בציטופלזמה ומועברות דרך הממברנה הציטופלסמית להרכבה מחוצה לה", correct: true }, { text: "בתוך הנוקלאואיד", correct: false } ], explanation: "אבני הבניין של הפפטידוגליקן (NAG-NAM-פפטיד) מסונתזות בציטופלזמה, נקשרות לנשא ליפידי בממברנה, מועברות אל מחוץ לממברנה הציטופלסמית, ושם הן משתלבות בדופן הקיימת ונוצרים קשרי הצילוב." },
+            { id: 'w4q20', question: "מהו תפקיד היוד (Lugol's iodine) בצביעת גרם?", options: [ { text: "לצבוע את החיידקים בצבע סגול", correct: false }, { text: "לשטוף את הצבע העודף", correct: false }, { text: "לשמש כמורדנט - לחזק את הקשר בין הקריסטל ויולט לדופן התא", correct: true }, { text: "לצבוע את החיידקים בצבע אדום", correct: false } ], explanation: "היוד יוצר קומפלקס גדול יותר עם הקריסטל ויולט. קומפלקס זה נכלא בצורה יעילה יותר בתוך שכבת הפפטידוגליקן העבה של חיידקים גרם-חיוביים, ומקשה על שטיפתו החוצה על ידי האלכוהול." },
+             { id: 'w4q21', question: "איזה מרכיב של דופן התא הגרם-חיובי מעוגן לממברנה הציטופלסמית?", options: [ { text: "פפטידוגליקן", correct: false }, { text: "חומצות טכואיות", correct: false }, { text: "חומצות ליפוטכואיות", correct: true }, { text: "חלבונים פריפריאליים", correct: false } ], explanation: "חומצות ליפוטכואיות (LTA) דומות לחומצות טכואיות אך מכילות קצה ליפידי המאפשר להן להתעגן בתוך הממברנה הציטופלסמית, בנוסף להיותן משולבות בדופן." },
+             { id: 'w4q22', question: "מה נכון לגבי קשיחות דופן התא?", options: [ { text: "היא מונעת לחלוטין מעבר של כל חומר שהוא", correct: false }, { text: "היא מקנה קשיחות מבנית אך מאפשרת מעבר של מולקולות קטנות", correct: true }, { text: "היא גמישה לחלוטין כמו הממברנה הציטופלסמית", correct: false }, { text: "היא קיימת רק בחיידקים גרם-חיוביים", correct: false } ], explanation: "הדופן קשיחה ומקנה צורה והגנה, אך היא אינה מחסום בררני כמו הממברנה. היא רשתית ומאפשרת מעבר חופשי יחסית של מולקולות קטנות (נוטריינטים, פסולת)." },
+             { id: 'w4q23', question: "אנטיביוטיקות הפוגעות בסינתזת דופן התא הן יעילות במיוחד נגד חיידקים:", options: [ { text: "כאשר הם נמצאים בשלב הסטציונרי", correct: false }, { text: "כאשר הם בתהליך גדילה וחלוקה פעיל", correct: true }, { text: "כאשר הם יוצרים נבגים", correct: false }, { text: "כאשר הם חסרי דופן באופן טבעי", correct: false } ], explanation: "אנטיביוטיקות אלו פוגעות בתהליך הבנייה של הדופן. תהליך זה מתרחש באופן אינטנסיבי כאשר החיידקים גדלים ומתחלקים וצריכים לסנתז דופן חדשה. חיידקים שאינם גדלים (למשל בשלב הסטציונרי) פחות רגישים." },
+             { id: 'w4q24', question: "מה מצופה שיקרה אם נבצע צביעת גרם על תאי שמר (Yeast)?", options: [ { text: "הם ייצבעו כגרם-שליליים (ורוד)", correct: false }, { text: "הם ייצבעו כגרם-חיוביים (סגול)", correct: true }, { text: "הם לא ייצבעו כלל", correct: false }, { text: "הם יעברו ליזיס", correct: false } ], explanation: "תאי שמר הם אאוקריוטים. למרות שאין להם פפטידוגליקן, יש להם דופן תא עבה (מכיטין וגלוקאנים) הנוטה לשמור את צבע הקריסטל ויולט-יוד בצביעת גרם, ולכן הם נראים כגרם-חיוביים." },
+             { id: 'w4q25', question: "היכולת של חיידק לשרוד ללא דופן תא בסביבה איזוטונית תלויה בעיקר ב:", options: [ { text: "יציבות הממברנה הציטופלסמית שלו", correct: true }, { text: "קצב שכפול ה-DNA שלו", correct: false }, { text: "נוכחות שוטונים", correct: false }, { text: "יכולתו לבצע פוטוסינתזה", correct: false } ], explanation: "בהיעדר דופן, הממברנה הציטופלסמית היא המחסום היחיד בין התא לסביבה. יכולת התא לשרוד תלויה ביציבות המכאנית והתפקודית של הממברנה שלו בתנאים אלו." },
+             { id: 'w4q26', question: "איזה מהבאים אינו מרכיב הנמצא בדרך כלל בפפטידוגליקן?", options: [ { text: "N-acetylglucosamine (NAG)", correct: false }, { text: "N-acetylmuramic acid (NAM)", correct: false }, { text: "חומצות אמינו מסוג D", correct: false }, { text: "ליפופוליסכריד (LPS)", correct: true } ], explanation: "LPS הוא מרכיב ייחודי לממברנה החיצונית של חיידקים גרם-שליליים, ואינו חלק ממבנה הפפטידוגליקן עצמו." },
+             { id: 'w4q27', question: "בצביעת גרם, אם שוכחים להוסיף את היוד (המורדנט), מה תהיה התוצאה הסבירה?", options: [ { text: "כל החיידקים ייראו גרם-חיוביים (סגולים)", correct: false }, { text: "כל החיידקים ייראו גרם-שליליים (ורודים)", correct: true }, { text: "רק תאים גרם-חיוביים ייצבעו", correct: false }, { text: "הצביעה לא תעבוד כלל, והתאים יישארו שקופים", correct: false } ], explanation: "היוד חיוני ליצירת קומפלקס גדול של קריסטל ויולט-יוד ה'נכלא' בדופן הגרם-חיובית. ללא היוד, גם הקריסטל ויולט יישטף בקלות מהתאים הגרם-חיוביים בשלב האלכוהול, וכתוצאה מכך כל החיידקים ייצבעו בצבע הניגוד (ורוד)." },
+             { id: 'w4q28', question: "חיידק שאיבד את דופן התא שלו אך נותר חי נקרא:", options: [ { text: "נבג (Spore)", correct: false }, { text: "פרוטופלסט (Protoplast) או ספרולסט (Spheroplast)", correct: true }, { text: "וירואיד (Viroid)", correct: false }, { text: "פלסמיד (Plasmid)", correct: false } ], explanation: "פרוטופלסט הוא תא (בדרך כלל גרם-חיובי) שכל הדופן שלו הוסרה. ספרולסט הוא תא (בדרך כלל גרם-שלילי) שחלק מהדופן שלו הוסר אך הממברנה החיצונית עשויה להישאר. שניהם יכולים לשרוד רק בתנאים איזוטוניים." },
+             { id: 'w4q29', question: "האם צביעת גרם יכולה להבדיל בין חיידקים לארכאות?", options: [ { text: "כן, ארכאות תמיד גרם-שליליות", correct: false }, { text: "כן, ארכאות תמיד גרם-חיוביות", correct: false }, { text: "לא תמיד, מכיוון שלא כל הארכאות מכילות מבנה דופן דומה לחיידקים, ותוצאות הצביעה יכולות להשתנות", correct: true }, { text: "כן, ארכאות אינן נצבעות כלל", correct: false } ], explanation: "לארכאות אין פפטידוגליקן, ומבנה הדופן שלהן מגוון. חלקן עשויות להיראות גרם-חיוביות וחלקן גרם-שליליות בצביעת גרם, אך תוצאה זו אינה תמיד עקבית או משקפת את המבנה האמיתי כמו בחיידקים. לכן, צביעת גרם אינה כלי אמין להבחנה ביניהם." },
+             { id: 'w4q30', question: "מה משותף לכל דפנות התא של חיידקים, צמחים ופטריות?", options: [ { text: "כולם מכילים פפטידוגליקן", correct: false }, { text: "כולם ממוקמים מחוץ לממברנה הציטופלסמית ומקנים הגנה מבנית", correct: true }, { text: "כולם בנויים מחלבונים בלבד", correct: false }, { text: "כולם מאפשרים תנועה אקטיבית", correct: false } ], explanation: "למרות שההרכב הכימי של דופן התא שונה מאוד בין קבוצות אלו (פפטידוגליקן בחיידקים, תאית בצמחים, כיטין בפטריות), התפקיד המבני הבסיסי של מתן צורה, קשיחות והגנה אוסמוטית משותף לכולם, והם כולם ממוקמים מחוץ לממברנה." }
+        ];
+
+
+        // --- MCQ JavaScript Logic (Use unique names like _w4) ---
+         let currentMCQIndex_w4 = 0;
+         let score_w4 = 0;
+         let userAnswers_w4 = {};
+         let viewMode_w4 = 'single';
+         const mcqsContainer_w4 = document.getElementById('mcqs-container');
+         const resultsContainer_w4 = document.getElementById('results');
+         const mcqNav_w4 = document.getElementById('mcq-nav');
+         const mcqCounterElement_w4 = document.getElementById('mcq-counter');
+         const prevBtn_w4 = document.getElementById('prev-mcq-btn');
+         const nextBtn_w4 = document.getElementById('next-mcq-btn');
+         const viewToggleBtn_w4 = document.getElementById('view-toggle-btn');
+         let shuffledMCQs_w4 = [];
+
+         function shuffleArray(array) { /* ... same shuffle logic ... */
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+         function renderMCQElement_w4(mcq, index) { /* ... same rendering logic using _w4 variables ... */
+             let shuffledOptions = [...mcq.options];
+             shuffleArray(shuffledOptions);
+
+             let optionsHTML = '<ul class="options">';
+             shuffledOptions.forEach(option => {
+                 const isSelected = userAnswers_w4[mcq.id] === option.text;
+                  optionsHTML += `<li data-correct="${option.correct}" class="${isSelected ? 'selected' : ''}">${option.text}</li>`;
+              });
+              optionsHTML += '</ul>';
+
+              const isAnswered = mcq.id in userAnswers_w4;
+              const correctOptionText = mcq.options.find(opt => opt.correct).text;
+              const userAnswer = userAnswers_w4[mcq.id];
+              const wasCorrect = isAnswered && userAnswer === correctOptionText;
+
+              const mcqElement = document.createElement('div');
+              mcqElement.classList.add('mcq');
+              mcqElement.id = `mcq-${mcq.id}`; // Unique ID
+              if (isAnswered) {
+                 mcqElement.classList.add('mcq-answered');
+              }
+
+              mcqElement.innerHTML = `
+                  <p class="question-text">${index + 1}. ${mcq.question}</p>
+                  ${optionsHTML}
+                  <div class="feedback" style="display: ${isAnswered ? 'block' : 'none'};">
+                      ${isAnswered ? (wasCorrect ? 'נכון!' : 'לא נכון.') : ''}
+                  </div>
+                  <div class="explanation" style="display: ${isAnswered ? 'block' : 'none'};">
+                      ${mcq.explanation}
+                  </div>
+              `;
+
+             if (isAnswered) {
+                 const optionsLi = mcqElement.querySelectorAll('.options li');
+                 optionsLi.forEach(li => {
+                     li.classList.add('answered');
+                     if (li.textContent === userAnswer) {
+                         li.classList.add(wasCorrect ? 'correct' : 'incorrect');
+                     } else if (li.dataset.correct === 'true' && !wasCorrect) {
+                          li.classList.add('correct');
+                      }
+                  });
+                  const feedbackDiv = mcqElement.querySelector('.feedback');
+                  feedbackDiv.classList.add(wasCorrect ? 'correct' : 'incorrect');
+              }
+
+             if (!isAnswered) {
+                 const optionsElements = mcqElement.querySelectorAll('.options li');
+                  optionsElements.forEach(optionEl => {
+                      optionEl.addEventListener('click', () => checkAnswer_w4(mcq.id, optionEl, mcqElement));
+                  });
+              }
+
+             return mcqElement;
+         }
+         function displayMCQs_w4() { /* ... same display logic using _w4 variables ... */
+             mcqsContainer_w4.innerHTML = '';
+              resultsContainer_w4.style.display = 'none';
+
+             if (viewMode_w4 === 'single') {
+                 mcqNav_w4.style.display = 'flex';
+                 mcqCounterElement_w4.style.display = 'block';
+                  mcqCounterElement_w4.textContent = `שאלה ${currentMCQIndex_w4 + 1} מתוך ${shuffledMCQs_w4.length}`;
+                 const mcqElement = renderMCQElement_w4(shuffledMCQs_w4[currentMCQIndex_w4], currentMCQIndex_w4);
+                 mcqsContainer_w4.appendChild(mcqElement);
+                 updateNavButtons_w4();
+             } else { // 'all' mode
+                 mcqNav_w4.style.display = 'none';
+                 mcqCounterElement_w4.style.display = 'none';
+                 shuffledMCQs_w4.forEach((mcq, index) => {
+                     const mcqElement = renderMCQElement_w4(mcq, index);
+                     mcqsContainer_w4.appendChild(mcqElement);
+                 });
+                  updateResultsDisplay_w4();
+                 resultsContainer_w4.style.display = 'block';
+              }
+         }
+         function checkAnswer_w4(mcqId, selectedOptionEl, mcqElement) { /* ... same checking logic using _w4 variables ... */
+             if (userAnswers_w4[mcqId]) return;
+
+             const isCorrect = selectedOptionEl.getAttribute('data-correct') === 'true';
+              const feedbackEl = mcqElement.querySelector('.feedback');
+              const explanationEl = mcqElement.querySelector('.explanation');
+              const optionsUl = mcqElement.querySelector('.options');
+              const allOptions = optionsUl.querySelectorAll('li');
+
+             userAnswers_w4[mcqId] = selectedOptionEl.textContent;
+
+             mcqElement.classList.add('mcq-answered');
+             allOptions.forEach(opt => {
+                 opt.classList.add('answered');
+             });
+
+              if (isCorrect) {
+                 score_w4++;
+             }
+
+             selectedOptionEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+              feedbackEl.textContent = isCorrect ? 'נכון!' : 'לא נכון.';
+              feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+              feedbackEl.style.display = 'block';
+              explanationEl.style.display = 'block';
+
+              if (!isCorrect) {
+                  allOptions.forEach(opt => {
+                      if (opt.getAttribute('data-correct') === 'true') {
+                          opt.classList.add('correct');
+                      }
+                  });
+              }
+
+              if (viewMode_w4 === 'all') {
+                 updateResultsDisplay_w4();
+              }
+         }
+         function updateResultsDisplay_w4() { /* ... same results logic using _w4 variables ... */
+             const answeredCount = Object.keys(userAnswers_w4).length;
+              resultsContainer_w4.innerHTML = `ענית על ${answeredCount} מתוך ${shuffledMCQs_w4.length}<br>ציון נוכחי: ${score_w4} מתוך ${answeredCount || 0}`;
+               resultsContainer_w4.style.display = 'block';
+         }
+         function updateNavButtons_w4() { /* ... same nav button logic using _w4 variables ... */
+             prevBtn_w4.disabled = currentMCQIndex_w4 === 0;
+             nextBtn_w4.disabled = currentMCQIndex_w4 === shuffledMCQs_w4.length - 1;
+         }
+         function nextMCQ_w4() { /* ... same next logic using _w4 variables ... */
+             if (currentMCQIndex_w4 < shuffledMCQs_w4.length - 1) {
+                 currentMCQIndex_w4++;
+                 displayMCQs_w4();
+             }
+             if(currentMCQIndex_w4 === shuffledMCQs_w4.length -1){
+                 updateResultsDisplay_w4();
+                 resultsContainer_w4.style.display = 'block';
+             }
+         }
+         function prevMCQ_w4() { /* ... same prev logic using _w4 variables ... */
+              if (currentMCQIndex_w4 > 0) {
+                 currentMCQIndex_w4--;
+                  resultsContainer_w4.style.display = 'none';
+                 displayMCQs_w4();
+             }
+         }
+         function toggleViewMode_w4() { /* ... same toggle logic using _w4 variables ... */
+             if (viewMode_w4 === 'single') {
+                 viewMode_w4 = 'all';
+                 viewToggleBtn_w4.textContent = 'הצג שאלה בודדת';
+             } else {
+                 viewMode_w4 = 'single';
+                 viewToggleBtn_w4.textContent = 'הצג הכל';
+             }
+             displayMCQs_w4();
+         }
+
+        function initWeek4() { // Unique init function name
+            shuffledMCQs_w4 = [...mcqData_w4];
+            shuffleArray(shuffledMCQs_w4);
+            userAnswers_w4 = {};
+            score_w4 = 0;
+            currentMCQIndex_w4 = 0;
+            viewMode_w4 = 'single';
+            viewToggleBtn_w4.textContent = 'הצג הכל';
+
+            displayMCQs_w4();
+
+            prevBtn_w4.addEventListener('click', prevMCQ_w4);
+            nextBtn_w4.addEventListener('click', nextMCQ_w4);
+            viewToggleBtn_w4.addEventListener('click', toggleViewMode_w4);
+        }
+
+        window.onload = initWeek4;
+
+    </script>
+
+</body>
+</html>

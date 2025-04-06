@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מיקרוביולוגיה כללית - שבוע 3: מבנה התא הפרוקריוטי א' - ממברנות</title>
+    <style>
+        /* CSS Styles are identical to revised week1.html/week2.html */
+         body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #eef5f3;
+            color: #333;
+            direction: rtl;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #006847; /* Dark green */
+            text-align: center;
+            border-bottom: 2px solid #8fbc8f; /* Dark Sea Green */
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        /* --- Flashcards Styles --- */
+        .flashcards-container {
+            perspective: 1000px;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-direction: column;
+        }
+        .flashcard {
+            width: 80%;
+            max-width: 400px;
+            height: 180px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 8px;
+            font-size: 1.2em;
+        }
+        .flashcard-front {
+            background-color: #c8e6c9;
+            color: #1b5e20;
+        }
+        .flashcard-back {
+            background-color: #a5d6a7;
+            color: #1b5e20;
+            transform: rotateY(180deg);
+            font-size: 1em;
+        }
+        .flashcard-nav {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .flashcard-nav button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .flashcard-nav button:hover {
+            background-color: #004d40;
+        }
+         #flashcard-counter {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        /* --- MCQ Styles --- */
+        .mcqs-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #view-toggle-btn {
+             padding: 6px 12px;
+             background-color: #6c757d;
+             color: white;
+             border: none;
+             border-radius: 4px;
+             cursor: pointer;
+             font-size: 0.9em;
+         }
+        #view-toggle-btn:hover {
+             background-color: #5a6268;
+         }
+
+        .mcq {
+            background-color: #ffffff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #004d40;
+        }
+        .options {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .options li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: 2px solid transparent; /* Add transparent border for layout consistency */
+        }
+        .options li:hover {
+            background-color: #ced4da;
+        }
+        /* Styles for answer states */
+        .options li.answered.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .options li.answered.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+         /* Style for selected but not yet confirmed answer (optional) */
+        .options li.selected {
+             border-color: #007bff;
+         }
+         /* Disable options after answering */
+        .mcq-answered .options li {
+            cursor: default;
+            pointer-events: none;
+             opacity: 0.8;
+        }
+        .mcq-answered .options li.correct,
+        .mcq-answered .options li.incorrect {
+            opacity: 1; /* Keep selected/correct ones fully visible */
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+             border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-right: 5px solid #8fbc8f;
+            font-size: 0.95em;
+            border-radius: 4px;
+        }
+        .mcq-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .mcq-navigation button {
+            padding: 10px 20px;
+            background-color: #00796b; /* Teal */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .mcq-navigation button:hover:not(:disabled) {
+            background-color: #004d40; /* Darker Teal */
+        }
+        .mcq-navigation button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #results {
+            text-align: center;
+            font-size: 1.4em;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e0f2f1;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            color: #00695c;
+        }
+         #mcq-counter {
+             text-align: center;
+             margin-bottom: 15px;
+             font-weight: bold;
+             color: #555;
+         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>שבוע 3: מבנה התא הפרוקריוטי א' - ממברנות</h1>
+
+        <!-- Flashcards Section -->
+        <div class="section">
+             <h2>כרטיסיות לימוד</h2>
+             <div class="flashcards-container">
+                 <div class="flashcard" id="flashcard">
+                     <div class="flashcard-face flashcard-front">מונח</div>
+                     <div class="flashcard-face flashcard-back">הגדרה</div>
+                 </div>
+                 <div class="flashcard-nav">
+                     <button id="prev-card">הקודם</button>
+                     <button id="flip-card">הפוך</button>
+                     <button id="next-card">הבא</button>
+                 </div>
+                 <div id="flashcard-counter">כרטיס 1 מתוך X</div>
+             </div>
+        </div>
+
+        <!-- MCQs Section -->
+        <div class="section">
+             <div class="mcqs-section-header">
+                 <h2>שאלות חזרה (MCQs)</h2>
+                 <button id="view-toggle-btn">הצג הכל</button>
+             </div>
+             <div id="mcq-counter">שאלה 1 מתוך 30</div>
+             <div id="mcqs-container">
+                 <!-- MCQs will be loaded here by JavaScript -->
+             </div>
+             <div id="results" style="display: none;">
+                 תוצאה סופית תופיע כאן.
+             </div>
+             <div class="mcq-navigation" id="mcq-nav" style="display: none;">
+                 <button id="prev-mcq-btn" disabled>הקודם</button>
+                 <button id="next-mcq-btn">הבא</button>
+             </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Flashcard Data and Logic ---
+        const flashcardData_w3 = [
+            { term: "ממברנה ציטופלסמית (Cytoplasmic membrane)", definition: "שכבה דקה העוטפת את הציטופלסמה בכל התאים, מורכבת בעיקר מדו-שכבה פוספוליפידית וחלבונים. משמשת כמחסום בררני, מעגן לחלבונים ומקום יצירת אנרגיה." },
+            { term: "פוספוליפיד (Phospholipid)", definition: "המולקולה העיקרית הבונה את ממברנת התא. מורכבת מ'ראש' הידרופילי (אוהב מים) ושני 'זנבות' הידרופוביים (שונאי מים)." },
+            { term: "דו-שכבה ליפידית (Lipid bilayer)", definition: "המבנה הבסיסי של ממברנת התא, שבו שתי שכבות של פוספוליפידים מסודרות כך שהזנבות ההידרופוביים פונים פנימה והראשים ההידרופיליים פונים החוצה." },
+            { term: "חלבונים אינטגרליים (Integral proteins)", definition: "חלבונים המשובצים בתוך הדו-שכבה הליפידית, ולעיתים קרובות חוצים אותה מצד לצד. משמשים כנשאים, תעלות, רצפטורים ועוד." },
+            { term: "חלבונים פריפריאליים (Peripheral proteins)", definition: "חלבונים הקשורים לפני השטח של הממברנה (הפנימי או החיצוני), אך אינם משובצים בתוכה." },
+            { term: "חדירות בררנית (Selective permeability)", definition: "תכונת הממברנה המאפשרת מעבר חופשי של מולקולות מסוימות (כמו מים, גזים), בעוד מעבר של מולקולות אחרות (כמו יונים, סוכרים) מבוקר ודורש חלבוני תעבורה." },
+            { term: "פוטנציאל ממברנה (Membrane potential)", definition: "הפרש מטענים חשמליים בין שני צדי הממברנה, הנוצר כתוצאה מחלוקה לא שווה של יונים. בפרוקריוטים נוצר בעיקר על ידי הוצאת פרוטונים (H+)." },
+            { term: "כוח מניע פרוטונים (Proton motive force - PMF)", definition: "האנרגיה האצורה בפוטנציאל הממברנה ובמפל ריכוז הפרוטונים. משמשת להנעת תהליכים הדורשים אנרגיה כמו סינתזת ATP, תנועת שוטונים והובלת חומרים." },
+            { term: "קשר אסתרי (Ester linkage)", definition: "הקשר הכימי המחבר בין חומצות השומן לגליצרול בפוספוליפידים של חיידקים (Bacteria) ואאוקריוטים." },
+            { term: "קשר אתרי (Ether linkage)", definition: "הקשר הכימי המחבר בין שרשראות הפחמימנים (איזופרנואידים) לגליצרול בליפידים של ארכאות (Archaea). קשר זה עמיד יותר." },
+            { term: "איזופרנואיד (Isoprenoid)", definition: "שרשרת פחמימנית מסועפת (לא חומצת שומן) המהווה את החלק ההידרופובי בליפידים של ממברנות ארכאות." },
+            { term: "ליפיד מונו-שכבה (Lipid monolayer)", definition: "מבנה ממברנה הקיים בחלק מהארכאות החיות בתנאי חום קיצוניים. מולקולות הליפיד חוצות את כל עובי הממברנה ויוצרות שכבה אחת יציבה במיוחד." },
+            { term: "הופנואידים (Hopanoids)", definition: "מולקולות דמויות סטרולים הנמצאות בממברנות של חיידקים רבים ומסייעות בייצוב הממברנה, בדומה לתפקיד הכולסטרול באאוקריוטים." },
+            { term: "סטרולים (Sterols)", definition: "מולקולות (כמו כולסטרול) הנמצאות בממברנות של תאים אאוקריוטיים (ובמספר קטן של חיידקים) ותורמות ליציבות ולוויסות נזילות הממברנה." },
+            { term: "מעטפת התא (Cell envelope)", definition: "כלל השכבות העוטפות את הציטופלסמה של תא פרוקריוטי, כולל הממברנה הציטופלסמית, דופן התא, ולעיתים גם ממברנה חיצונית וקפסולה." }
+        ];
+
+        let currentCardIndex_w3 = 0;
+        // ... (rest of flashcard JS logic, using unique variable names like _w3)
+        const flashcardElement_w3 = document.getElementById('flashcard');
+        const flashcardFront_w3 = flashcardElement_w3.querySelector('.flashcard-front');
+        const flashcardBack_w3 = flashcardElement_w3.querySelector('.flashcard-back');
+        const flipButton_w3 = document.getElementById('flip-card');
+        const nextButton_w3 = document.getElementById('next-card');
+        const prevButton_w3 = document.getElementById('prev-card');
+        const cardCounterElement_w3 = document.getElementById('flashcard-counter');
+
+        function displayCard_w3(index) {
+             if (!flashcardElement_w3) return;
+             const card = flashcardData_w3[index];
+             flashcardFront_w3.textContent = card.term;
+             flashcardBack_w3.textContent = card.definition;
+             flashcardElement_w3.classList.remove('is-flipped');
+             cardCounterElement_w3.textContent = `כרטיס ${index + 1} מתוך ${flashcardData_w3.length}`;
+        }
+        function flipCard_w3() { flashcardElement_w3.classList.toggle('is-flipped'); }
+        function nextCard_w3() { currentCardIndex_w3 = (currentCardIndex_w3 + 1) % flashcardData_w3.length; displayCard_w3(currentCardIndex_w3); }
+        function prevCard_w3() { currentCardIndex_w3 = (currentCardIndex_w3 - 1 + flashcardData_w3.length) % flashcardData_w3.length; displayCard_w3(currentCardIndex_w3); }
+
+        flipButton_w3.addEventListener('click', flipCard_w3);
+        nextButton_w3.addEventListener('click', nextCard_w3);
+        prevButton_w3.addEventListener('click', prevCard_w3);
+        if (flashcardData_w3.length > 0) displayCard_w3(currentCardIndex_w3);
+
+
+        // --- MCQ Data and Logic ---
+        const mcqData_w3 = [
+             { id: 'w3q1', question: "מהו המרכיב המבני הבסיסי של הממברנה הציטופלסמית בכל התאים?", options: [ { text: "פפטידוגליקן", correct: false }, { text: "דו-שכבה פוספוליפידית", correct: true }, { text: "חומצות טכואיות", correct: false }, { text: "ליפופוליסכריד (LPS)", correct: false } ], explanation: "המבנה הבסיסי של כל הממברנות הביולוגיות הוא דו-שכבה של פוספוליפידים, המספקת את המחסום ההידרופובי המרכזי." },
+             { id: 'w3q2', question: "איזו מולקולה חוצה את הממברנה הציטופלסמית בדיפוזיה פשוטה (ללא עזרת חלבונים) בקלות יחסית?", options: [ { text: "יון נתרן (+Na)", correct: false }, { text: "גלוקוז", correct: false }, { text: "חמצן (O2)", correct: true }, { text: "חומצה אמינית טעונה", correct: false } ], explanation: "מולקולות קטנות ולא קוטביות, כמו גזים (חמצן, פחמן דו-חמצני), יכולות לעבור דרך הליבה ההידרופובית של הממברנה בדיפוזיה פשוטה. יונים ומולקולות פולריות גדולות זקוקים לנשאים." },
+             { id: 'w3q3', question: "מהו תפקידה העיקרי של הממברנה הציטופלסמית כמחסום בררני?", options: [ { text: "לייצר את כל חלבוני התא", correct: false }, { text: "לאגור את החומר התורשתי", correct: false }, { text: "לווסת את מעבר החומרים אל התא ומחוצה לו", correct: true }, { text: "להעניק לתא את צורתו הקשיחה", correct: false } ], explanation: "החדירות הבררנית היא תפקיד מרכזי של הממברנה. היא מונעת כניסה ויציאה בלתי מבוקרת של חומרים ומאפשרת לתא לשמור על סביבה פנימית יציבה ושונה מהסביבה החיצונית." },
+             { id: 'w3q4', question: "בפרוקריוטים, היכן מתבצעים תהליכי יצירת האנרגיה המרכזיים (כמו שרשרת העברת אלקטרונים)?", options: [ { text: "במיטוכונדריה", correct: false }, { text: "בציטופלזמה בלבד", correct: false }, { text: "בממברנה הציטופלסמית", correct: true }, { text: "בדופן התא", correct: false } ], explanation: "בהיעדר מיטוכונדריה, תהליכי הנשימה ויצירת כוח מניע פרוטונים (PMF) בפרוקריוטים מתרחשים בממברנה הציטופלסמית, שם משובצים חלבוני שרשרת העברת האלקטרונים." },
+             { id: 'w3q5', question: "מהו ההבדל המרכזי בין הליפידים בממברנות של חיידקים (Bacteria) לאלו של ארכאות (Archaea)?", options: [ { text: "בחיידקים יש כולסטרול, בארכאות אין", correct: false }, { text: "בחיידקים הקשר הוא אסתרי, בארכאות הקשר הוא אתרי", correct: true }, { text: "בארכאות יש פפטידוגליקן, בחיידקים אין", correct: false }, { text: "בחיידקים הממברנה היא תמיד חד-שכבתית", correct: false } ], explanation: "ההבדל הכימי הבולט הוא סוג הקשר בין הגליצרול לשרשרות הפחמימניות: קשר אסתרי בחיידקים ובאאוקריוטים, וקשר אתרי (עמיד יותר) בארכאות. בנוסף, בארכאות השרשראות הן איזופרנואידים, לא חומצות שומן." },
+             { id: 'w3q6', question: "הימצאות של ליפיד מונו-שכבה (monolayer) אופיינית במיוחד לארכאות שחיות בתנאי:", options: [ { text: "קור קיצוני", correct: false }, { text: "מליחות גבוהה", correct: false }, { text: "חום קיצוני (Hyperthermophiles)", correct: true }, { text: "לחץ אוסמוטי נמוך", correct: false } ], explanation: "המבנה המונו-שכבתי, שבו מולקולות ליפיד ארוכות (ביפיטניל) חוצות את כל הממברנה, מקנה יציבות גבוהה במיוחד הנדרשת להישרדות בטמפרטורות גבוהות מאוד, שם ממברנה דו-שכבתית רגילה הייתה מתפרקת." },
+             { id: 'w3q7', question: "איזה תפקיד ממלאים הופנואידים (hopanoids) בממברנת החיידק?", options: [ { text: "הובלת סוכרים", correct: false }, { text: "ייצוב הממברנה וויסות נזילותה", correct: true }, { text: "קישור לדופן התא", correct: false }, { text: "סינתזת חלבונים", correct: false } ], explanation: "הופנואידים הם מולקולות שטוחות וקשיחות יחסית המשובצות בממברנה, בדומה לתפקיד הסטרולים (כמו כולסטרול) בממברנות אאוקריוטיות. הם מגבילים את תנועת הפוספוליפידים ותורמים ליציבות המכאנית של הממברנה." },
+             { id: 'w3q8', question: "כוח מניע פרוטונים (PMF) משמש בפרוקריוטים להנעת:", options: [ { text: "סינתזת ATP באמצעות ATP synthase", correct: true }, { text: "תנועת שוטונים (flagella)", correct: true }, { text: "הובלה אקטיבית של חומרים מסוימים", correct: true }, { text: "כל התשובות נכונות", correct: true } ], explanation: "האנרגיה האצורה במפל הפרוטונים (PMF) מנוצלת למגוון תהליכים חיוניים בתא הפרוקריוטי, כולל יצירת המטבע האנרגטי ATP, הנעת המנוע הסיבובי של השוטון, והובלת יונים ומולקולות כנגד מפל הריכוזים." },
+             { id: 'w3q9', question: "חלבון המעביר שני חומרים שונים דרך הממברנה באותו כיוון נקרא:", options: [ { text: "יוניפורטר (Uniport)", correct: false }, { text: "אנטיפורטר (Antiport)", correct: false }, { text: "סימפורטר (Symport)", correct: true }, { text: "תעלה יונית (Ion channel)", correct: false } ], explanation: "סימפורטר הוא סוג של חלבון נשא המבצע הובלה מצומדת (cotransport) של שני חומרים יחד באותו כיוון. יוניפורטר מעביר חומר אחד, ואנטיפורטר מעביר שני חומרים בכיוונים מנוגדים." },
+             { id: 'w3q10', question: "המבנה הדו-שכבתי של הממברנה נוצר באופן ספונטני בסביבה מימית בגלל:", options: [ { text: "הדחייה בין ראשי הפוספוליפידים", correct: false }, { text: "האופי האמפיפטי (הידרופילי והידרופובי) של הפוספוליפידים", correct: true }, { text: "הקשרים הקוולנטיים בין שתי השכבות", correct: false }, { text: "הימצאות חלבוני ממברנה", correct: false } ], explanation: "הפוספוליפידים הם אמפיפטיים. בסביבה מימית, הזנבות ההידרופוביים נוטים להתארגן יחד הרחק מהמים, והראשים ההידרופיליים פונים אל המים. הסידור היציב ביותר אנרגטית הוא הדו-שכבה." },
+            { id: 'w3q11', question: "מהו תפקידם של חלבוני תעבורה (transport proteins) בממברנה?", options: [ { text: "לייצב את מבנה הממברנה", correct: false }, { text: "לאפשר ולאפשר מעבר מבוקר של חומרים ספציפיים דרך הממברנה", correct: true }, { text: "לפרק רעלנים מחוץ לתא", correct: false }, { text: "לשכפל את ה-DNA", correct: false } ], explanation: "חלבוני תעבורה, כגון נשאים ותעלות, חיוניים למעבר של רוב המולקולות והיונים דרך הממברנה, במיוחד אלו שאינם יכולים לעבור בדיפוזיה פשוטה. הם מאפשרים ספציפיות ובקרה על התהליך." },
+            { id: 'w3q12', question: "המודל הנוכחי המתאר את מבנה הממברנה הציטופלסמית נקרא 'מודל הפסיפס הנוזלי' (Fluid Mosaic Model). מדוע?", options: [ { text: "כי הממברנה קשיחה כמו פסיפס ואינה נעה", correct: false }, { text: "כי הממברנה מורכבת מפסיפס של חלבונים המשובצים בדו-שכבה ליפידית הנמצאת בתנועה מתמדת (נוזלית)", correct: true }, { text: "כי היא עשויה רק ממים (נוזל)", correct: false }, { text: "כי ניתן לראות פסיפס צבעוני במיקרוסקופ", correct: false } ], explanation: "המודל מדגיש שני מאפיינים: 'פסיפס' - הממברנה מורכבת ממגוון מולקולות (ליפידים, חלבונים); 'נוזלי' - המרכיבים אינם קבועים במקומם אלא יכולים לנוע במישור הממברנה, מה שמעניק לה גמישות." },
+            { id: 'w3q13', question: "מה מהבאים אינו הבדל טיפוסי בין ממברנות של חיידקים לממברנות של ארכאות?", options: [ { text: "סוג הקשרים הליפידיים (אסתרי/אתרי)", correct: false }, { text: "סוג השרשרות ההידרופוביות (חומצות שומן/איזופרנואידים)", correct: false }, { text: "נוכחות/היעדר דו-שכבה לעומת חד-שכבה", correct: false }, { text: "נוכחות ריבוזומים המשובצים בממברנה", correct: true } ], explanation: "ריבוזומים אינם משובצים בממברנה הציטופלסמית באף אחד מהדומיינים הללו; הם נמצאים בציטופלזמה. שאר האפשרויות מתארות הבדלים ידועים בין ממברנות חיידקים וארכאות." },
+            { id: 'w3q14', question: "חלבונים המשמשים כרצפטורים (קולטנים) על פני הממברנה אחראים בעיקר ל:", options: [ { text: "העברת חומרים אל תוך התא", correct: false }, { text: "קליטת אותות מהסביבה החיצונית והעברתם לתא", correct: true }, { text: "פירוק מולקולות מזון גדולות", correct: false }, { text: "יצירת ATP", correct: false } ], explanation: "רצפטורים הם חלבונים (או גליקופרוטאינים) הקושרים מולקולות איתות ספציפיות (ליגנדים) מהסביבה החיצונית, וקישור זה מפעיל תגובה בתוך התא, ומאפשר לתא 'להרגיש' את סביבתו." },
+            { id: 'w3q15', question: "היכן ניתן למצוא כולסטרול באופן נפוץ?", options: [ { text: "בממברנות של כל הפרוקריוטים", correct: false }, { text: "בממברנות של תאים אאוקריוטיים (כמו תאי בעלי חיים)", correct: true }, { text: "בדופן התא של חיידקים גרם-חיוביים", correct: false }, { text: "בתוך ה-DNA הנגיפי", correct: false } ], explanation: "כולסטרול הוא סטרול אופייני לממברנות של תאי בעלי חיים, ותורם ליציבותן. רוב הפרוקריוטים אינם מייצרים סטרולים (לחיידקים יש לעיתים הופנואידים)." },
+            { id: 'w3q16', question: "כיצד הממברנה הציטופלסמית בפרוקריוטים קשורה ליצירת ה-ATP?", options: [ { text: "היא מכילה את כל האנזימים של הגליקוליזה", correct: false }, { text: "היא מאפשרת יצירת מפל פרוטונים (PMF) המנוצל על ידי ATP synthase", correct: true }, { text: "היא אוגרת מולקולות ATP מוכנות", correct: false }, { text: "היא אינה קשורה כלל ליצירת ATP", correct: false } ], explanation: "שרשרת העברת האלקטרונים המשובצת בממברנה יוצרת מפל פרוטונים (PMF) על פני הממברנה. האנזים ATP synthase, גם הוא בממברנה, מנצל את זרימת הפרוטונים חזרה דרכו כדי לסנתז ATP." },
+            { id: 'w3q17', question: "מולקולות גדולות, כמו פוליסכרידים, אינן יכולות בדרך כלל לחצות את הממברנה הציטופלסמית. כיצד חיידקים מנצלים אותן כמקור מזון?", options: [ { text: "הם אינם יכולים לנצל אותן", correct: false }, { text: "הם מכניסים אותן בשלמותן באמצעות פאגוציטוזה", correct: false }, { text: "הם מפרישים אנזימים חוץ-תאיים (exoenzymes) המפרקים אותן ליחידות קטנות יותר", correct: true }, { text: "הם משנים את מבנה הממברנה כדי להגדיל את החורים", correct: false } ], explanation: "חיידקים רבים מפרישים אנזימים לסביבה החיצונית (אקסואנזימים) המפרקים פולימרים גדולים (כמו עמילן או תאית) למונומרים קטנים (כמו גלוקוז) שיכולים להיכנס לתא דרך חלבוני תעבורה." },
+            { id: 'w3q18', question: "איזו תכונה של קשרי האתר בליפידים של ארכאות תורמת לעמידותם?", options: [ { text: "הם גמישים יותר מקשרי אסתר", correct: false }, { text: "הם יציבים יותר מבחינה כימית ועמידים יותר לפירוק (הידרוליזה)", correct: true }, { text: "הם מאפשרים מעבר מהיר יותר של מים", correct: false }, { text: "הם יוצרים מבנה טעון שלילית", correct: false } ], explanation: "קשרי אתר יציבים יותר מבחינה כימית מקשרי אסתר, במיוחד בטמפרטורות גבוהות או ב-pH קיצוני. יציבות זו היא אחת ההתאמות של ארכאות לסביבות מחיה קשות." },
+            { id: 'w3q19', question: "הבדל מבני משמעותי בין תא פרוקריוטי לאאוקריוטי הוא היעדר:", options: [ { text: "ממברנה ציטופלסמית בפרוקריוט", correct: false }, { text: "ריבוזומים בפרוקריוט", correct: false }, { text: "מיטוכונדריה בפרוקריוט", correct: true }, { text: "דופן תא באאוקריוט", correct: false } ], explanation: "פרוקריוטים חסרים אברונים תחומים בממברנה, כגון מיטוכונדריה (האחראית על הנשימה התאית באאוקריוטים). תפקיד זה מתבצע בממברנה הציטופלסמית בפרוקריוטים." },
+            { id: 'w3q20', question: "מהי 'מעטפת התא' (cell envelope) בפרוקריוטים?", options: [ { text: "הציטופלזמה והנוקלאואיד בלבד", correct: false }, { text: "מכלול השכבות החיצוניות לממברנה הציטופלסמית (כולל הדופן ולפעמים ממברנה חיצונית)", correct: true }, { text: "השוטונים והפילי בלבד", correct: false }, { text: "החומר התורשתי בלבד", correct: false } ], explanation: "מעטפת התא היא מונח המתאר את כל השכבות המבניות המקיפות את הציטופלזמה. היא כוללת לפחות את הממברנה הציטופלסמית ואת דופן התא, ובחיידקי גרם שליליים גם את הממברנה החיצונית." },
+            { id: 'w3q21', question: "תרופות מסוימות פועלות על ידי יצירת 'חורים' או תעלות בממברנה הציטופלסמית. מדוע פעולה זו קטלנית לתא?", options: [ { text: "היא גורמת ל-DNA לדלוף החוצה", correct: false }, { text: "היא הורסת את מפל הפרוטונים (PMF) וגורמת לדליפה בלתי מבוקרת של יונים", correct: true }, { text: "היא מונעת סינתזה של חלבונים", correct: false }, { text: "היא מעודדת שכפול מהיר מדי של התא", correct: false } ], explanation: "יצירת חורים פוגעת בתפקוד הממברנה כמחסום בררני. היא מאפשרת דליפה של יונים ומולקולות חיוניות החוצה וקריסה של מפל הפרוטונים, דבר המוביל להפסקת ייצור האנרגיה ולמוות התא." },
+            { id: 'w3q22', question: "באיזה חלק של הפוספוליפיד נמצא ה'ראש' ההידרופילי?", options: [ { text: "בשרשרות חומצות השומן", correct: false }, { text: "בקבוצת הגליצרול והפוספט (ולעיתים קבוצות נוספות)", correct: true }, { text: "באזור הקשר האסתרי/אתרי", correct: false }, { text: "אין חלק הידרופילי בפוספוליפיד", correct: false } ], explanation: "הראש ההידרופילי מורכב מקבוצת הפוספט הטעונה ומהגליצרול, ולעיתים קרובות מקבוצה קוטבית נוספת (כמו כולין או אתנולאמין), המקנות לו משיכה למים." },
+            { id: 'w3q23', question: "מה ההשלכה של העובדה שהממברנה הציטופלסמית היא מבנה דינמי ('נוזלי')?", options: [ { text: "היא אינה יכולה לשנות את צורתה", correct: false }, { text: "חלבונים וליפידים יכולים לנוע בתוכה, מה שמאפשר תפקודים כמו העברת אותות או חלוקת תא", correct: true }, { text: "היא אינה יציבה ומתפרקת בקלות", correct: false }, { text: "היא אינה מאפשרת עיגון של חלבונים", correct: false } ], explanation: "הנזילות מאפשרת תנועה צדדית של ליפידים וחלבונים, אינטראקציות ביניהם, שינויי צורה של התא (במידה מסוימת), ותהליכים כמו אנדוציטוזה ואקסוציטוזה (באאוקריוטים) או חלוקת תא." },
+            { id: 'w3q24', question: "הובלה אקטיבית דרך הממברנה דורשת:", options: [ { text: "מפל ריכוזים בכיוון ההובלה", correct: false }, { text: "השקעת אנרגיה (כמו מ-ATP או PMF)", correct: true }, { text: "מולקולות הידרופוביות בלבד", correct: false }, { text: "מעבר דרך הדו-שכבה הליפידית בלבד", correct: false } ], explanation: "הובלה אקטיבית היא העברת חומרים כנגד מפל הריכוזים שלהם (מריכוז נמוך לגבוה), ולכן היא דורשת השקעת אנרגיה, בניגוד לדיפוזיה פשוטה או מסייעת." },
+            { id: 'w3q25', question: "מדוע חשוב לתא לשמור על פוטנציאל ממברנה?", options: [ { text: "זהו מקור לחומרי בניין", correct: false }, { text: "הוא מאפשר אגירת אנרגיה לשימוש בתהליכים תאיים", correct: true }, { text: "הוא קובע את צורת התא", correct: false }, { text: "הוא מגן על ה-DNA מנזקים", correct: false } ], explanation: "פוטנציאל הממברנה, וה-PMF הנובע ממנו, הם צורה מרכזית לאגירת אנרגיה בתא הפרוקריוטי, המנוצלת ישירות להנעת תהליכים רבים." },
+            { id: 'w3q26', question: "איזה סוג של חלבון ממברנה צפוי להיות בעל אזורים הידרופוביים רבים הבאים במגע עם הליבה השומנית של הממברנה?", options: [ { text: "חלבון פריפריאלי הקשור לפני השטח", correct: false }, { text: "חלבון אינטגרלי החוצה את הממברנה (transmembrane)", correct: true }, { text: "אנזים המופרש אל מחוץ לתא", correct: false }, { text: "חלבון ריבוזומלי", correct: false } ], explanation: "חלבונים טרנסממברנליים חייבים להכיל אזורים הידרופוביים (המורכבים מחומצות אמינו לא קוטביות) שיתקשרו יציבות עם הסביבה ההידרופובית של זנבות הליפידים בתוך הממברנה." },
+            { id: 'w3q27', question: "מעטפת התא של חיידקים וארכאות היא:", options: [ { text: "זהה לחלוטין במבנה ובהרכב", correct: false }, { text: "שונה במבנה הליפידים ובסוג הקשרים (אסתרי/אתרי)", correct: true }, { text: "זהה למעטפת של תאים אאוקריוטיים", correct: false }, { text: "מורכבת מחלבונים בלבד", correct: false } ], explanation: "כפי שצוין, קיימים הבדלים כימיים בסיסיים בליפידים ובקשרים שלהם לגליצרול בין חיידקים לארכאות, המשקפים את ההיסטוריה האבולוציונית הנפרדת שלהם והתאמות לסביבות שונות." },
+            { id: 'w3q28', question: "איזו מבין הפעילויות הבאות אינה מתרחשת בממברנה הציטופלסמית של חיידק?", options: [ { text: "שרשרת העברת אלקטרונים", correct: false }, { text: "סינתזת ATP", correct: false }, { text: "הובלה בררנית של חומרים", correct: false }, { text: "שכפול ה-DNA הכרומוזומלי", correct: true } ], explanation: "שכפול ה-DNA הכרומוזומלי מתרחש בציטופלזמה, באזור הנוקלאואיד, ולא בממברנה. הממברנה מעורבת בתהליכי נשימה, הובלה וחישת סביבה." },
+            { id: 'w3q29', question: "מה עלול לקרות לתא פרוקריוטי אם הממברנה הציטופלסמית שלו תיפגע באופן חמור?", options: [ { text: "הוא יתחיל לבצע פוטוסינתזה", correct: false }, { text: "תוכן התא ידלוף החוצה והתא ימות (ליזיס)", correct: true }, { text: "הוא יפתח דופן תא עבה יותר", correct: false }, { text: "הוא יתחלק מהר יותר", correct: false } ], explanation: "פגיעה חמורה בממברנה הורסת את יכולתה לשמש כמחסום בררני ולאגור אנרגיה. הדבר מוביל לאיבוד הומאוסטזיס, דליפת תוכן תאי חיוני, ומוות של התא." },
+            { id: 'w3q30', question: "גליקוליפידים (Glycolipids) הם מולקולות המצויות לעיתים בממברנה ומורכבות מ:", options: [ { text: "חלבון הקשור לסוכר", correct: false }, { text: "ליפיד הקשור לקבוצת סוכר", correct: true }, { text: "שני סוגי ליפידים", correct: false }, { text: "RNA הקשור לליפיד", correct: false } ], explanation: "גליקוליפידים הם ליפידים (כמו פוספוליפידים או ספינגוליפידים) שאליהם קשורה קבוצת פחמימה (סוכר). הם משמשים לעיתים קרובות כאתרי זיהוי על פני התא." }
+        ];
+
+
+        // --- MCQ JavaScript Logic (Use unique names like _w3) ---
+         let currentMCQIndex_w3 = 0;
+         let score_w3 = 0;
+         let userAnswers_w3 = {};
+         let viewMode_w3 = 'single';
+         const mcqsContainer_w3 = document.getElementById('mcqs-container');
+         const resultsContainer_w3 = document.getElementById('results');
+         const mcqNav_w3 = document.getElementById('mcq-nav');
+         const mcqCounterElement_w3 = document.getElementById('mcq-counter');
+         const prevBtn_w3 = document.getElementById('prev-mcq-btn');
+         const nextBtn_w3 = document.getElementById('next-mcq-btn');
+         const viewToggleBtn_w3 = document.getElementById('view-toggle-btn');
+         let shuffledMCQs_w3 = [];
+
+         function shuffleArray(array) { /* ... same shuffle logic ... */
+             for (let i = array.length - 1; i > 0; i--) {
+                 const j = Math.floor(Math.random() * (i + 1));
+                 [array[i], array[j]] = [array[j], array[i]];
+             }
+         }
+
+         function renderMCQElement_w3(mcq, index) { /* ... same rendering logic using _w3 variables ... */
+             let shuffledOptions = [...mcq.options];
+             shuffleArray(shuffledOptions);
+
+             let optionsHTML = '<ul class="options">';
+             shuffledOptions.forEach(option => {
+                 const isSelected = userAnswers_w3[mcq.id] === option.text;
+                  optionsHTML += `<li data-correct="${option.correct}" class="${isSelected ? 'selected' : ''}">${option.text}</li>`;
+              });
+              optionsHTML += '</ul>';
+
+              const isAnswered = mcq.id in userAnswers_w3;
+              const correctOptionText = mcq.options.find(opt => opt.correct).text;
+              const userAnswer = userAnswers_w3[mcq.id];
+              const wasCorrect = isAnswered && userAnswer === correctOptionText;
+
+              const mcqElement = document.createElement('div');
+              mcqElement.classList.add('mcq');
+              mcqElement.id = `mcq-${mcq.id}`; // Unique ID
+              if (isAnswered) {
+                 mcqElement.classList.add('mcq-answered');
+              }
+
+              mcqElement.innerHTML = `
+                  <p class="question-text">${index + 1}. ${mcq.question}</p>
+                  ${optionsHTML}
+                  <div class="feedback" style="display: ${isAnswered ? 'block' : 'none'};">
+                      ${isAnswered ? (wasCorrect ? 'נכון!' : 'לא נכון.') : ''}
+                  </div>
+                  <div class="explanation" style="display: ${isAnswered ? 'block' : 'none'};">
+                      ${mcq.explanation}
+                  </div>
+              `;
+
+             if (isAnswered) {
+                 const optionsLi = mcqElement.querySelectorAll('.options li');
+                 optionsLi.forEach(li => {
+                     li.classList.add('answered');
+                     if (li.textContent === userAnswer) {
+                         li.classList.add(wasCorrect ? 'correct' : 'incorrect');
+                     } else if (li.dataset.correct === 'true' && !wasCorrect) {
+                          li.classList.add('correct');
+                      }
+                  });
+                  const feedbackDiv = mcqElement.querySelector('.feedback');
+                  feedbackDiv.classList.add(wasCorrect ? 'correct' : 'incorrect');
+              }
+
+             if (!isAnswered) {
+                 const optionsElements = mcqElement.querySelectorAll('.options li');
+                  optionsElements.forEach(optionEl => {
+                      optionEl.addEventListener('click', () => checkAnswer_w3(mcq.id, optionEl, mcqElement));
+                  });
+              }
+
+             return mcqElement;
+          }
+
+         function displayMCQs_w3() { /* ... same display logic using _w3 variables ... */
+             mcqsContainer_w3.innerHTML = '';
+              resultsContainer_w3.style.display = 'none';
+
+             if (viewMode_w3 === 'single') {
+                 mcqNav_w3.style.display = 'flex';
+                 mcqCounterElement_w3.style.display = 'block';
+                  mcqCounterElement_w3.textContent = `שאלה ${currentMCQIndex_w3 + 1} מתוך ${shuffledMCQs_w3.length}`;
+                 const mcqElement = renderMCQElement_w3(shuffledMCQs_w3[currentMCQIndex_w3], currentMCQIndex_w3);
+                 mcqsContainer_w3.appendChild(mcqElement);
+                 updateNavButtons_w3();
+             } else { // 'all' mode
+                 mcqNav_w3.style.display = 'none';
+                 mcqCounterElement_w3.style.display = 'none';
+                 shuffledMCQs_w3.forEach((mcq, index) => {
+                     const mcqElement = renderMCQElement_w3(mcq, index);
+                     mcqsContainer_w3.appendChild(mcqElement);
+                 });
+                  updateResultsDisplay_w3();
+                 resultsContainer_w3.style.display = 'block';
+              }
+          }
+
+         function checkAnswer_w3(mcqId, selectedOptionEl, mcqElement) { /* ... same checking logic using _w3 variables ... */
+             if (userAnswers_w3[mcqId]) return;
+
+             const isCorrect = selectedOptionEl.getAttribute('data-correct') === 'true';
+              const feedbackEl = mcqElement.querySelector('.feedback');
+              const explanationEl = mcqElement.querySelector('.explanation');
+              const optionsUl = mcqElement.querySelector('.options');
+              const allOptions = optionsUl.querySelectorAll('li');
+
+             userAnswers_w3[mcqId] = selectedOptionEl.textContent;
+
+             mcqElement.classList.add('mcq-answered');
+             allOptions.forEach(opt => {
+                 opt.classList.add('answered');
+             });
+
+              if (isCorrect) {
+                 score_w3++;
+             }
+
+             selectedOptionEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+              feedbackEl.textContent = isCorrect ? 'נכון!' : 'לא נכון.';
+              feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+              feedbackEl.style.display = 'block';
+              explanationEl.style.display = 'block';
+
+              if (!isCorrect) {
+                  allOptions.forEach(opt => {
+                      if (opt.getAttribute('data-correct') === 'true') {
+                          opt.classList.add('correct');
+                      }
+                  });
+              }
+
+              if (viewMode_w3 === 'all') {
+                 updateResultsDisplay_w3();
+              }
+         }
+
+         function updateResultsDisplay_w3() { /* ... same results logic using _w3 variables ... */
+              const answeredCount = Object.keys(userAnswers_w3).length;
+              resultsContainer_w3.innerHTML = `ענית על ${answeredCount} מתוך ${shuffledMCQs_w3.length}<br>ציון נוכחי: ${score_w3} מתוך ${answeredCount || 0}`;
+               resultsContainer_w3.style.display = 'block';
+          }
+
+         function updateNavButtons_w3() { /* ... same nav button logic using _w3 variables ... */
+             prevBtn_w3.disabled = currentMCQIndex_w3 === 0;
+             nextBtn_w3.disabled = currentMCQIndex_w3 === shuffledMCQs_w3.length - 1;
+         }
+
+         function nextMCQ_w3() { /* ... same next logic using _w3 variables ... */
+             if (currentMCQIndex_w3 < shuffledMCQs_w3.length - 1) {
+                 currentMCQIndex_w3++;
+                 displayMCQs_w3();
+             }
+             if(currentMCQIndex_w3 === shuffledMCQs_w3.length -1){
+                 updateResultsDisplay_w3();
+                 resultsContainer_w3.style.display = 'block';
+             }
+         }
+
+         function prevMCQ_w3() { /* ... same prev logic using _w3 variables ... */
+             if (currentMCQIndex_w3 > 0) {
+                 currentMCQIndex_w3--;
+                  resultsContainer_w3.style.display = 'none';
+                 displayMCQs_w3();
+             }
+         }
+
+         function toggleViewMode_w3() { /* ... same toggle logic using _w3 variables ... */
+             if (viewMode_w3 === 'single') {
+                 viewMode_w3 = 'all';
+                 viewToggleBtn_w3.textContent = 'הצג שאלה בודדת';
+             } else {
+                 viewMode_w3 = 'single';
+                 viewToggleBtn_w3.textContent = 'הצג הכל';
+             }
+             displayMCQs_w3();
+         }
+
+        function initWeek3() { // Unique init function name
+            shuffledMCQs_w3 = [...mcqData_w3];
+            shuffleArray(shuffledMCQs_w3);
+            userAnswers_w3 = {};
+            score_w3 = 0;
+            currentMCQIndex_w3 = 0;
+            viewMode_w3 = 'single';
+            viewToggleBtn_w3.textContent = 'הצג הכל';
+
+            displayMCQs_w3();
+
+            prevBtn_w3.addEventListener('click', prevMCQ_w3);
+            nextBtn_w3.addEventListener('click', nextMCQ_w3);
+            viewToggleBtn_w3.addEventListener('click', toggleViewMode_w3);
+        }
+
+        window.onload = initWeek3;
+
+    </script>
+
+</body>
+</html>

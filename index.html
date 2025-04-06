@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>תרגול אינטראקטיבי במיקרוביולוגיה כללית</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #eef5f3; /* Light green-blue background */
+            color: #333;
+            direction: rtl;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            width: 90%;
+            margin: 20px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+        h1 {
+            color: #006847; /* Dark green */
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #8fbc8f; /* Dark Sea Green */
+            display: inline-block; /* Keeps border only under text */
+        }
+        .intro-text {
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        /* Grid for symmetrical links */
+        .week-links {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 columns for symmetry with 12 items */
+            gap: 20px; /* Spacing between links */
+            padding: 0;
+            list-style: none;
+        }
+
+        .week-link a {
+            display: block;
+            padding: 20px 15px;
+            background-color: #00796b; /* Teal */
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center; /* Center text inside the link */
+            height: 100%; /* Make all links same height */
+            box-sizing: border-box; /* Include padding in height calculation */
+            display: flex; /* Use flexbox for vertical centering */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .week-link a:hover {
+            background-color: #004d40; /* Darker Teal */
+            transform: translateY(-3px); /* Slight lift effect */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 900px) {
+            .week-links {
+                grid-template-columns: repeat(3, 1fr); /* 3 columns for medium screens */
+            }
+        }
+
+        @media (max-width: 650px) {
+            .week-links {
+                grid-template-columns: repeat(2, 1fr); /* 2 columns for smaller screens */
+            }
+             h1 {
+                font-size: 1.8em;
+             }
+            .intro-text {
+                font-size: 1em;
+            }
+             .week-link a {
+                padding: 15px 10px;
+             }
+        }
+
+        @media (max-width: 450px) {
+            .week-links {
+                grid-template-columns: repeat(1, 1fr); /* 1 column for very small screens */
+                gap: 15px;
+            }
+            .container {
+                padding: 20px;
+            }
+             h1 {
+                font-size: 1.6em;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>תרגול אינטראקטיבי במיקרוביולוגיה כללית</h1>
+        <p class="intro-text">
+            ברוכים הבאים! אתר זה נועד לסייע לכם בתרגול החומר הנלמד בקורס מיקרוביולוגיה כללית. <br>
+            בחרו את השבוע הרצוי להתחלת התרגול.
+        </p>
+
+        <ul class="week-links">
+            <li class="week-link"><a href="week1.html">שבוע 1 <br> מבוא ומושגי יסוד</a></li>
+            <li class="week-link"><a href="week2.html">שבוע 2 <br> מיון, זיהוי וגידול במעבדה</a></li>
+            <li class="week-link"><a href="week3.html">שבוע 3 <br> מבנה התא הפרוקריוטי א'</a></li>
+            <li class="week-link"><a href="week4.html">שבוע 4 <br> מבנה התא הפרוקריוטי ב' (דופן)</a></li>
+            <li class="week-link"><a href="week5.html">שבוע 5 <br> מבנה התא הפרוקריוטי ג' (מעטפות)</a></li>
+            <li class="week-link"><a href="week6.html">שבוע 6 <br> תנועה וכימות א'</a></li>
+            <li class="week-link"><a href="week7.html">שבוע 7 <br> כימות ב' וגידול מיקרוביאלי</a></li>
+            <li class="week-link"><a href="week8.html">שבוע 8 <br> גורמי סביבה ונבגים</a></li>
+            <li class="week-link"><a href="week9.html">שבוע 9 <br> חומרים אנטימיקרוביאליים</a></li>
+            <li class="week-link"><a href="week10.html">שבוע 10 <br> וירוסים ובקטריופאג'ים</a></li>
+            <li class="week-link"><a href="week11.html">שבוע 11 <br> העברת חומר גנטי וסיסטמטיקה</a></li>
+            <li class="week-link"><a href="week12.html">שבוע 12 <br> חזרה כללית ותרגול מסכם</a></li>
+        </ul>
+    </div>
+</body>
+</html>

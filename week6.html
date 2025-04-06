@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מיקרוביולוגיה כללית - שבוע 6: תנועה וכימות א'</title>
+    <style>
+        /* CSS Styles are identical to revised week1/2/3/4/5.html */
+         body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #eef5f3;
+            color: #333;
+            direction: rtl;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #006847; /* Dark green */
+            text-align: center;
+            border-bottom: 2px solid #8fbc8f; /* Dark Sea Green */
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        /* --- Flashcards Styles --- */
+        .flashcards-container {
+            perspective: 1000px;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-direction: column;
+        }
+        .flashcard {
+            width: 80%;
+            max-width: 400px;
+            height: 180px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 8px;
+            font-size: 1.2em;
+        }
+        .flashcard-front {
+            background-color: #c8e6c9;
+            color: #1b5e20;
+        }
+        .flashcard-back {
+            background-color: #a5d6a7;
+            color: #1b5e20;
+            transform: rotateY(180deg);
+            font-size: 1em;
+        }
+        .flashcard-nav {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .flashcard-nav button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .flashcard-nav button:hover {
+            background-color: #004d40;
+        }
+         #flashcard-counter {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        /* --- MCQ Styles --- */
+        .mcqs-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #view-toggle-btn {
+             padding: 6px 12px;
+             background-color: #6c757d;
+             color: white;
+             border: none;
+             border-radius: 4px;
+             cursor: pointer;
+             font-size: 0.9em;
+         }
+        #view-toggle-btn:hover {
+             background-color: #5a6268;
+         }
+
+        .mcq {
+            background-color: #ffffff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #004d40;
+        }
+        .options {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .options li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: 2px solid transparent; /* Add transparent border for layout consistency */
+        }
+        .options li:hover {
+            background-color: #ced4da;
+        }
+        /* Styles for answer states */
+        .options li.answered.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .options li.answered.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+         /* Style for selected but not yet confirmed answer (optional) */
+        .options li.selected {
+             border-color: #007bff;
+         }
+         /* Disable options after answering */
+        .mcq-answered .options li {
+            cursor: default;
+            pointer-events: none;
+             opacity: 0.8;
+        }
+        .mcq-answered .options li.correct,
+        .mcq-answered .options li.incorrect {
+            opacity: 1; /* Keep selected/correct ones fully visible */
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+             border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-right: 5px solid #8fbc8f;
+            font-size: 0.95em;
+            border-radius: 4px;
+        }
+        .mcq-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .mcq-navigation button {
+            padding: 10px 20px;
+            background-color: #00796b; /* Teal */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .mcq-navigation button:hover:not(:disabled) {
+            background-color: #004d40; /* Darker Teal */
+        }
+        .mcq-navigation button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #results {
+            text-align: center;
+            font-size: 1.4em;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e0f2f1;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            color: #00695c;
+        }
+         #mcq-counter {
+             text-align: center;
+             margin-bottom: 15px;
+             font-weight: bold;
+             color: #555;
+         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>שבוע 6: תנועה וכימות א'</h1>
+
+        <!-- Flashcards Section -->
+        <div class="section">
+             <h2>כרטיסיות לימוד</h2>
+             <div class="flashcards-container">
+                 <div class="flashcard" id="flashcard">
+                     <div class="flashcard-face flashcard-front">מונח</div>
+                     <div class="flashcard-face flashcard-back">הגדרה</div>
+                 </div>
+                 <div class="flashcard-nav">
+                     <button id="prev-card">הקודם</button>
+                     <button id="flip-card">הפוך</button>
+                     <button id="next-card">הבא</button>
+                 </div>
+                 <div id="flashcard-counter">כרטיס 1 מתוך X</div>
+             </div>
+        </div>
+
+        <!-- MCQs Section -->
+        <div class="section">
+             <div class="mcqs-section-header">
+                 <h2>שאלות חזרה (MCQs)</h2>
+                 <button id="view-toggle-btn">הצג הכל</button>
+             </div>
+             <div id="mcq-counter">שאלה 1 מתוך 30</div>
+             <div id="mcqs-container">
+                 <!-- MCQs will be loaded here by JavaScript -->
+             </div>
+             <div id="results" style="display: none;">
+                 תוצאה סופית תופיע כאן.
+             </div>
+             <div class="mcq-navigation" id="mcq-nav" style="display: none;">
+                 <button id="prev-mcq-btn" disabled>הקודם</button>
+                 <button id="next-mcq-btn">הבא</button>
+             </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Flashcard Data and Logic ---
+        const flashcardData_w6 = [
+            { term: "שוטון (Flagellum)", definition: "אברון ארוך דמוי שוט, הבולט מפני התא ומשמש לתנועה סיבובית בחיידקים ובארכאות מסוימים." },
+            { term: "פילמנט (Filament)", definition: "החלק החיצוני, הארוך והחלול של השוטון, הבנוי מיחידות חוזרות של החלבון פלג'לין (Flagellin)." },
+            { term: "וו (Hook)", definition: "מבנה מעוקל וגמיש המחבר בין הפילמנט לגוף הבסיסי של השוטון, ומאפשר לפילמנט להסתובב." },
+            { term: "גוף בסיסי (Basal body)", definition: "המנוע הסיבובי של השוטון, המעוגן במעטפת התא (ממברנה ודופן) ומורכב ממערכת של טבעות וחלבונים נוספים." },
+            { term: "פלג'לין (Flagellin)", definition: "החלבון המרכיב את הפילמנט של השוטון החיידקי." },
+            { term: "סיבוב שוטון חיידקי", definition: "השוטון החיידקי מסתובב (ולא נע בתנועת הצלפה כמו באאוקריוטים), והאנרגיה לסיבוב מגיעה מכוח מניע פרוטונים (PMF)." },
+            { term: "סיבוב נגד כיוון השעון (CCW)", definition: "בדר\"כ גורם לתנועה ישרה ומתואמת ('ריצה' - run) של החיידק (במיוחד בסידור peritrichous)." },
+            { term: "סיבוב עם כיוון השעון (CW)", definition: "בדר\"כ גורם להתפרקות צרור השוטונים ולתנועה אקראית או שינוי כיוון ('התבלבלות' - tumble)." },
+            { term: "כימוטקסיס (Chemotaxis)", definition: "תנועה מכוונת של אורגניזם בתגובה לגירוי כימי (משיכה לחומרים מועילים - attractants, דחייה מחומרים מזיקים - repellents)." },
+            { term: "Attractant (מושכן)", definition: "חומר כימי שחיידק נע לקראתו (למשל, סוכר)." },
+            { term: "Repellent (דוחן)", definition: "חומר כימי שחיידק נע להתרחק ממנו (למשל, חומר רעיל)." },
+            { term: "ריצה (Run)", definition: "תקופה של תנועה יחסית ישרה של חיידק, הנגרמת מסיבוב CCW של השוטונים." },
+            { term: "התבלבלות (Tumble)", definition: "תקופה של תנועה אקראית ושינוי כיוון של חיידק, הנגרמת מסיבוב CW של השוטונים." },
+            { term: "תנועת החלקה (Gliding motility)", definition: "צורת תנועה על פני משטחים שאינה מערבת שוטונים, הנמצאת בחיידקים מסוימים. מנגנונים אפשריים כוללים הפרשת ריר או שימוש במנועים חלבוניים." },
+            { term: "שוטון של ארכאות", definition: "דומה לשוטון חיידקי בתפקוד אך שונה במבנה (דק יותר, בנוי מחלבונים שונים) ובמקור האנרגיה (מונע על ידי ATP)." },
+            { term: "אומדן כמותי (ספירת חיידקים)", definition: "קביעת מספר המיקרואורגניזמים ביחידת נפח או משקל נתונה." },
+            { term: "ספירה ישירה (Direct count)", definition: "שיטה לספירת תאים שבה סופרים את התאים עצמם, בדרך כלל באמצעות מיקרוסקופ או מכשיר ייעודי." },
+            { term: "תא ספירה (Counting chamber)", definition: "זכוכית נושא מיוחדת בעלת שקע עם נפח ידוע ורשת שנתות, המאפשרת ספירה מיקרוסקופית ישירה של תאים בדגימה." },
+            { term: "Petroff-Hausser chamber", definition: "סוג של תא ספירה הנפוץ לספירת חיידקים." },
+            { term: "מונה קולטר (Coulter counter)", definition: "מכשיר הסופר חלקיקים (כולל תאים) העוברים דרך פתח זעיר, על ידי מדידת השינויים בהתנגדות החשמלית." },
+            { term: "ציטומטריית זרימה (Flow cytometry)", definition: "טכניקה מתקדמת הסופרת ומאפיינת תאים בודדים הזורמים במהירות דרך קרן לייזר, על פי פיזור האור והפלואורסצנציה הנפלטים מהם." },
+            { term: "FACS (Fluorescence-Activated Cell Sorting)", definition: "ציטומטריית זרימה המאפשרת גם למיין ולהפריד פיזית תאים בעלי מאפיינים שונים." }
+        ];
+
+
+        let currentCardIndex_w6 = 0;
+        // ... (rest of flashcard JS logic, using unique variable names like _w6)
+        const flashcardElement_w6 = document.getElementById('flashcard');
+        const flashcardFront_w6 = flashcardElement_w6.querySelector('.flashcard-front');
+        const flashcardBack_w6 = flashcardElement_w6.querySelector('.flashcard-back');
+        const flipButton_w6 = document.getElementById('flip-card');
+        const nextButton_w6 = document.getElementById('next-card');
+        const prevButton_w6 = document.getElementById('prev-card');
+        const cardCounterElement_w6 = document.getElementById('flashcard-counter');
+
+        function displayCard_w6(index) {
+            if (!flashcardElement_w6) return;
+            const card = flashcardData_w6[index];
+            flashcardFront_w6.textContent = card.term;
+            flashcardBack_w6.textContent = card.definition;
+            flashcardElement_w6.classList.remove('is-flipped');
+            cardCounterElement_w6.textContent = `כרטיס ${index + 1} מתוך ${flashcardData_w6.length}`;
+        }
+        function flipCard_w6() { flashcardElement_w6.classList.toggle('is-flipped'); }
+        function nextCard_w6() { currentCardIndex_w6 = (currentCardIndex_w6 + 1) % flashcardData_w6.length; displayCard_w6(currentCardIndex_w6); }
+        function prevCard_w6() { currentCardIndex_w6 = (currentCardIndex_w6 - 1 + flashcardData_w6.length) % flashcardData_w6.length; displayCard_w6(currentCardIndex_w6); }
+
+        flipButton_w6.addEventListener('click', flipCard_w6);
+        nextButton_w6.addEventListener('click', nextCard_w6);
+        prevButton_w6.addEventListener('click', prevCard_w6);
+        if (flashcardData_w6.length > 0) displayCard_w6(currentCardIndex_w6);
+
+
+        // --- MCQ Data and Logic ---
+        const mcqData_w6 = [
+            { id: 'w6q1', question: "מהו מקור האנרגיה העיקרי לסיבוב השוטון (flagellum) בחיידקים?", options: [ { text: "פירוק ישיר של ATP", correct: false }, { text: "כוח מניע פרוטונים (Proton motive force - PMF)", correct: true }, { text: "אור השמש", correct: false }, { text: "פירוק שומנים בממברנה", correct: false } ], explanation: "המנוע הסיבובי של השוטון החיידקי מונע על ידי זרימת פרוטונים (H+) דרך חלבוני ה-Mot, בהתאם למפל האלקטרוכימי (PMF) שנוצר על פני הממברנה הציטופלסמית." },
+            { id: 'w6q2', question: "ברוב החיידקים בעלי שוטונים מרובים (peritrichous), איזה כיוון סיבוב גורם לתנועת 'ריצה' (run)?", options: [ { text: "עם כיוון השעון (CW)", correct: false }, { text: "נגד כיוון השעון (CCW)", correct: true }, { text: "סיבוב לסירוגין", correct: false }, { text: "אין קשר בין כיוון הסיבוב לריצה", correct: false } ], explanation: "סיבוב נגד כיוון השעון (CCW) של השוטונים גורם להם להתאגד לצרור מסתובב הדוחף את החיידק קדימה בתנועה ישרה יחסית, המכונה 'ריצה'." },
+            { id: 'w6q3', question: "מהי כימוטקסיס (chemotaxis)?", options: [ { text: "תנועה אקראית לחלוטין של חיידק", correct: false }, { text: "תנועה מכוונת בתגובה לאור", correct: false }, { text: "תנועה מכוונת בתגובה לגירוי כימי", correct: true }, { text: "תהליך חלוקת התא החיידקי", correct: false } ], explanation: "כימוטקסיס היא היכולת של אורגניזם לנוע לעבר ריכוזים גבוהים יותר של חומרים מושכים (attractants) או להתרחק מחומרים דוחים (repellents)." },
+            { id: 'w6q4', question: "כאשר חיידק נע במעלה מפל ריכוזים של חומר מושך (attractant), תדירות ה:", options: [ { text: "'ריצות' (runs) תקטן ותדירות ה'התבלבלויות' (tumbles) תגדל", correct: false }, { text: "'ריצות' (runs) תגדל ותדירות ה'התבלבלויות' (tumbles) תקטן", correct: true }, { text: "'ריצות' ו'התבלבלויות' תישאר ללא שינוי", correct: false }, { text: "החיידק יפסיק לנוע לחלוטין", correct: false } ], explanation: "בתגובה לעלייה בריכוז חומר מושך, החיידק מאריך את משך ה'ריצות' בכיוון הנכון ומקצר את משך או תדירות ה'התבלבלויות' המשמשות לשינוי כיוון אקראי, וכך מתקדם במעלה המפל." },
+            { id: 'w6q5', question: "איזה מבנה של השוטון אחראי על העיגון במעטפת התא ועל הסיבוב?", options: [ { text: "הפילמנט (Filament)", correct: false }, { text: "הוו (Hook)", correct: false }, { text: "הגוף הבסיסי (Basal body)", correct: true }, { text: "הקפסולה", correct: false } ], explanation: "הגוף הבסיסי הוא המבנה המורכב המכיל את הטבעות והמנוע החלבוני המעוגנים בממברנה ובדופן, והוא זה שמייצר את הסיבוב המניע את השוטון כולו." },
+            { id: 'w6q6', question: "מה נכון לגבי תנועת החלקה (gliding motility)?", options: [ { text: "היא דורשת שוטונים", correct: false }, { text: "היא מתרחשת רק בנוזל", correct: false }, { text: "היא מאפשרת תנועה על פני משטחים ללא שוטונים", correct: true }, { text: "היא מונעת על ידי ATP בלבד", correct: false } ], explanation: "תנועת החלקה היא מנגנון תנועה חלופי המאפשר לחיידקים מסוימים לזחול או להחליק על פני משטחים מוצקים, ללא שימוש בשוטונים. המנגנונים המדויקים מגוונים." },
+            { id: 'w6q7', question: "מהו ההבדל העיקרי בין מקור האנרגיה לשוטון חיידקי לזה של שוטון ארכאלי?", options: [ { text: "חיידקי - ATP, ארכאלי - PMF", correct: false }, { text: "חיידקי - PMF, ארכאלי - ATP", correct: true }, { text: "בשניהם - ATP", correct: false }, { text: "בשניהם - PMF", correct: false } ], explanation: "בעוד שסיבוב השוטון החיידקי מונע ישירות על ידי זרימת פרוטונים (PMF), סיבוב השוטון הארכאלי, למרות הדמיון התפקודי, מונע על ידי הידרוליזה של ATP." },
+            { id: 'w6q8', question: "ספירה ישירה של חיידקים באמצעות תא ספירה מיקרוסקופי (כמו Petroff-Hausser) נותנת אומדן ל:", options: [ { text: "מספר התאים החיים בלבד", correct: false }, { text: "מספר התאים המתים בלבד", correct: false }, { text: "סך כל התאים (חיים ומתים)", correct: true }, { text: "מספר התאים בעלי קפסולה", correct: false } ], explanation: "בספירה מיקרוסקופית ישירה, סופרים את כל החלקיקים הנראים כתאים תחת המיקרוסקופ, ללא יכולת להבחין באופן סטנדרטי בין תאים חיים למתים (אלא אם משתמשים בצביעות חיוניות מיוחדות)." },
+            { id: 'w6q9', question: "מהו החיסרון העיקרי של ספירה ישירה במיקרוסקופ?", options: [ { text: "היא אינה מדויקת כלל", correct: false }, { text: "היא סופרת רק תאים חיים", correct: false }, { text: "קשה לספור תאים בריכוז נמוך, קשה להבחין בין חיים למתים, והיא יכולה להיות מייגעת", correct: true }, { text: "היא דורשת ציוד יקר ומסובך", correct: false } ], explanation: "ספירה מיקרוסקופית יכולה להיות לא מדויקת בריכוזים נמוכים (מעט תאים בשדה הראייה), אינה מבחינה בין חיים למתים, קשה לספור תאים נעים, והיא דורשת זמן ומאמץ." },
+            { id: 'w6q10', question: "מונה קולטר (Coulter counter) סופר תאים על בסיס:", options: [ { text: "פיזור אור לייזר", correct: false }, { text: "השינוי בהתנגדות החשמלית כאשר תא עובר דרך פתח זעיר", correct: true }, { text: "צפייה ישירה במיקרוסקופ", correct: false }, { text: "קצב צריכת החמצן", correct: false } ], explanation: "המכשיר מודד את הזרם החשמלי הזורם דרך פתח צר. כאשר חלקיק (תא) שאינו מוליך עובר בפתח, הוא מגדיל רגעית את ההתנגדות ומפחית את הזרם. כל שינוי כזה נספר כחלקיק." },
+            { id: 'w6q11', question: "איזו טכנולוגיה מאפשרת לא רק לספור תאים אלא גם לאפיין אותם לפי גודל, מורכבות פנימית ונוכחות סמנים פלואורסצנטיים?", options: [ { text: "תא ספירה Petroff-Hausser", correct: false }, { text: "מונה קולטר", correct: false }, { text: "ציטומטריית זרימה (Flow cytometry)", correct: true }, { text: "ספקטרופוטומטר למדידת עכירות", correct: false } ], explanation: "ציטומטריית זרימה מעבירה תאים בודדים דרך קרן לייזר ומודדת את פיזור האור בכיוונים שונים (המעיד על גודל ומורכבות) ואת עוצמת הפלואורסצנציה באורכי גל שונים (אם התאים נצבעו), ומאפשרת ניתוח רב-פרמטרי מפורט." },
+            { id: 'w6q12', question: "מה ההבדל בין ציטומטריית זרימה (Flow Cytometry) ל-FACS?", options: [ { text: "אין הבדל, אלו שמות נרדפים", correct: false }, { text: "FACS היא שיטה ישנה יותר", correct: false }, { text: "FACS היא ציטומטריית זרימה המוסיפה יכולת מיון פיזי של התאים", correct: true }, { text: "ציטומטריית זרימה משתמשת בלייזר, FACS לא", correct: false } ], explanation: "FACS (Fluorescence-Activated Cell Sorting) היא יישום ספציפי של ציטומטריית זרימה שבו, בנוסף לאנליזה, המכשיר יכול להפריד פיזית אוכלוסיות תאים שונות למיכלים נפרדים על בסיס המאפיינים שנמדדו." },
+            { id: 'w6q13', question: "מדוע בספירה מיקרוסקופית ישירה, חשוב לדעת את נפח הנוזל הנספר?", options: [ { text: "כדי לחשב את גודל התאים", correct: false }, { text: "כדי לחשב את ריכוז התאים (למשל, תאים למ\"ל)", correct: true }, { text: "כדי לבחור את סוג העדשה במיקרוסקופ", correct: false }, { text: "זה לא חשוב כלל", correct: false } ], explanation: "הספירה עצמה נותנת מספר תאים באזור מסוים. רק על ידי ידיעת הנפח המדויק של האזור שנספר (כמו בקוביות של תא ספירה), ניתן לחשב את הריכוז המקורי של התאים בדגימה." },
+            { id: 'w6q14', question: "מה נכון לגבי החלבון פלג'לין (Flagellin)?", options: [ { text: "הוא מרכיב את הגוף הבסיסי של השוטון", correct: false }, { text: "הוא אנזים המפרק ATP להנעת השוטון בארכאות", correct: false }, { text: "הוא החלבון המבני העיקרי של הפילמנט החיידקי", correct: true }, { text: "הוא נמצא רק בשוטונים של אאוקריוטים", correct: false } ], explanation: "הפילמנט, החלק הארוך והחיצוני של השוטון החיידקי, בנוי מאלפי יחידות חוזרות של החלבון פלג'לין, המסודרות במבנה סלילי חלול." },
+            { id: 'w6q15', question: "מהי מגבלה משותפת לכל שיטות הספירה הישירה (מיקרוסקופ, קולטר, ציטומטר)?", options: [ { text: "הן סופרות רק תאים חיים", correct: false }, { text: "הן אינן יכולות להבחין בבירור בין תאים חיים למתים ללא שימוש בטכניקות נוספות", correct: true }, { text: "הן איטיות מאוד בהשוואה לספירת צלחות", correct: false }, { text: "הן דורשות מצע גידול מיוחד", correct: false } ], explanation: "כל השיטות הללו סופרות חלקיקים הנראים או מזוהים כתאים. ללא צביעות חיוניות מיוחדות (במיקרוסקופ או בציטומטר), הן אינן מבדילות בין תא חי, תא מת, או אפילו חלקיק דמוי-תא." },
+             { id: 'w6q16', question: "בכימוטקסיס, חיישנים (receptors) בממברנת החיידק מזהים:", options: [ { text: "את כיוון האור", correct: false }, { text: "שינויים בריכוז חומרים כימיים בסביבה", correct: true }, { text: "את טמפרטורת הסביבה", correct: false }, { text: "את ה-pH של הסביבה", correct: false } ], explanation: "מערכת הכימוטקסיס מתחילה בקולטנים טרנסממברנליים הקושרים חומרים מושכים או דוחים ספציפיים. קישור זה מפעיל שרשרת העברת אותות המשפיעה על כיוון סיבוב השוטונים." },
+             { id: 'w6q17', question: "איזה סידור שוטונים מתואר כ-'Peritrichous'?", options: [ { text: "שוטון בודד בקצה אחד", correct: false }, { text: "ציצית שוטונים בקצה אחד", correct: false }, { text: "שוטונים המפוזרים על פני כל שטח התא", correct: true }, { text: "שוטון בודד בכל קצה", correct: false } ], explanation: "בסידור פריטריכי (Peritrichous), שוטונים מרובים יוצאים מנקודות שונות על פני כל מעטפת התא, כמו ב-E. coli." },
+             { id: 'w6q18', question: "איזה סידור שוטונים מתואר כ-'Polar'?", options: [ { text: "שוטונים המפוזרים על פני כל התא", correct: false }, { text: "שוטון אחד או יותר הממוקמים בקצה אחד (או בשני הקצוות) של התא", correct: true }, { text: "היעדר מוחלט של שוטונים", correct: false }, { text: "שוטונים הנמצאים רק בפריפלסמה", correct: false } ], explanation: "סידור פולארי (قطبي) פירושו שהשוטון (או השוטונים) ממוקם בקוטב אחד או בשני הקטבים של התא." },
+             { id: 'w6q19', question: "כיצד מתבצעת סינתזת הפילמנט של השוטון החיידקי?", options: [ { text: "הוא גדל מהבסיס כלפי חוץ", correct: false }, { text: "יחידות פלג'לין עוברות דרך התעלה המרכזית החלולה ומתווספות לקצה הרחוק", correct: true }, { text: "הוא נוצר כולו בציטופלזמה ומופרש בשלמותו", correct: false }, { text: "הוא מורכב על ידי הריבוזומים ישירות מחוץ לתא", correct: false } ], explanation: "הפילמנט מתארך על ידי הוספת יחידות פלג'לין חדשות לקצהו המרוחק מהתא. היחידות מסונתזות בציטופלזמה, מועברות דרך הגוף הבסיסי והתעלה החלולה של הוו והפילמנט, ומצטרפות לקצה הגדל." },
+             { id: 'w6q20', question: "אומדן כמותי של חיידקים חשוב בבקרת איכות של:", options: [ { text: "מים ומוצרי מזון", correct: true }, { text: "תרופות ומוצרי קוסמטיקה", correct: true }, { text: "ניטור רמת זיהום בבתי חולים", correct: true }, { text: "כל התשובות נכונות", correct: true } ], explanation: "קביעת העומס המיקרוביאלי חיונית במגוון תחומים כדי להבטיח בטיחות, איכות ויעילות של מוצרים ותהליכים." },
+            { id: 'w6q21', question: "בשימוש בתא ספירה, מהו הנוהל המקובל לקבלת תוצאה אמינה?", options: [ { text: "לספור את כל התאים בקוביה אחת בלבד", correct: false }, { text: "לספור מספר קוביות/אזורים ולחשב ממוצע", correct: true }, { text: "להעריך את מספר התאים לפי העין", correct: false }, { text: "לספור רק את התאים הגדולים ביותר", correct: false } ], explanation: "בשל פיזור לא אחיד אפשרי של התאים, ספירת מספר אזורים וחישוב ממוצע מפחיתה את השגיאה הסטטיסטית ומספקת אומדן מייצג ואמין יותר של הריכוז." },
+            { id: 'w6q22', question: "מה היתרון של ציטומטריית זרימה על פני מונה קולטר?", options: [ { text: "היא זולה משמעותית", correct: false }, { text: "היא מאפשרת ניתוח רב-פרמטרי של תאים בודדים (גודל, מורכבות, פלואורסצנציה)", correct: true }, { text: "היא אינה דורשת נוזל מוליך", correct: false }, { text: "היא אינה רגישה לגודל החלקיקים", correct: false } ], explanation: "בעוד שמונה קולטר בעיקר סופר חלקיקים (עם מידע מסוים על גודלם), ציטומטר זרימה מספק מידע רב ומפורט יותר על מאפיינים שונים של כל תא בודד העובר במכשיר." },
+            { id: 'w6q23', question: "תנועת חיידקים בתוך נוזל מושפעת מ:", options: [ { text: "צמיגות הנוזל", correct: true }, { text: "טמפרטורת הנוזל", correct: true }, { text: "גודל וצורת החיידק", correct: true }, { text: "כל התשובות נכונות", correct: true } ], explanation: "כל הגורמים הללו משפיעים על יכולת התנועה. צמיגות גבוהה מקשה על התנועה, טמפרטורה משפיעה על קצב התהליכים המטבוליים המניעים את התנועה, וגודל וצורה משפיעים על החיכוך וההידרודינמיקה." },
+            { id: 'w6q24', question: "כיצד חיידק בעל סידור שוטונים פולארי בודד (Monotrichous) משנה כיוון?", options: [ { text: "על ידי סיבוב השוטון בכיוון ההפוך (CW במקום CCW)", correct: true }, { text: "על ידי עצירה והתחלת תנועה מחדש", correct: false }, { text: "על ידי התנתקות והרכבה מחדש של השוטון", correct: false }, { text: "הוא אינו יכול לשנות כיוון באופן פעיל", correct: false } ], explanation: "בחיידקים עם שוטון פולארי בודד, שינוי כיוון הסיבוב של השוטון הוא המנגנון העיקרי לשינוי כיוון התנועה של התא." },
+            { id: 'w6q25', question: "מדוע חשוב לדלל דגימה המכילה ריכוז גבוה של חיידקים לפני ספירה מיקרוסקופית?", options: [ { text: "כדי שהחיידקים לא יפריעו זה לזה", correct: false }, { text: "כדי למנוע חפיפה של תאים ולהקל על הספירה המדויקת", correct: true }, { text: "כדי להרוג חלק מהחיידקים", correct: false }, { text: "כדי להגביר את מהירות התנועה שלהם", correct: false } ], explanation: "בריכוז גבוה מדי, התאים עלולים להיות צפופים מאוד בתא הספירה, לחפוף זה את זה ולהקשות על ספירה מדויקת של תאים בודדים." },
+            { id: 'w6q26', question: "מהירות התנועה של חיידק נמדדת בדרך כלל ביחידות של:", options: [ { text: "מטר לשנייה", correct: false }, { text: "קילומטר לשעה", correct: false }, { text: "אורכי גוף לשנייה", correct: true }, { text: "מיקרומטר לדקה", correct: false } ], explanation: "מכיוון שחיידקים הם קטנים מאוד, השוואת מהירות מוחלטת (כמו מיקרומטר לשנייה) פחות אינפורמטיבית מהשוואת מהירות יחסית לגודל הגוף. לכן, נהוג למדוד בכמה אורכי גוף החיידק עובר בשנייה." },
+            { id: 'w6q27', question: "איזה מהחלבונים הבאים קשור ישירות להנעת השוטון החיידקי על ידי זרימת פרוטונים?", options: [ { text: "חלבוני Fli", correct: false }, { text: "חלבוני Mot", correct: true }, { text: "חלבון RecA", correct: false }, { text: "חלבון פלג'לין", correct: false } ], explanation: "חלבוני Mot יוצרים את ה'סטטור' (החלק הנייח) של המנוע הסיבובי, והם אלו שמתעלים את זרימת הפרוטונים ומתקשרים עם הטבעות המסתובבות (ה'רוטור') כדי ליצור את הסיבוב." },
+            { id: 'w6q28', question: "ספירת חיידקים בתא ספירה דורשת בדרך כלל שימוש ב:", options: [ { text: "מיקרוסקופ אלקטרונים", correct: false }, { text: "מיקרוסקופ אור עם ניגוד פאזה או שדה אפל", correct: true }, { text: "מכשיר PCR", correct: false }, { text: "ספקטרופוטומטר", correct: false } ], explanation: "חיידקים הם לרוב שקופים במיקרוסקופ אור רגיל. כדי לראותם בבירור ולספור אותם בתא ספירה, יש צורך בטכניקות המגבירות את הניגודיות, כמו מיקרוסקופיית ניגוד פאזה (phase contrast) או שדה אפל (dark field)." },
+            { id: 'w6q29', question: "חלבונים המשתתפים ב'החלפת הילוכים' (קביעת כיוון הסיבוב) של השוטון החיידקי הם בעיקר:", options: [ { text: "חלבוני Mot", correct: false }, { text: "חלבוני Fli", correct: true }, { text: "פורינים", correct: false }, { text: "טרנספפטידאז", correct: false } ], explanation: "חלבוני Fli מהווים את 'מתג' המנוע, המקבלים אותות ממערכת הכימוטקסיס וקובעים אם המנוע יסתובב בכיוון CCW או CW." },
+            { id: 'w6q30', question: "בספירה ישירה, אם רוצים להבחין באופן ברור בין תאים חיים למתים, ניתן להשתמש ב:", options: [ { text: "צביעת גרם", correct: false }, { text: "צבענים פלואורסצנטיים חיוניים (Vital stains) החודרים רק לתאים עם ממברנה פגועה (מתים) או רק לתאים פעילים (חיים)", correct: true }, { text: "הוספת יוד", correct: false }, { text: "הגדלה גבוהה יותר במיקרוסקופ", correct: false } ], explanation: "צבענים חיוניים, המשמשים לעיתים קרובות עם מיקרוסקופ פלואורסצנטי או ציטומטר זרימה, מבוססים על הבדלים בחדירות הממברנה או בפעילות מטבולית בין תאים חיים למתים, ומאפשרים להבחין ביניהם." }
+        ];
+
+
+        // --- MCQ JavaScript Logic (Use unique names like _w6) ---
+         let currentMCQIndex_w6 = 0;
+         let score_w6 = 0;
+         let userAnswers_w6 = {};
+         let viewMode_w6 = 'single';
+         const mcqsContainer_w6 = document.getElementById('mcqs-container');
+         const resultsContainer_w6 = document.getElementById('results');
+         const mcqNav_w6 = document.getElementById('mcq-nav');
+         const mcqCounterElement_w6 = document.getElementById('mcq-counter');
+         const prevBtn_w6 = document.getElementById('prev-mcq-btn');
+         const nextBtn_w6 = document.getElementById('next-mcq-btn');
+         const viewToggleBtn_w6 = document.getElementById('view-toggle-btn');
+         let shuffledMCQs_w6 = [];
+
+         function shuffleArray(array) { /* ... */
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+         function renderMCQElement_w6(mcq, index) { /* ... */
+             let shuffledOptions = [...mcq.options];
+             shuffleArray(shuffledOptions);
+
+             let optionsHTML = '<ul class="options">';
+             shuffledOptions.forEach(option => {
+                 const isSelected = userAnswers_w6[mcq.id] === option.text;
+                  optionsHTML += `<li data-correct="${option.correct}" class="${isSelected ? 'selected' : ''}">${option.text}</li>`;
+              });
+              optionsHTML += '</ul>';
+
+              const isAnswered = mcq.id in userAnswers_w6;
+              const correctOptionText = mcq.options.find(opt => opt.correct).text;
+              const userAnswer = userAnswers_w6[mcq.id];
+              const wasCorrect = isAnswered && userAnswer === correctOptionText;
+
+              const mcqElement = document.createElement('div');
+              mcqElement.classList.add('mcq');
+              mcqElement.id = `mcq-${mcq.id}`; // Unique ID
+              if (isAnswered) {
+                 mcqElement.classList.add('mcq-answered');
+              }
+
+              mcqElement.innerHTML = `
+                  <p class="question-text">${index + 1}. ${mcq.question}</p>
+                  ${optionsHTML}
+                  <div class="feedback" style="display: ${isAnswered ? 'block' : 'none'};">
+                      ${isAnswered ? (wasCorrect ? 'נכון!' : 'לא נכון.') : ''}
+                  </div>
+                  <div class="explanation" style="display: ${isAnswered ? 'block' : 'none'};">
+                      ${mcq.explanation}
+                  </div>
+              `;
+
+             if (isAnswered) {
+                 const optionsLi = mcqElement.querySelectorAll('.options li');
+                 optionsLi.forEach(li => {
+                     li.classList.add('answered');
+                     if (li.textContent === userAnswer) {
+                         li.classList.add(wasCorrect ? 'correct' : 'incorrect');
+                     } else if (li.dataset.correct === 'true' && !wasCorrect) {
+                          li.classList.add('correct');
+                      }
+                  });
+                  const feedbackDiv = mcqElement.querySelector('.feedback');
+                  feedbackDiv.classList.add(wasCorrect ? 'correct' : 'incorrect');
+              }
+
+             if (!isAnswered) {
+                 const optionsElements = mcqElement.querySelectorAll('.options li');
+                  optionsElements.forEach(optionEl => {
+                      optionEl.addEventListener('click', () => checkAnswer_w6(mcq.id, optionEl, mcqElement));
+                  });
+              }
+
+             return mcqElement;
+         }
+         function displayMCQs_w6() { /* ... */
+             mcqsContainer_w6.innerHTML = '';
+              resultsContainer_w6.style.display = 'none';
+
+             if (viewMode_w6 === 'single') {
+                 mcqNav_w6.style.display = 'flex';
+                 mcqCounterElement_w6.style.display = 'block';
+                  mcqCounterElement_w6.textContent = `שאלה ${currentMCQIndex_w6 + 1} מתוך ${shuffledMCQs_w6.length}`;
+                 const mcqElement = renderMCQElement_w6(shuffledMCQs_w6[currentMCQIndex_w6], currentMCQIndex_w6);
+                 mcqsContainer_w6.appendChild(mcqElement);
+                 updateNavButtons_w6();
+             } else { // 'all' mode
+                 mcqNav_w6.style.display = 'none';
+                 mcqCounterElement_w6.style.display = 'none';
+                 shuffledMCQs_w6.forEach((mcq, index) => {
+                     const mcqElement = renderMCQElement_w6(mcq, index);
+                     mcqsContainer_w6.appendChild(mcqElement);
+                 });
+                  updateResultsDisplay_w6();
+                 resultsContainer_w6.style.display = 'block';
+              }
+         }
+         function checkAnswer_w6(mcqId, selectedOptionEl, mcqElement) { /* ... */
+             if (userAnswers_w6[mcqId]) return;
+
+             const isCorrect = selectedOptionEl.getAttribute('data-correct') === 'true';
+              const feedbackEl = mcqElement.querySelector('.feedback');
+              const explanationEl = mcqElement.querySelector('.explanation');
+              const optionsUl = mcqElement.querySelector('.options');
+              const allOptions = optionsUl.querySelectorAll('li');
+
+             userAnswers_w6[mcqId] = selectedOptionEl.textContent;
+
+             mcqElement.classList.add('mcq-answered');
+             allOptions.forEach(opt => {
+                 opt.classList.add('answered');
+             });
+
+              if (isCorrect) {
+                 score_w6++;
+             }
+
+             selectedOptionEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+              feedbackEl.textContent = isCorrect ? 'נכון!' : 'לא נכון.';
+              feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+              feedbackEl.style.display = 'block';
+              explanationEl.style.display = 'block';
+
+              if (!isCorrect) {
+                  allOptions.forEach(opt => {
+                      if (opt.getAttribute('data-correct') === 'true') {
+                          opt.classList.add('correct');
+                      }
+                  });
+              }
+
+              if (viewMode_w6 === 'all') {
+                 updateResultsDisplay_w6();
+              }
+         }
+         function updateResultsDisplay_w6() { /* ... */
+             const answeredCount = Object.keys(userAnswers_w6).length;
+              resultsContainer_w6.innerHTML = `ענית על ${answeredCount} מתוך ${shuffledMCQs_w6.length}<br>ציון נוכחי: ${score_w6} מתוך ${answeredCount || 0}`;
+               resultsContainer_w6.style.display = 'block';
+         }
+         function updateNavButtons_w6() { /* ... */
+             prevBtn_w6.disabled = currentMCQIndex_w6 === 0;
+             nextBtn_w6.disabled = currentMCQIndex_w6 === shuffledMCQs_w6.length - 1;
+         }
+         function nextMCQ_w6() { /* ... */
+            if (currentMCQIndex_w6 < shuffledMCQs_w6.length - 1) {
+                 currentMCQIndex_w6++;
+                 displayMCQs_w6();
+             }
+             if(currentMCQIndex_w6 === shuffledMCQs_w6.length -1){
+                 updateResultsDisplay_w6();
+                 resultsContainer_w6.style.display = 'block';
+             }
+         }
+         function prevMCQ_w6() { /* ... */
+            if (currentMCQIndex_w6 > 0) {
+                 currentMCQIndex_w6--;
+                  resultsContainer_w6.style.display = 'none';
+                 displayMCQs_w6();
+             }
+         }
+         function toggleViewMode_w6() { /* ... */
+             if (viewMode_w6 === 'single') {
+                 viewMode_w6 = 'all';
+                 viewToggleBtn_w6.textContent = 'הצג שאלה בודדת';
+             } else {
+                 viewMode_w6 = 'single';
+                 viewToggleBtn_w6.textContent = 'הצג הכל';
+             }
+             displayMCQs_w6();
+         }
+
+        function initWeek6() { // Unique init function name
+            shuffledMCQs_w6 = [...mcqData_w6];
+            shuffleArray(shuffledMCQs_w6);
+            userAnswers_w6 = {};
+            score_w6 = 0;
+            currentMCQIndex_w6 = 0;
+            viewMode_w6 = 'single';
+            viewToggleBtn_w6.textContent = 'הצג הכל';
+
+            displayMCQs_w6();
+
+            prevBtn_w6.addEventListener('click', prevMCQ_w6);
+            nextBtn_w6.addEventListener('click', nextMCQ_w6);
+            viewToggleBtn_w6.addEventListener('click', toggleViewMode_w6);
+        }
+
+        window.onload = initWeek6;
+
+    </script>
+
+</body>
+</html>

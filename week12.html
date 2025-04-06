@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מיקרוביולוגיה כללית - שבוע 12: חזרה כללית ותרגול מסכם</title>
+    <style>
+        /* CSS Styles are identical to revised week1/2/8/9/10/11... etc. */
+         body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #eef5f3;
+            color: #333;
+            direction: rtl;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #006847; /* Dark green */
+            text-align: center;
+            border-bottom: 2px solid #8fbc8f; /* Dark Sea Green */
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        /* --- Flashcards Styles --- */
+        .flashcards-container {
+            perspective: 1000px;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-direction: column;
+        }
+        .flashcard {
+            width: 80%;
+            max-width: 400px;
+            height: 180px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 8px;
+            font-size: 1.2em;
+        }
+        .flashcard-front {
+            background-color: #c8e6c9;
+            color: #1b5e20;
+        }
+        .flashcard-back {
+            background-color: #a5d6a7;
+            color: #1b5e20;
+            transform: rotateY(180deg);
+            font-size: 1em;
+        }
+        .flashcard-nav {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .flashcard-nav button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .flashcard-nav button:hover {
+            background-color: #004d40;
+        }
+         #flashcard-counter {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        /* --- MCQ Styles --- */
+        .mcqs-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #view-toggle-btn {
+             padding: 6px 12px;
+             background-color: #6c757d;
+             color: white;
+             border: none;
+             border-radius: 4px;
+             cursor: pointer;
+             font-size: 0.9em;
+         }
+        #view-toggle-btn:hover {
+             background-color: #5a6268;
+         }
+
+        .mcq {
+            background-color: #ffffff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #004d40;
+        }
+        .options {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .options li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: 2px solid transparent; /* Add transparent border for layout consistency */
+        }
+        .options li:hover {
+            background-color: #ced4da;
+        }
+        /* Styles for answer states */
+        .options li.answered.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .options li.answered.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+         /* Style for selected but not yet confirmed answer (optional) */
+        .options li.selected {
+             border-color: #007bff;
+         }
+         /* Disable options after answering */
+        .mcq-answered .options li {
+            cursor: default;
+            pointer-events: none;
+             opacity: 0.8;
+        }
+        .mcq-answered .options li.correct,
+        .mcq-answered .options li.incorrect {
+            opacity: 1; /* Keep selected/correct ones fully visible */
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+             border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-right: 5px solid #8fbc8f;
+            font-size: 0.95em;
+            border-radius: 4px;
+        }
+        .mcq-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .mcq-navigation button {
+            padding: 10px 20px;
+            background-color: #00796b; /* Teal */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .mcq-navigation button:hover:not(:disabled) {
+            background-color: #004d40; /* Darker Teal */
+        }
+        .mcq-navigation button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #results {
+            text-align: center;
+            font-size: 1.4em;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e0f2f1;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            color: #00695c;
+        }
+         #mcq-counter {
+             text-align: center;
+             margin-bottom: 15px;
+             font-weight: bold;
+             color: #555;
+         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>שבוע 12: חזרה כללית ותרגול מסכם</h1>
+
+        <!-- Flashcards Section -->
+        <div class="section">
+             <h2>כרטיסיות לימוד (חזרה כללית)</h2>
+             <div class="flashcards-container">
+                 <div class="flashcard" id="flashcard">
+                     <div class="flashcard-face flashcard-front">מונח</div>
+                     <div class="flashcard-face flashcard-back">הגדרה</div>
+                 </div>
+                 <div class="flashcard-nav">
+                     <button id="prev-card">הקודם</button>
+                     <button id="flip-card">הפוך</button>
+                     <button id="next-card">הבא</button>
+                 </div>
+                 <div id="flashcard-counter">כרטיס 1 מתוך X</div>
+             </div>
+        </div>
+
+        <!-- MCQs Section -->
+        <div class="section">
+             <div class="mcqs-section-header">
+                 <h2>שאלות חזרה (MCQs - כללי)</h2>
+                 <button id="view-toggle-btn">הצג הכל</button>
+             </div>
+             <div id="mcq-counter">שאלה 1 מתוך 30</div>
+             <div id="mcqs-container">
+                 <!-- MCQs will be loaded here by JavaScript -->
+             </div>
+             <div id="results" style="display: none;">
+                 תוצאה סופית תופיע כאן.
+             </div>
+             <div class="mcq-navigation" id="mcq-nav" style="display: none;">
+                 <button id="prev-mcq-btn" disabled>הקודם</button>
+                 <button id="next-mcq-btn">הבא</button>
+             </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Flashcard Data and Logic for Week 12 (General Review) ---
+        const flashcardData_w12 = [
+            // Mix of key terms from all weeks
+            { term: "פרוקריוט (Prokaryote)", definition: "אורגניזם חד-תאי חסר גרעין תא ואברונים מוקפי ממברנה. כולל חיידקים וארכאות." },
+            { term: "אאוקריוט (Eukaryote)", definition: "אורגניזם שתאיו מכילים גרעין מוגדר ואברונים מוקפי ממברנה. כולל פרוטיסטים, פטריות, צמחים ובעלי חיים." },
+            { term: "פפטידוגליקן (Peptidoglycan)", definition: "פולימר ייחודי המרכיב את דופן התא של רוב החיידקים, ומורכב משרשראות סוכרים (NAG ו-NAM) וקשרי פפטיד." },
+            { term: "צביעת גרם (Gram stain)", definition: "שיטת צביעה דיפרנציאלית המחלקת חיידקים לשתי קבוצות עיקריות (גרם-חיוביים וגרם-שליליים) על בסיס הבדלים במבנה דופן התא." },
+            { term: "חיידק גרם-חיובי", definition: "חיידק הנצבע בסגול בצביעת גרם, בעל דופן עבה של פפטידוגליקן וללא ממברנה חיצונית." },
+            { term: "חיידק גרם-שלילי", definition: "חיידק הנצבע בוורוד/אדום בצביעת גרם, בעל דופן דקה של פפטידוגליקן וממברנה חיצונית המכילה LPS." },
+            { term: "LPS (Lipopolysaccharide)", definition: "מולקולה מורכבת בממברנה החיצונית של חיידקים גרם-שליליים, המורכבת מ-Lipid A (אנדוטוקסין), סוכר ליבה (core) ו-O-אנטיגן." },
+            { term: "קפסולה (Capsule)", definition: "שכבה חיצונית רירית (לרוב פוליסכרידית) המקיפה חיידקים מסוימים, ותורמת להגנה מפני פאגוציטוזה והתייבשות." },
+            { term: "ביופילם (Biofilm)", definition: "קהילה מורכבת של מיקרואורגניזמים הצמודים למשטח ושקועים במטריצה חוץ-תאית שהם מפרישים." },
+            { term: "שוטון (Flagellum)", definition: "אברון חלבוני דמוי שוט המשמש לתנועה בחיידקים רבים." },
+            { term: "כימוטקסיס (Chemotaxis)", definition: "תנועה מכוונת של אורגניזם בתגובה לגרדיאנט כימי (משיכה לחומרי מזון, דחייה מחומרים רעילים)." },
+            { term: "מצע גידול (Growth medium)", definition: "תערובת נוטריינטים נוזלית או מוצקה המשמשת לגידול מיקרואורגניזמים במעבדה." },
+            { term: "תרבית טהורה (Pure culture)", definition: "תרבית המכילה סוג אחד בלבד של מיקרואורגניזם." },
+            { term: "CFU (Colony Forming Unit)", definition: "יחידה לספירת חיידקים חיים בשיטת viable plate count, המייצגת תא בודד או צבר תאים שיצר מושבה אחת." },
+            { term: "עקומת גידול (Growth curve)", definition: "תיאור גרפי של גידול אוכלוסיית חיידקים בתרבית סגורה לאורך זמן, הכוללת את שלבי ה-lag, log (אקספוננציאלי), stationary ו-death." },
+            { term: "זמן דור (Generation time)", definition: "הזמן הדרוש לאוכלוסיית חיידקים להכפיל את מספרה בתנאי גידול נתונים." },
+            { term: "אירובי אובליגטורי", definition: "אורגניזם שחייב חמצן מולקולרי (O2) לגידול." },
+            { term: "אנאירובי אובליגטורי", definition: "אורגניזם שאינו יכול לגדול בנוכחות חמצן, והוא אף רעיל עבורו." },
+            { term: "אנאירובי פקולטטיבי", definition: "אורגניזם שיכול לגדול עם או בלי חמצן." },
+            { term: "אנדוספורה (Endospore)", definition: "מבנה הישרדות רדום ועמיד ביותר הנוצר על ידי חיידקים מסוימים (כמו Bacillus, Clostridium)." },
+            { term: "אנטיביוטיקה", definition: "חומר (לרוב טבעי) המעכב או הורג חיידקים בריכוזים נמוכים." },
+            { term: "MIC (Minimal Inhibitory Concentration)", definition: "הריכוז הנמוך ביותר של אנטיביוטיקה המעכב גידול חיידקי." },
+            { term: "בטא-לקטם (β-Lactam)", definition: "קבוצת אנטיביוטיקות (כמו פניצילין) הפוגעות בסינתזת דופן הפפטידוגליקן." },
+            { term: "עמידות לאנטיביוטיקה", definition: "יכולת של חיידק לשרוד ולהתרבות בנוכחות אנטיביוטיקה." },
+            { term: "וירוס (Virus)", definition: "טפיל תוך-תאי מוחלט המתרבה רק בתוך תא פונדקאי." },
+            { term: "בקטריופאג' (Bacteriophage)", definition: "וירוס המדביק חיידקים." },
+            { term: "מחזור ליטי (Lytic cycle)", definition: "מחזור הדבקה ויראלי המוביל להרס התא הפונדקאי." },
+            { term: "מחזור ליזוגני (Lysogenic cycle)", definition: "מחזור הדבקה ויראלי שבו גנום הוירוס משתלב בגנום הפונדקאי או נשאר רדום." },
+            { term: "טרנספורמציה", definition: "קליטת DNA חופשי מהסביבה על ידי חיידק." },
+            { term: "קוניוגציה", definition: "העברת DNA בין חיידקים במגע ישיר." }
+            // Add more key terms covering the entire course...
+        ];
+
+
+        let currentCardIndex_w12 = 0;
+        // ... (rest of flashcard JS logic, using unique variable names like _w12)
+        const flashcardElement_w12 = document.getElementById('flashcard');
+        const flashcardFront_w12 = flashcardElement_w12.querySelector('.flashcard-front');
+        const flashcardBack_w12 = flashcardElement_w12.querySelector('.flashcard-back');
+        const flipButton_w12 = document.getElementById('flip-card');
+        const nextButton_w12 = document.getElementById('next-card');
+        const prevButton_w12 = document.getElementById('prev-card');
+        const cardCounterElement_w12 = document.getElementById('flashcard-counter');
+
+        function displayCard_w12(index) {
+            if (!flashcardElement_w12) return;
+            const card = flashcardData_w12[index];
+            flashcardFront_w12.textContent = card.term;
+            flashcardBack_w12.textContent = card.definition;
+            flashcardElement_w12.classList.remove('is-flipped');
+            cardCounterElement_w12.textContent = `כרטיס ${index + 1} מתוך ${flashcardData_w12.length}`;
+        }
+        function flipCard_w12() { flashcardElement_w12.classList.toggle('is-flipped'); }
+        function nextCard_w12() { currentCardIndex_w12 = (currentCardIndex_w12 + 1) % flashcardData_w12.length; displayCard_w12(currentCardIndex_w12); }
+        function prevCard_w12() { currentCardIndex_w12 = (currentCardIndex_w12 - 1 + flashcardData_w12.length) % flashcardData_w12.length; displayCard_w12(currentCardIndex_w12); }
+
+        flipButton_w12.addEventListener('click', flipCard_w12);
+        nextButton_w12.addEventListener('click', nextCard_w12);
+        prevButton_w12.addEventListener('click', prevCard_w12);
+        if (flashcardData_w12.length > 0) displayCard_w12(currentCardIndex_w12);
+
+
+        // --- MCQ Data and Logic for Week 12 (General Review) ---
+        const mcqData_w12 = [
+             // Mix of questions from all topics
+             { id: 'w12q1', question: "איזה מבנה ייחודי לחיידקים גרם-שליליים ומכיל אנדוטוקסין?", options: [ { text: "פפטידוגליקן", correct: false }, { text: "קפסולה", correct: false }, { text: "ליפופוליסכריד (LPS)", correct: true }, { text: "חומצה טיכואית", correct: false } ], explanation: "LPS הוא מרכיב מרכזי בממברנה החיצונית של חיידקים גרם-שליליים. חלק ה-Lipid A שלו הוא אנדוטוקסין הגורם לתגובה דלקתית חזקה במאכסן." },
+             { id: 'w12q2', question: "באיזה שלב של עקומת הגידול קצב התמותה של החיידקים שווה (בערך) לקצב החלוקה?", options: [ { text: "שלב ה-Lag", correct: false }, { text: "השלב הלוגריתמי (Log)", correct: false }, { text: "השלב העמיד (Stationary)", correct: true }, { text: "שלב התמותה (Death)", correct: false } ], explanation: "בשלב העמיד (סטציונרי), הגידול נעצר (קצב החלוקה יורד) ו/או קצב התמותה משתווה לקצב החלוקה, כתוצאה ממגבלות נוטריינטים, הצטברות תוצרים רעילים וגורמים נוספים." },
+             { id: 'w12q3', question: "חיידק המשתמש באור כמקור אנרגיה וב-CO2 כמקור פחמן הוא:", options: [ { text: "כמואורגנוטרוף", correct: false }, { text: "כמוליטואוטוטרוף", correct: false }, { text: "פוטואוטוטרוף", correct: true }, { text: "פוטוהטרוטרוף", correct: false } ], explanation: "פוטואוטוטרופים (כמו ציאנובקטריה וצמחים) מבצעים פוטוסינתזה, שבה אנרגיית אור משמשת לקיבוע פחמן דו-חמצני (CO2) למולקולות אורגניות." },
+             { id: 'w12q4', question: "אנטיביוטיקות ממשפחת הפניצילינים פוגעות ב:", options: [ { text: "סינתזת חלבון בריבוזום 30S", correct: false }, { text: "סינתזת דופן הפפטידוגליקן", correct: true }, { text: "שכפול DNA על ידי עיכוב גיראז", correct: false }, { text: "סינתזת חומצה פולית", correct: false } ], explanation: "פניצילינים הם אנטיביוטיקות בטא-לקטם המעכבות את האנזים טרנספפטידאז, החיוני ליצירת קשרי הצילוב בדופן הפפטידוגליקן." },
+             { id: 'w12q5', question: "מהי טרנסדוקציה?", options: [ { text: "קליטת DNA חופשי מהסביבה", correct: false }, { text: "העברת DNA בין חיידקים במגע ישיר", correct: false }, { text: "העברת DNA בין חיידקים באמצעות וירוס (פאג')", correct: true }, { text: "תנועה של טרנספוזון בגנום", correct: false } ], explanation: "טרנסדוקציה היא מנגנון העברת גנים אופקית שבו בקטריופאג' משמש כנשא להעברת DNA מחיידק תורם לחיידק מקבל." },
+             { id: 'w12q6', question: "מהי אנדוספורה?", options: [ { text: "סוג של פלסמיד", correct: false }, { text: "מבנה רבייה א-מיני", correct: false }, { text: "מבנה הישרדות עמיד ורדום הנוצר על ידי חיידקים מסוימים", correct: true }, { text: "אברון המכיל את ה-DNA בחיידק", correct: false } ], explanation: "אנדוספורה היא מבנה עמיד ביותר לחום, יובש, קרינה וכימיקלים, הנוצר על ידי חיידקים כמו Bacillus ו-Clostridium בתנאי עקה, ומאפשר להם לשרוד עד שהתנאים ישתפרו." },
+             { id: 'w12q7', question: "תהליך שבו הגנום הנגיפי משתלב בגנום החיידקי נקרא:", options: [ { text: "ליזיס (Lysis)", correct: false }, { text: "ליזוגניה (Lysogeny)", correct: true }, { text: "אינדוקציה (Induction)", correct: false }, { text: "טרנספורמציה (Transformation)", correct: false } ], explanation: "במחזור הליזוגני, הגנום של פאג' מתון יכול להשתלב בכרומוזום החיידק (ולהפוך לפרופאג') ולהתרבות יחד איתו מבלי לגרום להרס מיידי של התא." },
+             { id: 'w12q8', question: "האנזים קטלאז (Catalase) מפרק:", options: [ { text: "רדיקל סופראוקסיד (O2⁻)", correct: false }, { text: "מי חמצן (H2O2) למים וחמצן", correct: true }, { text: "אוזון (O3)", correct: false }, { text: "DNA", correct: false } ], explanation: "קטלאז הוא אנזים חשוב הנמצא באורגניזמים רבים הגדלים בנוכחות חמצן, ותפקידו לנטרל את תוצר הלוואי הרעיל מי חמצן על ידי פירוקו למים וחמצן מולקולרי." },
+             { id: 'w12q9', question: "איזה מהבאים הוא מאפיין של ארכאות (Archaea) אך לא של חיידקים (Bacteria)?", options: [ { text: "דופן תא מפפטידוגליקן", correct: false }, { text: "ריבוזומים 70S", correct: false }, { text: "ממברנה ציטופלסמית המכילה ליפידים עם קשרי אתר (ether linkages)", correct: true }, { text: "גנום מעגלי", correct: false } ], explanation: "אחד ההבדלים הביוכימיים המרכזיים בין ארכאות לחיידקים הוא מבנה הליפידים בממברנה. בארכאות, הגליצרול קשור לשרשראות הצד הפחמימניות (לרוב פיטאניל) בקשרי אתר, בעוד שבחיידקים ובאאוקריוטים הקשר הוא קשר אסתרי לחומצות שומן." },
+             { id: 'w12q10', question: "הגן 16S rRNA משמש בפילוגנטיקה כי:", options: [ { text: "הוא מקודד לחלבון חיוני", correct: false }, { text: "הוא נמצא רק באאוקריוטים", correct: false }, { text: "הוא מכיל אזורים שמורים ומשתנים ומצוי בכל הפרוקריוטים", correct: true }, { text: "הוא עובר העברה אופקית בקלות", correct: false } ], explanation: "הגן 16S rRNA משלב תכונות אידיאליות לשמש כסמן פילוגנטי: הוא חיוני וקיים בכל החיידקים והארכאות, גודלו מתאים לריצוף, והוא מכיל אזורים שמורים המאפשרים עיצוב פריימרים אוניברסליים ואזורים משתנים המשקפים את המרחק האבולוציוני." },
+            // Add 20 more diverse review questions...
+             { id: 'w12q11', question: "מצע גידול המכיל תמצית שמרים ופפטון הוא דוגמה ל:", options: [ { text: "מצע מוגדר (סינתטי)", correct: false }, { text: "מצע בררני (סלקטיבי)", correct: false }, { text: "מצע מורכב (קומפלקסי)", correct: true }, { text: "מצע מבחין (דיפרנציאלי)", correct: false } ], explanation: "מצע מורכב מכיל רכיבים שהרכבם הכימי המדויק אינו ידוע או משתנה (כמו תמציות ביולוגיות). מצע מוגדר מכיל רק רכיבים כימיים טהורים בריכוזים ידועים." },
+             { id: 'w12q12', question: "המעבר משלב ה-Log לשלב העמיד (Stationary) בתרבית חיידקים נגרם לרוב על ידי:", options: [ { text: "עלייה בריכוז החמצן", correct: false }, { text: "הוספת אנטיביוטיקה", correct: false }, { text: "מגבלות נוטריינטים והצטברות תוצרים רעילים", correct: true }, { text: "ירידה חדה בטמפרטורה", correct: false } ], explanation: "ככל שהאוכלוסייה גדלה בתרבית סגורה, הנוטריינטים החיוניים מתכלים ותוצרי פסולת מטבוליים (כמו חומצות) מצטברים, מה שמאט את קצב הגידול ומוביל לכניסה לשלב העמיד." },
+             { id: 'w12q13', question: "מהו וירואיד (Viroid)?", options: [ { text: "חלבון מדביק (פריון)", correct: false }, { text: "מולקולת RNA זעירה הגורמת למחלות בצמחים", correct: true }, { text: "פאג' ללא זנב", correct: false }, { text: "שלב רדום של וירוס", correct: false } ], explanation: "וירואידים הם הפתוגנים הקטנים ביותר, המורכבים ממולקולת RNA חד-גדילית מעגלית קטנה, ללא קפסיד או קידוד לחלבונים, והם גורמים למחלות בצמחים." },
+             { id: 'w12q14', question: "תנועת חיידקים באמצעות החלקה (Gliding motility) אינה דורשת:", options: [ { text: "מגע עם משטח", correct: false }, { text: "השקעת אנרגיה", correct: false }, { text: "שוטונים (Flagella)", correct: true }, { text: "מנגנון ייעודי (כמו הפרשת ריר או חלבוני תנועה)", correct: false } ], explanation: "תנועת החלקה היא תנועה על פני משטחים שאינה מתווכת על ידי שוטונים. קיימים מנגנונים שונים לתנועת החלקה, אך כולם דורשים מגע עם המשטח והשקעת אנרגיה." },
+             { id: 'w12q15', question: "מהי המטרה העיקרית של תהליך הפסטור?", options: [ { text: "עיקור מלא של המוצר (הרג כל המיקרואורגניזמים)", correct: false }, { text: "הפחתת מספר החיידקים הפתוגניים והמקלקלים לרמה בטוחה", correct: true }, { text: "שיפור הטעם של המוצר", correct: false }, { text: "העשרת המוצר בויטמינים", correct: false } ], explanation: "פסטור הוא טיפול בחום מתון (לרוב מתחת ל-100°C) שמטרתו להרוג פתוגנים רגישים לחום ולהפחית את העומס המיקרוביאלי הכולל כדי להאריך את חיי המדף, תוך פגיעה מינימלית בערך התזונתי ובטעם של המוצר. הוא אינו מעקר." },
+             { id: 'w12q16', question: "קוניוגציה בין תא Hfr לתא F- תוביל בשכיחות גבוהה ל:", options: [ { text: "הפיכת תא ה-F- לתא F+", correct: false }, { text: "רקומבינציה של גנים כרומוזומליים בתא ה-F-", correct: true }, { text: "ליזיס של תא ה-F-", correct: false }, { text: "יצירת פלסמיד F' בתא ה-Hfr", correct: false } ], explanation: "מכיוון שתא Hfr מעביר חלק מהכרומוזום שלו, ונדיר שכל הכרומוזום (כולל כל פלסמיד F המשולב) מועבר, התוצאה הנפוצה היא כניסת מקטעים כרומוזומליים מהתורם לגנום המקבל באמצעות רקומבינציה הומולוגית." },
+             { id: 'w12q17', question: "באיזה חלק של התא הפרוקריוטי מתרחשת שרשרת העברת האלקטרונים בנשימה?", options: [ { text: "בציטופלסמה", correct: false }, { text: "בריבוזומים", correct: false }, { text: "בממברנה הציטופלסמית", correct: true }, { text: "בדופן התא", correct: false } ], explanation: "בהיעדר מיטוכונדריה, הממברנה הציטופלסמית בפרוקריוטים ממלאת תפקיד מרכזי בהפקת אנרגיה, כולל אכלוס מרכיבי שרשרת העברת האלקטרונים ויצירת מפל פרוטונים (proton motive force)." },
+             { id: 'w12q18', question: "איזה מנגנון מאפשר לחיידקים רבים להגן על ה-DNA שלהם מפני אנזימי רסטריקציה שהם עצמם מייצרים?", options: [ { text: "שימוש ב-RNA במקום DNA", correct: false }, { text: "מערכת תיקון DNA יעילה", correct: false }, { text: "מתילציה של ה-DNA העצמי באתרי הזיהוי", correct: true }, { text: "הפרשת אנזימי הרסטריקציה אל מחוץ לתא", correct: false } ], explanation: "מערכת הרסטריקציה-מודיפיקציה כוללת אנזים רסטריקציה (החותך DNA זר) ואנזים מתילאז (המוסיף קבוצת מתיל ל-DNA העצמי באותם אתרי זיהוי). המתילציה מונעת את החיתוך העצמי." },
+             { id: 'w12q19', question: "הדמיון הרב בין הריבוזומים במיטוכונדריה לריבוזומים חיידקיים תומך בתיאוריה:", options: [ { text: "האנדוסימביוטית", correct: true }, { text: "הבריאה הספונטנית", correct: false }, { text: "הפנספרמיה", correct: false }, { text: "האבולוציה הכימית", correct: false } ], explanation: "התיאוריה האנדוסימביוטית גורסת שמיטוכונדריה (וכלורופלסטים) התפתחו מחיידקים קדומים שנבלעו על ידי תא אאוקריוטי קדום ופיתחו יחסי סימביוזה. הדמיון בריבוזומים (70S, רגישות לאנטיביוטיקות מסוימות), בגנום המעגלי ובממברנה הכפולה תומכים בתיאוריה זו." },
+             { id: 'w12q20', question: "שיטת ה-FISH (Fluorescence In Situ Hybridization) מאפשרת:", options: [ { text: "לרצף גנום שלם של חיידק", correct: false }, { text: "לזהות ולמקם חיידקים ספציפיים בדגימה סביבתית או קלינית באמצעות גלאי DNA/RNA פלואורסצנטיים", correct: true }, { text: "למדוד את קצב הנשימה החיידקית", correct: false }, { text: "להפריד חיידקים לפי גודלם", correct: false } ], explanation: "FISH היא טכניקה המשתמשת בגלאים פלואורסצנטיים קצרים של חומצות גרעין (לרוב מבוססי rRNA) הנקשרים באופן ספציפי לרצפים תואמים בתוך תאים מקובעים. היא מאפשרת לזהות, לספור ולראות את הפיזור המרחבי של חיידקים מסוימים בתוך דגימה מורכבת." },
+            { id: 'w12q21', question: "מהו תפקיד החורים (Porins) בממברנה החיצונית של חיידקים גרם-שליליים?", options: [ { text: "לעגן את הדופן לממברנה", correct: false }, { text: "לאפשר מעבר פסיבי של מולקולות הידרופיליות קטנות", correct: true }, { text: "לסנתז LPS", correct: false }, { text: "לשאוב אנטיביוטיקות אל מחוץ לתא", correct: false } ], explanation: "פורינים הם חלבונים היוצרים תעלות מימיות רחבות יחסית בממברנה החיצונית, המאפשרות דיפוזיה לא ספציפית (עד גודל מסוים) של מולקולות קטנות ומסיסות במים (כמו סוכרים, חומצות אמינו, יונים) אל הפריפלסמה." },
+            { id: 'w12q22', question: "זמן הדור של חיידק הוא 20 דקות. כמה חיידקים יהיו בתרבית לאחר שעתיים, אם התחלנו עם חיידק אחד והגידול אקספוננציאלי?", options: [ { text: "6", correct: false }, { text: "12", correct: false }, { text: "64", correct: true }, { text: "120", correct: false } ], explanation: "שעתיים הן 120 דקות. מספר הדורות הוא 120 דקות / 20 דקות/דור = 6 דורות. מספר החיידקים הסופי = מספר התחלתי * 2 בחזקת מספר הדורות = 1 * 2^6 = 64." },
+            { id: 'w12q23', question: "איזה מהגורמים הבאים *אינו* תורם לעמידות הגבוהה של אנדוספורות?", options: [ { text: "תכולת מים נמוכה בליבה", correct: false }, { text: "נוכחות חומצה דיפיקולינית (DPA) וסידן", correct: false }, { text: "קצב מטבולי גבוה מאוד", correct: true }, { text: "מעטפות חלבוניות קשיחות", correct: false } ], explanation: "אנדוספורות הן מבנים רדומים מבחינה מטבולית. קצב המטבוליזם הנמוך (או אפסי) תורם לעמידותן בכך שהוא מונע תהליכים ביולוגיים רגישים ומפחית את הצורך באנרגיה ובנוטריינטים, אך הוא אינו 'גבוה מאוד'." },
+            { id: 'w12q24', question: "פוטוסינתזה אנוקסיגנית (Anoxygenic photosynthesis) המבוצעת על ידי חיידקים מסוימים:", options: [ { text: "משתמשת במים כתורם אלקטרונים ומשחררת חמצן", correct: false }, { text: "משתמשת בתרכובות כמו H2S כתורם אלקטרונים ואינה משחררת חמצן", correct: true }, { text: "דורשת חושך מוחלט", correct: false }, { text: "מתרחשת רק בארכאות", correct: false } ], explanation: "בניגוד לפוטוסינתזה אוקסיגנית (בציאנובקטריה, אצות וצמחים) המשתמשת במים ומייצרת חמצן, פוטוסינתזה אנוקסיגנית משתמשת בתורמי אלקטרונים מחוזרים אחרים (כמו מימן גופרי H2S, גופרית S, או תרכובות אורגניות) ואינה מייצרת חמצן." },
+            { id: 'w12q25', question: "איזו טכניקה מאפשרת להגביר מספר עותקים של מקטע DNA ספציפי?", options: [ { text: "צביעת גרם", correct: false }, { text: "PCR (Polymerase Chain Reaction)", correct: true }, { text: "קוניוגציה", correct: false }, { text: "פסטור", correct: false } ], explanation: "PCR היא טכניקה מולקולרית המאפשרת שכפול מהיר וממוקד (אמפליפיקציה) של מקטע DNA מסוים באמצעות אנזים DNA פולימראז עמיד לחום ומחזורי טמפרטורה מבוקרים." },
+            { id: 'w12q26', question: "המרכיב העיקרי בדופן התא של פטריות הוא:", options: [ { text: "פפטידוגליקן", correct: false }, { text: "צלולוז (תאית)", correct: false }, { text: "כיטין (Chitin)", correct: true }, { text: "LPS", correct: false } ], explanation: "בניגוד לחיידקים (פפטידוגליקן) וצמחים (צלולוז), דופן התא של רוב הפטריות מורכבת בעיקר מהפוליסכריד כיטין, שהוא פולימר של N-אצטילגלוקוזאמין (NAG)." },
+            { id: 'w12q27', question: "העברת גנים באמצעות פלסמיד F בין שני חיידקי E. coli היא דוגמה ל:", options: [ { text: "טרנספורמציה", correct: false }, { text: "טרנסדוקציה כללית", correct: false }, { text: "קוניוגציה", correct: true }, { text: "טרנסדוקציה ייחודית", correct: false } ], explanation: "קוניוגציה המתווכת על ידי פלסמיד F היא הדוגמה הקלאסית להעברת DNA במגע ישיר בין חיידקים." },
+            { id: 'w12q28', question: "חיידק הגדל בצורה מיטבית ב-pH 2 הוא:", options: [ { text: "נויטרופיל (Neutrophile)", correct: false }, { text: "אלקלופיל (Alkaliphile)", correct: false }, { text: "אצידופיל (Acidophile)", correct: true }, { text: "הלופיל (Halophile)", correct: false } ], explanation: "אצידופילים הם אורגניזמים המותאמים לגדול בסביבות חומציות מאוד (pH נמוך). אלקלופילים גדלים בסביבות בסיסיות (pH גבוה), ונויטרופילים גדלים סביב pH ניטרלי (6-8)." },
+            { id: 'w12q29', question: "מה ההבדל בין אנטיביוטיקה טבעית לאנטיביוטיקה סמי-סינתטית?", options: [ { text: "טבעית מופקת מחיידק, סמי-סינתטית מצמח", correct: false }, { text: "סמי-סינתטית היא אנטיביוטיקה טבעית שעברה שינוי כימי במעבדה", correct: true }, { text: "טבעית פועלת על הריבוזום, סמי-סינתטית על הדופן", correct: false }, { text: "סמי-סינתטית תמיד רחבת טווח יותר", correct: false } ], explanation: "אנטיביוטיקה סמי-סינתטית מתחילה ממולקולה טבעית המיוצרת על ידי מיקרואורגניזם, ועוברת שינויים כימיים במעבדה כדי לשפר את תכונותיה (כמו יציבות, ספיגה, טווח פעולה או עמידות לפירוק)." },
+            { id: 'w12q30', question: "חקר הקהילות המיקרוביאליות השונות בגוף האדם (כמו במעי) נקרא חקר ה:", options: [ { text: "וירולוגיה", correct: false }, { text: "מיקולוגיה", correct: false }, { text: "מיקרוביום (Microbiome)", correct: true }, { text: "פרזיטולוגיה", correct: false } ], explanation: "המיקרוביום מתייחס לכלל המיקרואורגניזמים (חיידקים, ארכאות, פטריות, וירוסים) החיים בסביבה מסוימת, כגון גוף האדם, ואילו המיקרוביוטה מתייחסת לאורגניזמים עצמם. חקר המיקרוביום הפך לתחום מרכזי בהבנת הבריאות והחולי." }
+        ];
+
+
+        // --- MCQ JavaScript Logic for Week 12 (Use unique names like _w12) ---
+         let currentMCQIndex_w12 = 0;
+         let score_w12 = 0;
+         let userAnswers_w12 = {};
+         let viewMode_w12 = 'single';
+         const mcqsContainer_w12 = document.getElementById('mcqs-container');
+         const resultsContainer_w12 = document.getElementById('results');
+         const mcqNav_w12 = document.getElementById('mcq-nav');
+         const mcqCounterElement_w12 = document.getElementById('mcq-counter');
+         const prevBtn_w12 = document.getElementById('prev-mcq-btn');
+         const nextBtn_w12 = document.getElementById('next-mcq-btn');
+         const viewToggleBtn_w12 = document.getElementById('view-toggle-btn');
+         let shuffledMCQs_w12 = [];
+
+         function shuffleArray(array) { /* ... */
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+         function renderMCQElement_w12(mcq, index) { /* ... */
+            let shuffledOptions = [...mcq.options];
+            shuffleArray(shuffledOptions);
+
+            let optionsHTML = '<ul class="options">';
+            shuffledOptions.forEach(option => {
+                const isSelected = userAnswers_w12[mcq.id] === option.text;
+                 optionsHTML += `<li data-correct="${option.correct}" class="${isSelected ? 'selected' : ''}">${option.text}</li>`;
+             });
+             optionsHTML += '</ul>';
+
+             const isAnswered = mcq.id in userAnswers_w12;
+             const correctOptionText = mcq.options.find(opt => opt.correct).text;
+             const userAnswer = userAnswers_w12[mcq.id];
+             const wasCorrect = isAnswered && userAnswer === correctOptionText;
+
+             const mcqElement = document.createElement('div');
+             mcqElement.classList.add('mcq');
+             mcqElement.id = `mcq-${mcq.id}`; // Unique ID
+             if (isAnswered) {
+                mcqElement.classList.add('mcq-answered');
+             }
+
+             mcqElement.innerHTML = `
+                 <p class="question-text">${index + 1}. ${mcq.question}</p>
+                 ${optionsHTML}
+                 <div class="feedback" style="display: ${isAnswered ? 'block' : 'none'};">
+                     ${isAnswered ? (wasCorrect ? 'נכון!' : 'לא נכון.') : ''}
+                 </div>
+                 <div class="explanation" style="display: ${isAnswered ? 'block' : 'none'};">
+                     ${mcq.explanation}
+                 </div>
+             `;
+
+            if (isAnswered) {
+                const optionsLi = mcqElement.querySelectorAll('.options li');
+                optionsLi.forEach(li => {
+                    li.classList.add('answered');
+                    if (li.textContent === userAnswer) {
+                        li.classList.add(wasCorrect ? 'correct' : 'incorrect');
+                    } else if (li.dataset.correct === 'true' && !wasCorrect) {
+                         li.classList.add('correct');
+                     }
+                 });
+                 const feedbackDiv = mcqElement.querySelector('.feedback');
+                 feedbackDiv.classList.add(wasCorrect ? 'correct' : 'incorrect');
+             }
+
+            if (!isAnswered) {
+                const optionsElements = mcqElement.querySelectorAll('.options li');
+                 optionsElements.forEach(optionEl => {
+                     optionEl.addEventListener('click', () => checkAnswer_w12(mcq.id, optionEl, mcqElement));
+                 });
+             }
+
+            return mcqElement;
+         }
+         function displayMCQs_w12() { /* ... */
+             mcqsContainer_w12.innerHTML = '';
+             resultsContainer_w12.style.display = 'none';
+
+             if (viewMode_w12 === 'single') {
+                 mcqNav_w12.style.display = 'flex';
+                 mcqCounterElement_w12.style.display = 'block';
+                 mcqCounterElement_w12.textContent = `שאלה ${currentMCQIndex_w12 + 1} מתוך ${shuffledMCQs_w12.length}`;
+                 const mcqElement = renderMCQElement_w12(shuffledMCQs_w12[currentMCQIndex_w12], currentMCQIndex_w12);
+                 mcqsContainer_w12.appendChild(mcqElement);
+                 updateNavButtons_w12();
+             } else { // 'all' mode
+                 mcqNav_w12.style.display = 'none';
+                 mcqCounterElement_w12.style.display = 'none';
+                 shuffledMCQs_w12.forEach((mcq, index) => {
+                     const mcqElement = renderMCQElement_w12(mcq, index);
+                     mcqsContainer_w12.appendChild(mcqElement);
+                 });
+                 updateResultsDisplay_w12();
+                 resultsContainer_w12.style.display = 'block';
+             }
+         }
+         function checkAnswer_w12(mcqId, selectedOptionEl, mcqElement) { /* ... */
+             if (userAnswers_w12[mcqId]) return;
+
+             const isCorrect = selectedOptionEl.getAttribute('data-correct') === 'true';
+             const feedbackEl = mcqElement.querySelector('.feedback');
+             const explanationEl = mcqElement.querySelector('.explanation');
+             const optionsUl = mcqElement.querySelector('.options');
+             const allOptions = optionsUl.querySelectorAll('li');
+
+             userAnswers_w12[mcqId] = selectedOptionEl.textContent;
+
+             mcqElement.classList.add('mcq-answered');
+             allOptions.forEach(opt => {
+                 opt.classList.add('answered');
+             });
+
+             if (isCorrect) {
+                 score_w12++;
+             }
+
+             selectedOptionEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+             feedbackEl.textContent = isCorrect ? 'נכון!' : 'לא נכון.';
+             feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+             feedbackEl.style.display = 'block';
+             explanationEl.style.display = 'block';
+
+             if (!isCorrect) {
+                 allOptions.forEach(opt => {
+                     if (opt.getAttribute('data-correct') === 'true') {
+                         opt.classList.add('correct');
+                     }
+                 });
+             }
+
+             if (viewMode_w12 === 'all') {
+                 updateResultsDisplay_w12();
+             }
+         }
+         function updateResultsDisplay_w12() { /* ... */
+            const answeredCount = Object.keys(userAnswers_w12).length;
+             resultsContainer_w12.innerHTML = `ענית על ${answeredCount} מתוך ${shuffledMCQs_w12.length}<br>ציון נוכחי: ${score_w12} מתוך ${answeredCount || 0}`;
+             resultsContainer_w12.style.display = 'block';
+         }
+         function updateNavButtons_w12() { /* ... */
+            prevBtn_w12.disabled = currentMCQIndex_w12 === 0;
+            nextBtn_w12.disabled = currentMCQIndex_w12 === shuffledMCQs_w12.length - 1;
+         }
+         function nextMCQ_w12() { /* ... */
+            if (currentMCQIndex_w12 < shuffledMCQs_w12.length - 1) {
+                 currentMCQIndex_w12++;
+                 displayMCQs_w12();
+             }
+             if(currentMCQIndex_w12 === shuffledMCQs_w12.length -1){
+                 updateResultsDisplay_w12();
+                 resultsContainer_w12.style.display = 'block';
+             }
+         }
+         function prevMCQ_w12() { /* ... */
+             if (currentMCQIndex_w12 > 0) {
+                 currentMCQIndex_w12--;
+                 resultsContainer_w12.style.display = 'none';
+                 displayMCQs_w12();
+             }
+         }
+         function toggleViewMode_w12() { /* ... */
+            if (viewMode_w12 === 'single') {
+                 viewMode_w12 = 'all';
+                 viewToggleBtn_w12.textContent = 'הצג שאלה בודדת';
+             } else {
+                 viewMode_w12 = 'single';
+                 viewToggleBtn_w12.textContent = 'הצג הכל';
+             }
+             displayMCQs_w12();
+         }
+
+        function initWeek12() { // Unique init function name for Week 12
+            shuffledMCQs_w12 = [...mcqData_w12];
+            shuffleArray(shuffledMCQs_w12);
+            userAnswers_w12 = {};
+            score_w12 = 0;
+            currentMCQIndex_w12 = 0;
+            viewMode_w12 = 'single';
+            viewToggleBtn_w12.textContent = 'הצג הכל';
+
+            displayMCQs_w12();
+
+            prevBtn_w12.addEventListener('click', prevMCQ_w12);
+            nextBtn_w12.addEventListener('click', nextMCQ_w12);
+            viewToggleBtn_w12.addEventListener('click', toggleViewMode_w12);
+        }
+
+        window.onload = initWeek12; // Initialize Week 12 logic
+
+    </script>
+
+</body>
+</html>

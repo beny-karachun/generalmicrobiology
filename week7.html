@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מיקרוביולוגיה כללית - שבוע 7: כימות ב' וגידול מיקרוביאלי</title>
+    <style>
+        /* CSS Styles are identical to revised week1/2/3/4/5/6.html */
+         body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #eef5f3;
+            color: #333;
+            direction: rtl;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #006847; /* Dark green */
+            text-align: center;
+            border-bottom: 2px solid #8fbc8f; /* Dark Sea Green */
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        /* --- Flashcards Styles --- */
+        .flashcards-container {
+            perspective: 1000px;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-direction: column;
+        }
+        .flashcard {
+            width: 80%;
+            max-width: 400px;
+            height: 180px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 8px;
+            font-size: 1.2em;
+        }
+        .flashcard-front {
+            background-color: #c8e6c9;
+            color: #1b5e20;
+        }
+        .flashcard-back {
+            background-color: #a5d6a7;
+            color: #1b5e20;
+            transform: rotateY(180deg);
+            font-size: 1em;
+        }
+        .flashcard-nav {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .flashcard-nav button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .flashcard-nav button:hover {
+            background-color: #004d40;
+        }
+         #flashcard-counter {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        /* --- MCQ Styles --- */
+        .mcqs-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #view-toggle-btn {
+             padding: 6px 12px;
+             background-color: #6c757d;
+             color: white;
+             border: none;
+             border-radius: 4px;
+             cursor: pointer;
+             font-size: 0.9em;
+         }
+        #view-toggle-btn:hover {
+             background-color: #5a6268;
+         }
+
+        .mcq {
+            background-color: #ffffff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #004d40;
+        }
+        .options {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .options li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: 2px solid transparent; /* Add transparent border for layout consistency */
+        }
+        .options li:hover {
+            background-color: #ced4da;
+        }
+        /* Styles for answer states */
+        .options li.answered.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .options li.answered.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+         /* Style for selected but not yet confirmed answer (optional) */
+        .options li.selected {
+             border-color: #007bff;
+         }
+         /* Disable options after answering */
+        .mcq-answered .options li {
+            cursor: default;
+            pointer-events: none;
+             opacity: 0.8;
+        }
+        .mcq-answered .options li.correct,
+        .mcq-answered .options li.incorrect {
+            opacity: 1; /* Keep selected/correct ones fully visible */
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+             border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-right: 5px solid #8fbc8f;
+            font-size: 0.95em;
+            border-radius: 4px;
+        }
+        .mcq-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .mcq-navigation button {
+            padding: 10px 20px;
+            background-color: #00796b; /* Teal */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .mcq-navigation button:hover:not(:disabled) {
+            background-color: #004d40; /* Darker Teal */
+        }
+        .mcq-navigation button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #results {
+            text-align: center;
+            font-size: 1.4em;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e0f2f1;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            color: #00695c;
+        }
+         #mcq-counter {
+             text-align: center;
+             margin-bottom: 15px;
+             font-weight: bold;
+             color: #555;
+         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>שבוע 7: כימות ב' וגידול מיקרוביאלי</h1>
+
+        <!-- Flashcards Section -->
+        <div class="section">
+             <h2>כרטיסיות לימוד</h2>
+             <div class="flashcards-container">
+                 <div class="flashcard" id="flashcard">
+                     <div class="flashcard-face flashcard-front">מונח</div>
+                     <div class="flashcard-face flashcard-back">הגדרה</div>
+                 </div>
+                 <div class="flashcard-nav">
+                     <button id="prev-card">הקודם</button>
+                     <button id="flip-card">הפוך</button>
+                     <button id="next-card">הבא</button>
+                 </div>
+                 <div id="flashcard-counter">כרטיס 1 מתוך X</div>
+             </div>
+        </div>
+
+        <!-- MCQs Section -->
+        <div class="section">
+             <div class="mcqs-section-header">
+                 <h2>שאלות חזרה (MCQs)</h2>
+                 <button id="view-toggle-btn">הצג הכל</button>
+             </div>
+             <div id="mcq-counter">שאלה 1 מתוך 30</div>
+             <div id="mcqs-container">
+                 <!-- MCQs will be loaded here by JavaScript -->
+             </div>
+             <div id="results" style="display: none;">
+                 תוצאה סופית תופיע כאן.
+             </div>
+             <div class="mcq-navigation" id="mcq-nav" style="display: none;">
+                 <button id="prev-mcq-btn" disabled>הקודם</button>
+                 <button id="next-mcq-btn">הבא</button>
+             </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Flashcard Data and Logic ---
+        const flashcardData_w7 = [
+            { term: "ספירה חיה (Viable count)", definition: "שיטה להערכת מספר התאים החיים (המסוגלים להתרבות) בדגימה, בדרך כלל על ידי זריעה על מצע מוצק וספירת המושבות (CFU) שנוצרו." },
+            { term: "CFU (Colony Forming Unit)", definition: "יחידה לספירת חיידקים חיים. מייצגת תא בודד או קבוצת תאים צמודים שיצרו מושבה אחת נראית לעין על מצע מוצק." },
+            { term: "זריעת שפיכה (Pour plate)", definition: "טכניקה לספירה חיה שבה מערבבים דגימה מדוללת עם אגר מותך ושופכים לצלחת פטרי. מושבות גדלות גם בתוך האגר וגם על פניו." },
+            { term: "זריעת מריחה (Spread plate)", definition: "טכניקה לספירה חיה שבה מורחים נפח ידוע של דגימה מדוללת על פני שטח של מצע אגר מוצק. המושבות גדלות רק על פני האגר." },
+            { term: "מספר מסתבר ביותר (Most Probable Number - MPN)", definition: "שיטה סטטיסטית להערכת מספר החיידקים בדגימה (במיוחד בריכוזים נמוכים) על ידי זריעת מיהולים עשרוניים למספר מבחנות עם מדיום נוזלי ובדיקת נוכחות/היעדר גידול." },
+            { term: "עכירות (Turbidity)", definition: "מידת ה'אטימות' של תרבית נוזלית הנגרמת מפיזור אור על ידי התאים. משמשת כמדד עקיף ומהיר לריכוז התאים." },
+            { term: "צפיפות אופטית (Optical Density - OD)", definition: "הערך הנמדד בספקטרופוטומטר המבטא את מידת בליעת/פיזור האור על ידי תרבית. פרופורציונלי לריכוז התאים בתחום מסוים." },
+            { term: "ספקטרופוטומטר (Spectrophotometer)", definition: "מכשיר המודד את כמות האור באורך גל מסוים העוברת דרך דגימה נוזלית. משמש למדידת OD." },
+            { term: "חלוקה בינארית (Binary fission)", definition: "אופן הרבייה הא-מיני הנפוץ ברוב החיידקים, שבו תא אחד גדל ומתחלק לשני תאי בת זהים." },
+            { term: "עקום גידול (Growth curve)", definition: "גרף המתאר את השינוי במספר התאים החיים בתרבית חיידקים סגורה לאורך זמן. כולל ארבעה שלבים עיקריים." },
+            { term: "שלב ההשהיה (Lag phase)", definition: "השלב ההתחלתי בעקום הגידול, שבו החיידקים מסתגלים לתנאים החדשים ומסנתזים אנזימים וחומרים הנדרשים לגידול, אך כמעט ואין עלייה במספר התאים." },
+            { term: "שלב הגידול המעריכי (Log / Exponential phase)", definition: "השלב שבו החיידקים מתחלקים בקצב המרבי והקבוע האפשרי בתנאים הנתונים. מספר התאים עולה באופן מעריכי (לוגריתמי)." },
+            { term: "זמן דור / זמן הכפלה (Generation time / Doubling time)", definition: "הזמן הדרוש לאוכלוסיית חיידקים להכפיל את מספרה במהלך שלב הגידול המעריכי." },
+            { term: "שלב העמידה (Stationary phase)", definition: "השלב שבו קצב חלוקת התאים משתווה לקצב תמותת התאים, או שקצב החלוקה מאט משמעותית. מספר התאים החיים נשאר קבוע יחסית. נגרם לרוב מהגבלת נוטריינטים או הצטברות חומרי פסולת." },
+            { term: "שלב התמותה (Death / Decline phase)", definition: "השלב שבו קצב תמותת התאים עולה על קצב החלוקה (אם קיים), ומספר התאים החיים יורד באופן מעריכי." },
+            { term: "תרבית סגורה (Batch culture)", definition: "מערכת גידול שבה מכניסים את החיידקים למדיום גידול בנפח קבוע, ללא הוספת נוטריינטים או סילוק פסולת במהלך הגידול. עקום הגידול הטיפוסי מתקבל בתרבית כזו." },
+            { term: "תרבית רציפה (Continuous culture)", definition: "מערכת גידול שבה מוסיפים מדיום טרי ומסלקים מדיום משומש ותאים באופן רציף, כדי לשמור על תנאי גידול קבועים ולאפשר גידול יציב לאורך זמן." },
+            { term: "כמוסטט (Chemostat)", definition: "סוג נפוץ של מערכת לתרבית רציפה, שבה קצב הגידול נשלט על ידי ריכוז של נוטריינט מגביל אחד במדיום הטרי הנכנס." }
+        ];
+
+
+        let currentCardIndex_w7 = 0;
+        // ... (rest of flashcard JS logic, using unique variable names like _w7)
+        const flashcardElement_w7 = document.getElementById('flashcard');
+        const flashcardFront_w7 = flashcardElement_w7.querySelector('.flashcard-front');
+        const flashcardBack_w7 = flashcardElement_w7.querySelector('.flashcard-back');
+        const flipButton_w7 = document.getElementById('flip-card');
+        const nextButton_w7 = document.getElementById('next-card');
+        const prevButton_w7 = document.getElementById('prev-card');
+        const cardCounterElement_w7 = document.getElementById('flashcard-counter');
+
+        function displayCard_w7(index) {
+             if (!flashcardElement_w7) return;
+             const card = flashcardData_w7[index];
+             flashcardFront_w7.textContent = card.term;
+             flashcardBack_w7.textContent = card.definition;
+             flashcardElement_w7.classList.remove('is-flipped');
+             cardCounterElement_w7.textContent = `כרטיס ${index + 1} מתוך ${flashcardData_w7.length}`;
+         }
+         function flipCard_w7() { flashcardElement_w7.classList.toggle('is-flipped'); }
+         function nextCard_w7() { currentCardIndex_w7 = (currentCardIndex_w7 + 1) % flashcardData_w7.length; displayCard_w7(currentCardIndex_w7); }
+         function prevCard_w7() { currentCardIndex_w7 = (currentCardIndex_w7 - 1 + flashcardData_w7.length) % flashcardData_w7.length; displayCard_w7(currentCardIndex_w7); }
+
+         flipButton_w7.addEventListener('click', flipCard_w7);
+         nextButton_w7.addEventListener('click', nextCard_w7);
+         prevButton_w7.addEventListener('click', prevCard_w7);
+         if (flashcardData_w7.length > 0) displayCard_w7(currentCardIndex_w7);
+
+
+        // --- MCQ Data and Logic ---
+        const mcqData_w7 = [
+             { id: 'w7q1', question: "איזו שיטת כימות מעריכה את מספר התאים החיידקיים על פי יכולתם ליצור מושבה על מצע מוצק?", options: [ { text: "ספירה ישירה במיקרוסקופ", correct: false }, { text: "מדידת עכירות (OD)", correct: false }, { text: "ספירה חיה (Viable count / CFU)", correct: true }, { text: "שיטת MPN", correct: false } ], explanation: "ספירה חיה מבוססת על ההנחה שכל תא חי (או קבוצת תאים צמודים) בדגימה יתפתח למושבה נראית לעין בתנאי גידול מתאימים. התוצאה מבוטאת ב-CFU (יחידות יוצרות מושבה) למ\"ל או לגרם." },
+             { id: 'w7q2', question: "מהו החיסרון העיקרי של שיטת הספירה החיה (Viable count)?", options: [ { text: "היא מהירה מאוד", correct: false }, { text: "היא סופרת גם תאים מתים", correct: false }, { text: "נדרש זמן הדגרה (שעות עד ימים) לקבלת תוצאות, והיא סלקטיבית לתנאי הגידול", correct: true }, { text: "היא אינה רגישה לריכוזים נמוכים", correct: false } ], explanation: "החיסרון הבולט הוא ההמתנה לגידול המושבות. בנוסף, השיטה תלויה בכך שהתאים יצליחו לגדול בתנאי המעבדה הספציפיים (מצע, טמפ', חמצן), ולכן היא עשויה לתת הערכת חסר למספר התאים החיים הכולל בדגימה סביבתית." },
+             { id: 'w7q3', question: "מדידת עכירות (OD) של תרבית נוזלית היא שיטה:", options: [ { text: "ישירה הסופרת תאים חיים בלבד", correct: false }, { text: "עקיפה, מהירה, אך אינה מבחינה בין תאים חיים למתים", correct: true }, { text: "ישירה הסופרת תאים מתים בלבד", correct: false }, { text: "עקיפה הדורשת הדגרה ממושכת", correct: false } ], explanation: "מדידת העכירות היא מהירה ונוחה, אך היא מודדת את פיזור האור הכללי הנגרם מכל החלקיקים בתרבית (חיים, מתים, ואף חלקיקים אחרים), ולכן אינה ספציפית לתאים חיים." },
+             { id: 'w7q4', question: "באיזה שלב של עקום הגידול קצב חלוקת התאים הוא המהיר והקבוע ביותר?", options: [ { text: "שלב ההשהיה (Lag)", correct: false }, { text: "שלב הגידול המעריכי (Log / Exponential)", correct: true }, { text: "שלב העמידה (Stationary)", correct: false }, { text: "שלב התמותה (Death)", correct: false } ], explanation: "בשלב הגידול המעריכי, החיידקים התאקלמו לתנאים והם מתחלקים בקצב המרבי האפשרי, התלוי בזן החיידק ובתנאי הגידול. קצב זה נשאר קבוע (ומכאן העלייה המעריכית)." },
+             { id: 'w7q5', question: "מהו 'זמן דור' (Generation time)?", options: [ { text: "הזמן הכולל של עקום הגידול", correct: false }, { text: "הזמן הדרוש לחיידק בודד להגיע לבגרות", correct: false }, { text: "הזמן הדרוש לאוכלוסיית חיידקים להכפיל את מספרה בשלב הגידול המעריכי", correct: true }, { text: "משך שלב ההשהיה", correct: false } ], explanation: "זמן הדור (g) הוא מדד לקצב הגידול המרבי של אוכלוסייה בתנאים נתונים, ומחושב במהלך השלב המעריכי." },
+             { id: 'w7q6', question: "מה גורם בדרך כלל למעבר משלב הגידול המעריכי לשלב העמידה בתרבית סגורה?", options: [ { text: "עלייה פתאומית בטמפרטורה", correct: false }, { text: "הגבלה של חומרי מזון חיוניים או הצטברות חומרי פסולת רעילים", correct: true }, { text: "הוספת מדיום גידול טרי", correct: false }, { text: "זיהום ויראלי של התרבית", correct: false } ], explanation: "בתרבית סגורה, ככל שהחיידקים מתרבים, הם צורכים את חומרי המזון הזמינים ומפרישים חומרי פסולת. בסופו של דבר, אחד הנוטריינטים הופך מגביל, או שריכוז הפסולת מגיע לרמה רעילה, מה שמאט ומפסיק את הגידול נטו." },
+             { id: 'w7q7', question: "באיזה שלב בעקום הגידול מספר התאים החיים נשאר קבוע יחסית?", options: [ { text: "שלב ההשהיה", correct: false }, { text: "שלב הגידול המעריכי", correct: false }, { text: "שלב העמידה", correct: true }, { text: "שלב התמותה", correct: false } ], explanation: "בשלב העמידה, קצב יצירת תאים חדשים (אם קיים) מאוזן על ידי קצב תמותת התאים, כך שהמספר הכולל של תאים חיים (viable count) נשאר יציב פחות או יותר." },
+             { id: 'w7q8', question: "מה היתרון העיקרי של שימוש בתרבית רציפה (כמו כמוסטט) לעומת תרבית סגורה?", options: [ { text: "ניתן לגדל בה נפחים קטנים יותר", correct: false }, { text: "קל יותר לעבוד איתה", correct: false }, { text: "מאפשרת לשמור על אוכלוסיית חיידקים בשלב הגידול המעריכי לאורך זמן", correct: true }, { text: "היא סטרילית יותר", correct: false } ], explanation: "על ידי אספקה רציפה של נוטריינטים וסילוק פסולת, תרבית רציפה מאפשרת לשמור על תנאי גידול קבועים ולמנוע את המגבלות המובילות לשלב העמידה והתמותה, ובכך לשמר את התאים במצב גידול פעיל ויציב." },
+             { id: 'w7q9', question: "בכמוסטט, כיצד ניתן לשלוט על קצב הגידול של החיידקים?", options: [ { text: "על ידי שינוי הטמפרטורה בלבד", correct: false }, { text: "על ידי שינוי קצב הזרימה של המדיום הטרי", correct: true }, { text: "על ידי שינוי גודל מיכל הגידול", correct: false }, { text: "על ידי סילוק כל התאים המתים", correct: false } ], explanation: "קצב הגידול בכמוסטט נקבע על ידי קצב הדילול (dilution rate), שהוא קצב הזרימה של המדיום הנכנס חלקי נפח התרבית. קצב זרימה מהיר יותר יוביל לקצב גידול מהיר יותר, עד לגבול מסוים שבו התאים 'נשטפים' החוצה מהר מכדי שיוכלו להתרבות." },
+             { id: 'w7q10', question: "אם מתחילים תרבית עם 1000 תאים וחיידק מסוים בעל זמן דור של 30 דקות, כמה תאים יהיו לאחר 2 שעות של גידול מעריכי?", options: [ { text: "4000", correct: false }, { text: "8000", correct: false }, { text: "16000", correct: true }, { text: "32000", correct: false } ], explanation: "ב-2 שעות יש 120 דקות. מספר הדורות (n) הוא 120 דקות / 30 דקות/דור = 4 דורות. מספר התאים הסופי (N) = מספר התאים ההתחלתי (N0) * 2^n. N = 1000 * 2^4 = 1000 * 16 = 16000." },
+             { id: 'w7q11', question: "בשיטת MPN, ההערכה הכמותית מבוססת על:", options: [ { text: "ספירת מושבות בודדות", correct: false }, { text: "מדידת קצב צריכת חמצן", correct: false }, { text: "ניתוח סטטיסטי של מספר המבחנות שהראו גידול בכל רמת מיהול", correct: true }, { text: "מדידת משקל יבש של התאים", correct: false } ], explanation: "השיטה משתמשת בטבלאות סטטיסטיות המקשרות בין התבנית של מבחנות חיוביות (עם גידול) ושליליות (ללא גידול) במיהולים שונים לבין המספר המסתבר ביותר של חיידקים שהיו בדגימה המקורית." },
+             { id: 'w7q12', question: "מדוע יש צורך לדלל דגימה לפני זריעה לספירה חיה אם ריכוז החיידקים גבוה?", options: [ { text: "כדי להרוג את רוב החיידקים", correct: false }, { text: "כדי לקבל מספר מושבות שניתן לספור (בדרך כלל 30-300 מושבות לצלחת)", correct: true }, { text: "כדי להאיץ את קצב הגידול", correct: false }, { text: "כדי להפוך את המצע ליותר מזין", correct: false } ], explanation: "אם זורעים דגימה מרוכזת מדי, יתקבלו יותר מדי מושבות על הצלחת ('דשא' או 'שטיח'), כך שאי אפשר יהיה לספור אותן במדויק או להבחין ביניהן." },
+             { id: 'w7q13', question: "הקשר בין צפיפות אופטית (OD) לריכוז תאים הוא בדרך כלל לינארי:", options: [ { text: "בכל טווח הריכוזים", correct: false }, { text: "רק בריכוזים נמוכים מאוד (מתחת ל-0.1 OD)", correct: false }, { text: "בתחום מסוים (למשל, 0.1-1.0 OD), אך לא בריכוזים גבוהים מאוד", correct: true }, { text: "רק בריכוזים גבוהים מאוד", correct: false } ], explanation: "בריכוזים גבוהים, מתרחשת תופעה של פיזור אור מרובה בין התאים, והקשר בין ה-OD לריכוז התאים מפסיק להיות לינארי. לכן, למדידות מדויקות יש לעיתים צורך לדלל את התרבית כדי שה-OD יהיה בתחום הלינארי." },
+             { id: 'w7q14', question: "מהי חלוקה בינארית?", options: [ { text: "יצירת נבגים", correct: false }, { text: "תהליך שבו תא אב מתחלק לשני תאי בת", correct: true }, { text: "התאחות של שני תאים", correct: false }, { text: "מעבר חומר גנטי בין תאים", correct: false } ], explanation: "חלוקה בינארית היא צורת הרבייה העיקרית של חיידקים, שבה תא אחד מכפיל את תכולתו ומתפצל לשני תאים זהים גנטית." },
+             { id: 'w7q15', question: "בשלב ההשהיה (Lag phase), החיידקים:", options: [ { text: "מתים בקצב מהיר", correct: false }, { text: "נמצאים בתרדמת מוחלטת", correct: false }, { text: "מסתגלים לסביבה החדשה ומסנתזים חומרים לקראת חלוקה", correct: true }, { text: "מתחלקים בקצב המרבי", correct: false } ], explanation: "שלב ההשהיה אינו שלב של חוסר פעילות, אלא שלב של הסתגלות מטבולית שבו התאים מתאימים את עצמם למדיום החדש, מייצרים RNA, אנזימים ומרכיבים אחרים הנדרשים לגידול מיטבי בתנאים אלו." },
+             { id: 'w7q16', question: "חישוב זמן דור אפשרי רק במהלך:", options: [ { text: "שלב ההשהיה", correct: false }, { text: "שלב הגידול המעריכי", correct: true }, { text: "שלב העמידה", correct: false }, { text: "שלב התמותה", correct: false } ], explanation: "זמן הדור מוגדר כזמן ההכפלה של האוכלוסייה, וקצב ההכפלה הוא קבוע ומרבי רק במהלך שלב הגידול המעריכי." },
+             { id: 'w7q17', question: "מהו היתרון העיקרי של ספירה חיה בשיטת מריחה (spread plate) על פני שיטת שפיכה (pour plate)?", options: [ { text: "ניתן לספור ריכוזים גבוהים יותר ללא דילול", correct: false }, { text: "קל יותר לראות ולבודד מושבות הגדלות רק על פני השטח", correct: true }, { text: "היא מהירה יותר", correct: false }, { text: "היא מתאימה יותר לחיידקים אנאירוביים", correct: false } ], explanation: "בשיטת המריחה, כל המושבות גדלות על פני האגר, מה שמקל על הבחנה במורפולוגיה שלהן ועל בידודן להמשך עבודה. בשיטת השפיכה, חלק מהמושבות גדלות בתוך האגר וקשה יותר לבחון אותן." },
+             { id: 'w7q18', question: "מדוע גידול חיידקים במעבדה שונה לעיתים קרובות מגידולם בטבע?", options: [ { text: "בטבע אין תחרות על משאבים", correct: false }, { text: "במעבדה התנאים קבועים ואופטימליים, בעוד שבטבע התנאים משתנים ויש אינטראקציות עם אורגניזמים אחרים", correct: true }, { text: "במעבדה החיידקים אינם יכולים לנוע", correct: false }, { text: "בטבע החיידקים אינם מתחלקים", correct: false } ], explanation: "המעבדה מספקת סביבה מבוקרת ועשירה, לרוב ללא מתחרים או טורפים. בטבע, החיידקים חשופים לתנאים משתנים (טמפ', pH, זמינות מזון), תחרות, טריפה ואינטראקציות מורכבות אחרות." },
+             { id: 'w7q19', question: "מהי המטרה העיקרית של הוספת אגר (Agar) למצע גידול?", options: [ { text: "לספק מקור פחמן לחיידקים", correct: false }, { text: "להפוך את המצע למוצק או מוצק-למחצה", correct: true }, { text: "לעכב גידול של פטריות", correct: false }, { text: "לשמש כאינדיקטור pH", correct: false } ], explanation: "אגר הוא חומר מקריש (gelling agent) המוסף למצעים נוזליים כדי ליצור מצע מוצק (כמו בצלחות פטרי) או מוצק-למחצה (כמו במבחנות אגר רך). רוב החיידקים אינם מפרקים אותו כמקור מזון." },
+             { id: 'w7q20', question: "מה יקרה לזמן הדור של חיידק מזופילי אם יעבירו אותו מטמפרטורה אופטימלית (37°C) לטמפרטורה נמוכה יותר (20°C)?", options: [ { text: "זמן הדור יתקצר (הגידול יהיה מהיר יותר)", correct: false }, { text: "זמן הדור יתארך (הגידול יהיה איטי יותר)", correct: true }, { text: "זמן הדור לא ישתנה", correct: false }, { text: "החיידק ימות מיד", correct: false } ], explanation: "מתחת לטמפרטורה האופטימלית, קצב התגובות האנזימטיות והתהליכים המטבוליים יורד, מה שמאט את קצב הגידול ומאריך את זמן הדור." },
+            { id: 'w7q21', question: "שיטת MPN (Most Probable Number) מתאימה במיוחד להערכת מספר חיידקים:", options: [ { text: "היוצרים נבגים עמידים", correct: false }, { text: "הנמצאים בריכוזים נמוכים מאוד בדגימה (כמו בבדיקות איכות מים)", correct: true }, { text: "הגדלים רק על מצע מוצק", correct: false }, { text: "הנראים בבירור במיקרוסקופ אור", correct: false } ], explanation: "השיטה יעילה במיוחד כאשר מצפים למצוא מספר קטן של חיידקים בדגימה גדולה יחסית (כמו חיידקי קוליפורם במים), מצב שבו ספירת צלחות רגילה עשויה לתת תוצאה של אפס מושבות." },
+            { id: 'w7q22', question: "בתרבית סגורה, מדוע שלב התמותה מתרחש בסופו של דבר?", options: [ { text: "כי החיידקים 'מתעייפים' מלהתחלק", correct: false }, { text: "בשל דלדול סופי של נוטריינטים חיוניים והצטברות רמות קטלניות של פסולת", correct: true }, { text: "כי הטמפרטורה באינקובטור יורדת", correct: false }, { text: "כי נגמר המקום הפיזי בכלי הגידול", correct: false } ], explanation: "גם לאחר שלב העמידה, התנאים בתרבית הסגורה ממשיכים להתדרדר. המחסור במזון והרעילות הגוברת של הפסולת גורמים בסופו של דבר לנזק בלתי הפיך ולתמותה של יותר ויותר תאים." },
+            { id: 'w7q23', question: "איזו שיטת כימות תיתן את האומדן המהיר ביותר לגידול חיידקים בתרבית נוזלית?", options: [ { text: "ספירה חיה (CFU)", correct: false }, { text: "מדידת עכירות (OD)", correct: true }, { text: "ספירה ישירה במיקרוסקופ", correct: false }, { text: "שיטת MPN", correct: false } ], explanation: "מדידת OD באמצעות ספקטרופוטומטר היא מהירה מאוד (לוקחת שניות) ואינה דורשת הדגרה, ולכן היא השיטה המועדפת למעקב שוטף אחר גידול בתרבית נוזלית, למרות מגבלותיה." },
+            { id: 'w7q24', question: "המספר '30-300 מושבות' נחשב לטווח האופטימלי לספירה חיה בצלחת פטרי סטנדרטית כי:", options: [ { text: "זה המספר המרבי שצלחת יכולה להכיל", correct: false }, { text: "בטווח זה הספירה היא גם מדויקת סטטיסטית וגם ניתנת לביצוע מעשי (לא מעט מדי ולא צפוף מדי)", correct: true }, { text: "רק בטווח זה החיידקים יכולים לגדול", correct: false }, { text: "זה קשור למספר המיהולים שבוצעו", correct: false } ], explanation: "ספירת פחות מ-30 מושבות נחשבת לפחות אמינה סטטיסטית. ספירת יותר מ-300 מושבות הופכת לקשה ומאומצת, והסיכוי לטעויות או לחפיפה בין מושבות עולה." },
+            { id: 'w7q25', question: "בשלב הגידול המעריכי, אם מציירים גרף של לוגריתם מספר התאים כנגד הזמן, מתקבל:", options: [ { text: "קו ישר בעל שיפוע חיובי", correct: true }, { text: "עקומה מעריכית", correct: false }, { text: "קו ישר אופקי", correct: false }, { text: "קו ישר בעל שיפוע שלילי", correct: false } ], explanation: "העלייה המעריכית במספר התאים הופכת לעלייה לינארית כאשר מציירים את הנתונים על סקאלה לוגריתמית. השיפוע של קו ישר זה מייצג את קצב הגידול." },
+            { id: 'w7q26', question: "כאשר משווים ספירה ישירה (Direct count) לספירה חיה (Viable count) מאותה דגימה, בדרך כלל:", options: [ { text: "הספירה הישירה תהיה נמוכה יותר", correct: false }, { text: "הספירה הישירה תהיה גבוהה יותר (או שווה)", correct: true }, { text: "התוצאות תמיד יהיו זהות לחלוטין", correct: false }, { text: "לא ניתן להשוות ביניהן", correct: false } ], explanation: "הספירה הישירה סופרת את כל התאים (חיים ומתים), בעוד הספירה החיה סופרת רק את התאים המסוגלים לגדול ולהתרבות בתנאי הבדיקה. לכן, הספירה הישירה כמעט תמיד תיתן ערך גבוה יותר או שווה לספירה החיה." },
+            { id: 'w7q27', question: "תרבית רציפה שבה קצב הזרימה נמוך מאוד (קצב דילול נמוך) תביא ל:", options: [ { text: "גידול מהיר מאוד של החיידקים", correct: false }, { text: "ריכוז תאים נמוך וגידול איטי המוגבל על ידי הנוטריינט", correct: true }, { text: "שטיפה של החיידקים מהמערכת", correct: false }, { text: "מעבר מהיר לשלב התמותה", correct: false } ], explanation: "בכמוסטט, קצב הדילול קובע את קצב הגידול. בקצב דילול נמוך, אספקת הנוטריינט המגביל איטית, קצב הגידול איטי, וריכוז התאים שניתן לשמור במערכת נמוך יחסית." },
+            { id: 'w7q28', question: "מה היתרון בשימוש בזריעת שפיכה (Pour plate) על פני זריעת מריחה (Spread plate) עבור חיידקים מסוימים?", options: [ { text: "היא תמיד מדויקת יותר", correct: false }, { text: "היא מאפשרת גידול של חיידקים הזקוקים לריכוזי חמצן נמוכים (מיקרוארופילים) בתוך האגר", correct: true }, { text: "קל יותר לבצע אותה", correct: false }, { text: "המושבות תמיד גדולות יותר", correct: false } ], explanation: "חיידקים שרגישים לחמצן או מעדיפים ריכוזי חמצן נמוכים יכולים לגדול טוב יותר בתוך שכבת האגר בשיטת השפיכה, שם ריכוז החמצן נמוך יותר מאשר על פני השטח." },
+            { id: 'w7q29', question: "עקום גידול טיפוסי מתאר גידול בתנאי:", options: [ { text: "מעבדה, בתרבית סגורה (Batch culture)", correct: true }, { text: "הסביבה הטבעית", correct: false }, { text: "מעבדה, בתרבית רציפה (Continuous culture)", correct: false }, { text: "חוסר מוחלט של חומרי מזון", correct: false } ], explanation: "ארבעת השלבים הקלאסיים של עקום הגידול (השהיה, גידול מעריכי, עמידה, תמותה) מתארים את הדינמיקה של אוכלוסיית חיידקים הגדלה במערכת סגורה עם כמות מוגבלת של משאבים." },
+            { id: 'w7q30', question: "אם ידוע שריכוז התאים ההתחלתי (N0) הוא 10^3 תאים/מ\"ל, וריכוז התאים הסופי (N) לאחר זמן t הוא 10^6 תאים/מ\"ל, כמה דורות (n) עברו?", options: [ { text: "כ-3 דורות", correct: false }, { text: "כ-10 דורות", correct: true }, { text: "כ-1000 דורות", correct: false }, { text: "לא ניתן לקבוע מהנתונים", correct: false } ], explanation: "האוכלוסייה גדלה פי 1000 (10^6 / 10^3 = 10^3). מכיוון שכל דור הוא הכפלה פי 2, אנו מחפשים n כך ש- 2^n ≈ 1000. ידוע ש- 2^10 = 1024, ולכן עברו בקירוב 10 דורות. (חישוב מדויק: n = log2(1000) ≈ 9.96)." }
+        ];
+
+
+
+        // --- MCQ JavaScript Logic (Use unique names like _w7) ---
+        let currentMCQIndex_w7 = 0;
+        let score_w7 = 0;
+        let userAnswers_w7 = {};
+        let viewMode_w7 = 'single';
+        const mcqsContainer_w7 = document.getElementById('mcqs-container');
+        const resultsContainer_w7 = document.getElementById('results');
+        const mcqNav_w7 = document.getElementById('mcq-nav');
+        const mcqCounterElement_w7 = document.getElementById('mcq-counter');
+        const prevBtn_w7 = document.getElementById('prev-mcq-btn');
+        const nextBtn_w7 = document.getElementById('next-mcq-btn');
+        const viewToggleBtn_w7 = document.getElementById('view-toggle-btn');
+        let shuffledMCQs_w7 = [];
+
+         function shuffleArray(array) { /* ... */
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+         function renderMCQElement_w7(mcq, index) { /* ... */
+            let shuffledOptions = [...mcq.options];
+            shuffleArray(shuffledOptions);
+
+            let optionsHTML = '<ul class="options">';
+            shuffledOptions.forEach(option => {
+                const isSelected = userAnswers_w7[mcq.id] === option.text;
+                 optionsHTML += `<li data-correct="${option.correct}" class="${isSelected ? 'selected' : ''}">${option.text}</li>`;
+             });
+             optionsHTML += '</ul>';
+
+             const isAnswered = mcq.id in userAnswers_w7;
+             const correctOptionText = mcq.options.find(opt => opt.correct).text;
+             const userAnswer = userAnswers_w7[mcq.id];
+             const wasCorrect = isAnswered && userAnswer === correctOptionText;
+
+             const mcqElement = document.createElement('div');
+             mcqElement.classList.add('mcq');
+             mcqElement.id = `mcq-${mcq.id}`; // Unique ID
+             if (isAnswered) {
+                mcqElement.classList.add('mcq-answered');
+             }
+
+             mcqElement.innerHTML = `
+                 <p class="question-text">${index + 1}. ${mcq.question}</p>
+                 ${optionsHTML}
+                 <div class="feedback" style="display: ${isAnswered ? 'block' : 'none'};">
+                     ${isAnswered ? (wasCorrect ? 'נכון!' : 'לא נכון.') : ''}
+                 </div>
+                 <div class="explanation" style="display: ${isAnswered ? 'block' : 'none'};">
+                     ${mcq.explanation}
+                 </div>
+             `;
+
+            if (isAnswered) {
+                const optionsLi = mcqElement.querySelectorAll('.options li');
+                optionsLi.forEach(li => {
+                    li.classList.add('answered');
+                    if (li.textContent === userAnswer) {
+                        li.classList.add(wasCorrect ? 'correct' : 'incorrect');
+                    } else if (li.dataset.correct === 'true' && !wasCorrect) {
+                         li.classList.add('correct');
+                     }
+                 });
+                 const feedbackDiv = mcqElement.querySelector('.feedback');
+                 feedbackDiv.classList.add(wasCorrect ? 'correct' : 'incorrect');
+             }
+
+            if (!isAnswered) {
+                const optionsElements = mcqElement.querySelectorAll('.options li');
+                 optionsElements.forEach(optionEl => {
+                     optionEl.addEventListener('click', () => checkAnswer_w7(mcq.id, optionEl, mcqElement));
+                 });
+             }
+
+            return mcqElement;
+        }
+         function displayMCQs_w7() { /* ... */
+             mcqsContainer_w7.innerHTML = '';
+             resultsContainer_w7.style.display = 'none';
+
+             if (viewMode_w7 === 'single') {
+                 mcqNav_w7.style.display = 'flex';
+                 mcqCounterElement_w7.style.display = 'block';
+                 mcqCounterElement_w7.textContent = `שאלה ${currentMCQIndex_w7 + 1} מתוך ${shuffledMCQs_w7.length}`;
+                 const mcqElement = renderMCQElement_w7(shuffledMCQs_w7[currentMCQIndex_w7], currentMCQIndex_w7);
+                 mcqsContainer_w7.appendChild(mcqElement);
+                 updateNavButtons_w7();
+             } else { // 'all' mode
+                 mcqNav_w7.style.display = 'none';
+                 mcqCounterElement_w7.style.display = 'none';
+                 shuffledMCQs_w7.forEach((mcq, index) => {
+                     const mcqElement = renderMCQElement_w7(mcq, index);
+                     mcqsContainer_w7.appendChild(mcqElement);
+                 });
+                 updateResultsDisplay_w7();
+                 resultsContainer_w7.style.display = 'block';
+             }
+        }
+         function checkAnswer_w7(mcqId, selectedOptionEl, mcqElement) { /* ... */
+            if (userAnswers_w7[mcqId]) return;
+
+            const isCorrect = selectedOptionEl.getAttribute('data-correct') === 'true';
+             const feedbackEl = mcqElement.querySelector('.feedback');
+             const explanationEl = mcqElement.querySelector('.explanation');
+             const optionsUl = mcqElement.querySelector('.options');
+             const allOptions = optionsUl.querySelectorAll('li');
+
+            userAnswers_w7[mcqId] = selectedOptionEl.textContent;
+
+            mcqElement.classList.add('mcq-answered');
+            allOptions.forEach(opt => {
+                opt.classList.add('answered');
+            });
+
+             if (isCorrect) {
+                score_w7++;
+            }
+
+            selectedOptionEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+             feedbackEl.textContent = isCorrect ? 'נכון!' : 'לא נכון.';
+             feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+             feedbackEl.style.display = 'block';
+             explanationEl.style.display = 'block';
+
+             if (!isCorrect) {
+                 allOptions.forEach(opt => {
+                     if (opt.getAttribute('data-correct') === 'true') {
+                         opt.classList.add('correct');
+                     }
+                 });
+             }
+
+             if (viewMode_w7 === 'all') {
+                updateResultsDisplay_w7();
+             }
+        }
+         function updateResultsDisplay_w7() { /* ... */
+            const answeredCount = Object.keys(userAnswers_w7).length;
+             resultsContainer_w7.innerHTML = `ענית על ${answeredCount} מתוך ${shuffledMCQs_w7.length}<br>ציון נוכחי: ${score_w7} מתוך ${answeredCount || 0}`;
+             resultsContainer_w7.style.display = 'block';
+        }
+         function updateNavButtons_w7() { /* ... */
+            prevBtn_w7.disabled = currentMCQIndex_w7 === 0;
+            nextBtn_w7.disabled = currentMCQIndex_w7 === shuffledMCQs_w7.length - 1;
+        }
+         function nextMCQ_w7() { /* ... */
+            if (currentMCQIndex_w7 < shuffledMCQs_w7.length - 1) {
+                 currentMCQIndex_w7++;
+                 displayMCQs_w7();
+             }
+             if(currentMCQIndex_w7 === shuffledMCQs_w7.length -1){
+                 updateResultsDisplay_w7();
+                 resultsContainer_w7.style.display = 'block';
+             }
+        }
+         function prevMCQ_w7() { /* ... */
+            if (currentMCQIndex_w7 > 0) {
+                 currentMCQIndex_w7--;
+                 resultsContainer_w7.style.display = 'none';
+                 displayMCQs_w7();
+             }
+        }
+         function toggleViewMode_w7() { /* ... */
+            if (viewMode_w7 === 'single') {
+                 viewMode_w7 = 'all';
+                 viewToggleBtn_w7.textContent = 'הצג שאלה בודדת';
+             } else {
+                 viewMode_w7 = 'single';
+                 viewToggleBtn_w7.textContent = 'הצג הכל';
+             }
+             displayMCQs_w7();
+        }
+
+        function initWeek7() { // Unique init function name
+            shuffledMCQs_w7 = [...mcqData_w7];
+            shuffleArray(shuffledMCQs_w7);
+            userAnswers_w7 = {};
+            score_w7 = 0;
+            currentMCQIndex_w7 = 0;
+            viewMode_w7 = 'single';
+            viewToggleBtn_w7.textContent = 'הצג הכל';
+
+            displayMCQs_w7();
+
+            prevBtn_w7.addEventListener('click', prevMCQ_w7);
+            nextBtn_w7.addEventListener('click', nextMCQ_w7);
+            viewToggleBtn_w7.addEventListener('click', toggleViewMode_w7);
+        }
+
+        window.onload = initWeek7;
+
+    </script>
+
+</body>
+</html>

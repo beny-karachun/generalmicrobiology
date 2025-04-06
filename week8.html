@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מיקרוביולוגיה כללית - שבוע 8: גורמי סביבה ונבגים</title>
+    <style>
+        /* CSS Styles are identical to revised week1/2/3/4/5/6/7.html */
+         body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #eef5f3;
+            color: #333;
+            direction: rtl;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #006847; /* Dark green */
+            text-align: center;
+            border-bottom: 2px solid #8fbc8f; /* Dark Sea Green */
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        /* --- Flashcards Styles --- */
+        .flashcards-container {
+            perspective: 1000px;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-direction: column;
+        }
+        .flashcard {
+            width: 80%;
+            max-width: 400px;
+            height: 180px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 8px;
+            font-size: 1.2em;
+        }
+        .flashcard-front {
+            background-color: #c8e6c9;
+            color: #1b5e20;
+        }
+        .flashcard-back {
+            background-color: #a5d6a7;
+            color: #1b5e20;
+            transform: rotateY(180deg);
+            font-size: 1em;
+        }
+        .flashcard-nav {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .flashcard-nav button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .flashcard-nav button:hover {
+            background-color: #004d40;
+        }
+         #flashcard-counter {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        /* --- MCQ Styles --- */
+        .mcqs-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #view-toggle-btn {
+             padding: 6px 12px;
+             background-color: #6c757d;
+             color: white;
+             border: none;
+             border-radius: 4px;
+             cursor: pointer;
+             font-size: 0.9em;
+         }
+        #view-toggle-btn:hover {
+             background-color: #5a6268;
+         }
+
+        .mcq {
+            background-color: #ffffff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #004d40;
+        }
+        .options {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .options li {
+            padding: 10px;
+            margin-bottom: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border: 2px solid transparent; /* Add transparent border for layout consistency */
+        }
+        .options li:hover {
+            background-color: #ced4da;
+        }
+        /* Styles for answer states */
+        .options li.answered.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .options li.answered.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+         /* Style for selected but not yet confirmed answer (optional) */
+        .options li.selected {
+             border-color: #007bff;
+         }
+         /* Disable options after answering */
+        .mcq-answered .options li {
+            cursor: default;
+            pointer-events: none;
+             opacity: 0.8;
+        }
+        .mcq-answered .options li.correct,
+        .mcq-answered .options li.incorrect {
+            opacity: 1; /* Keep selected/correct ones fully visible */
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+             border: 1px solid #f5c6cb;
+        }
+        .explanation {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-right: 5px solid #8fbc8f;
+            font-size: 0.95em;
+            border-radius: 4px;
+        }
+        .mcq-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .mcq-navigation button {
+            padding: 10px 20px;
+            background-color: #00796b; /* Teal */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .mcq-navigation button:hover:not(:disabled) {
+            background-color: #004d40; /* Darker Teal */
+        }
+        .mcq-navigation button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #results {
+            text-align: center;
+            font-size: 1.4em;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e0f2f1;
+            border: 1px solid #b2dfdb;
+            border-radius: 5px;
+            color: #00695c;
+        }
+         #mcq-counter {
+             text-align: center;
+             margin-bottom: 15px;
+             font-weight: bold;
+             color: #555;
+         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>שבוע 8: גורמי סביבה ונבגים</h1>
+
+        <!-- Flashcards Section -->
+        <div class="section">
+             <h2>כרטיסיות לימוד</h2>
+             <div class="flashcards-container">
+                 <div class="flashcard" id="flashcard">
+                     <div class="flashcard-face flashcard-front">מונח</div>
+                     <div class="flashcard-face flashcard-back">הגדרה</div>
+                 </div>
+                 <div class="flashcard-nav">
+                     <button id="prev-card">הקודם</button>
+                     <button id="flip-card">הפוך</button>
+                     <button id="next-card">הבא</button>
+                 </div>
+                 <div id="flashcard-counter">כרטיס 1 מתוך X</div>
+             </div>
+        </div>
+
+        <!-- MCQs Section -->
+        <div class="section">
+             <div class="mcqs-section-header">
+                 <h2>שאלות חזרה (MCQs)</h2>
+                 <button id="view-toggle-btn">הצג הכל</button>
+             </div>
+             <div id="mcq-counter">שאלה 1 מתוך 30</div>
+             <div id="mcqs-container">
+                 <!-- MCQs will be loaded here by JavaScript -->
+             </div>
+             <div id="results" style="display: none;">
+                 תוצאה סופית תופיע כאן.
+             </div>
+             <div class="mcq-navigation" id="mcq-nav" style="display: none;">
+                 <button id="prev-mcq-btn" disabled>הקודם</button>
+                 <button id="next-mcq-btn">הבא</button>
+             </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Flashcard Data and Logic ---
+        const flashcardData_w8 = [
+            { term: "אירובי אובליגטורי (Obligate aerobe)", definition: "אורגניזם שחייב חמצן מולקולרי (O2) לצורך גידול ונשימה." },
+            { term: "אנאירובי אובליגטורי (Obligate anaerobe)", definition: "אורגניזם שאינו יכול לגדול בנוכחות חמצן מולקולרי, ולעיתים אף מת בנוכחותו." },
+            { term: "אנאירובי פקולטטיבי (Facultative anaerobe)", definition: "אורגניזם שיכול לגדול הן בנוכחות והן בהיעדר חמצן מולקולרי. לרוב יעדיף לגדול בנוכחות חמצן (יעילות אנרגטית גבוהה יותר)." },
+            { term: "מיקרואירופילי (Microaerophile)", definition: "אורגניזם הדורש חמצן לגידול, אך בריכוזים נמוכים יותר מאשר באוויר (2-10% במקום ~21%)." },
+            { term: "אנאירובי אירוטולרנטי (Aerotolerant anaerobe)", definition: "אורגניזם שאינו משתמש בחמצן לגידול (גדל רק על ידי תסיסה), אך מסוגל לשרוד בנוכחותו." },
+            { term: "תוצרי חמצן רעילים (Toxic oxygen species)", definition: "מולקולות ריאקטיביות הנוצרות כתוצרי לוואי של מטבוליזם בנוכחות חמצן, כמו רדיקל סופראוקסיד (O2⁻), מי חמצן (H2O2), ורדיקל הידרוקסיל (OH·)." },
+            { term: "קטלאז (Catalase)", definition: "אנזים המפרק מי חמצן (H2O2) למים וחמצן. נפוץ באורגניזמים אירוביים ופקולטטיביים." },
+            { term: "פראוקסידאז (Peroxidase)", definition: "אנזים המנטרל מי חמצן על ידי חמצון סובסטרט אחר, ללא יצירת חמצן גזי." },
+            { term: "סופראוקסיד דיסמוטאז (Superoxide dismutase - SOD)", definition: "אנזים המנטרל את רדיקל הסופראוקסיד (O2⁻) והופך אותו לחמצן ולמי חמצן." },
+            { term: "פסיכרופיל (Psychrophile)", definition: "אורגניזם 'אוהב קור', הגדל בטמפרטורות נמוכות (אופטימום ≤ 15°C, מינימום ≤ 0°C)." },
+            { term: "מזופיל (Mesophile)", definition: "אורגניזם הגדל בטמפרטורות בינוניות (אופטימום 20-45°C). רוב הפתוגנים לאדם הם מזופילים." },
+            { term: "תרמופיל (Thermophile)", definition: "אורגניזם 'אוהב חום', הגדל בטמפרטורות גבוהות (אופטימום 55-65°C)." },
+            { term: "היפרתרמופיל (Hyperthermophile)", definition: "אורגניזם הגדל בטמפרטורות גבוהות מאוד (אופטימום ≥ 80°C). נפוץ בעיקר בארכאות." },
+            { term: "טמפרטורות קרדינליות", definition: "שלוש הטמפרטורות המגדירות את טווח הגידול של אורגניזם: טמפרטורת מינימום, טמפרטורת אופטימום וטמפרטורת מקסימום." },
+            { term: "נבג (Spore)", definition: "מבנה עמיד ורדום הנוצר על ידי אורגניזמים מסוימים (כמו חיידקים ופטריות) בתגובה לתנאי עקה, ומאפשר הישרדות בתנאים קשים." },
+            { term: "אנדוספורה (Endospore)", definition: "סוג של נבג הנוצר בתוך תא האם החיידקי (אופייני לסוגים Bacillus ו-Clostridium). עמיד במיוחד לחום, יובש, קרינה וכימיקלים." },
+            { term: "ליבה (Core)", definition: "החלק הפנימי ביותר של האנדוספורה, המכיל את ה-DNA, הריבוזומים והציטופלסמה המיובשת." },
+            { term: "דיפיקולינט (Dipicolinic acid - DPA)", definition: "חומר ייחודי המצוי בריכוז גבוה בליבת האנדוספורה. יחד עם יוני סידן, הוא תורם לייבוש הליבה ולעמידות לחום." },
+            { term: "חלבונים קושרי DNA קטנים (SASPs)", definition: "Small Acid-Soluble Spore Proteins. חלבונים ייחודיים לאנדוספורה הנקשרים ל-DNA בליבה, מגנים עליו מנזקי קרינה ומשמשים מקור אנרגיה וחומצות אמינו בנביטה." },
+            { term: "קורטקס (Cortex)", definition: "שכבה עבה של פפטידוגליקן בעל מבנה ייחודי (פחות קשרי צילוב) המקיפה את הליבה. עוזרת לשמור על ייבוש הליבה." },
+            { term: "מעטפת הנבג (Spore coat)", definition: "שכבה חיצונית קשיחה המורכבת מחלבונים ייחודיים. מקנה עמידות כימית ומגנה מפני אנזימים וכימיקלים." },
+            { term: "אקסוספוריום (Exosporium)", definition: "שכבה חיצונית דקה נוספת, שאינה קיימת בכל האנדוספורות." },
+            { term: "ספורולציה (Sporulation)", definition: "תהליך יצירת האנדוספורה בתוך תא האם הוגטטיבי." },
+            { term: "נביטה (Germination)", definition: "תהליך החזרה של האנדוספורה למצב וגטטיבי פעיל, המתרחש בתגובה לתנאים סביבתיים מתאימים (נוכחות מים ונוטריינטים)." }
+        ];
+
+
+        let currentCardIndex_w8 = 0;
+        // ... (rest of flashcard JS logic, using unique variable names like _w8)
+        const flashcardElement_w8 = document.getElementById('flashcard');
+        const flashcardFront_w8 = flashcardElement_w8.querySelector('.flashcard-front');
+        const flashcardBack_w8 = flashcardElement_w8.querySelector('.flashcard-back');
+        const flipButton_w8 = document.getElementById('flip-card');
+        const nextButton_w8 = document.getElementById('next-card');
+        const prevButton_w8 = document.getElementById('prev-card');
+        const cardCounterElement_w8 = document.getElementById('flashcard-counter');
+
+        function displayCard_w8(index) {
+            if (!flashcardElement_w8) return;
+            const card = flashcardData_w8[index];
+            flashcardFront_w8.textContent = card.term;
+            flashcardBack_w8.textContent = card.definition;
+            flashcardElement_w8.classList.remove('is-flipped');
+            cardCounterElement_w8.textContent = `כרטיס ${index + 1} מתוך ${flashcardData_w8.length}`;
+        }
+        function flipCard_w8() { flashcardElement_w8.classList.toggle('is-flipped'); }
+        function nextCard_w8() { currentCardIndex_w8 = (currentCardIndex_w8 + 1) % flashcardData_w8.length; displayCard_w8(currentCardIndex_w8); }
+        function prevCard_w8() { currentCardIndex_w8 = (currentCardIndex_w8 - 1 + flashcardData_w8.length) % flashcardData_w8.length; displayCard_w8(currentCardIndex_w8); }
+
+        flipButton_w8.addEventListener('click', flipCard_w8);
+        nextButton_w8.addEventListener('click', nextCard_w8);
+        prevButton_w8.addEventListener('click', prevCard_w8);
+        if (flashcardData_w8.length > 0) displayCard_w8(currentCardIndex_w8);
+
+
+        // --- MCQ Data and Logic ---
+        const mcqData_w8 = [
+             { id: 'w8q1', question: "חיידק הגדל בצורה מיטבית בריכוז חמצן אטמוספרי (~21%) ואינו יכול לגדול בהיעדר חמצן הוא:", options: [ { text: "אנאירובי אובליגטורי", correct: false }, { text: "אירובי אובליגטורי", correct: true }, { text: "אנאירובי פקולטטיבי", correct: false }, { text: "אנאירובי אירוטולרנטי", correct: false } ], explanation: "אירובי אובליגטורי מחייב נוכחות חמצן מולקולרי לצורך הפקת אנרגיה (נשימה אירובית) וגידול." },
+             { id: 'w8q2', question: "חיידק E. coli מסוגל לגדול הן בנוכחות והן בהיעדר חמצן, אך גדל טוב יותר בנוכחותו. כיצד נסווג אותו?", options: [ { text: "אנאירובי אובליגטורי", correct: false }, { text: "מיקרואירופילי", correct: false }, { text: "אנאירובי פקולטטיבי", correct: true }, { text: "אירובי אובליגטורי", correct: false } ], explanation: "אנאירוביים פקולטטיביים יכולים להפיק אנרגיה בנשימה אירובית (יעילה יותר) בנוכחות חמצן, או לעבור לנשימה אנאירובית או תסיסה בהיעדרו." },
+             { id: 'w8q3', question: "איזה אנזים חיוני לנטרול רדיקל הסופראוקסיד (O2⁻)?", options: [ { text: "קטלאז", correct: false }, { text: "פראוקסידאז", correct: false }, { text: "סופראוקסיד דיסמוטאז (SOD)", correct: true }, { text: "ATP סינתאז", correct: false } ], explanation: "SOD הוא האנזים העיקרי המנטרל את רדיקל הסופראוקסיד הרעיל והופך אותו לחמצן ולמי חמצן (שמנוטרלים בהמשך על ידי קטלאז או פראוקסידאז). היעדר SOD הוא מאפיין של אנאירוביים אובליגטוריים רבים." },
+             { id: 'w8q4', question: "חיידק הגדל באופן מיטבי בטמפרטורה של 4°C (טמפ' מקרר) מסווג כ:", options: [ { text: "פסיכרופיל", correct: true }, { text: "מזופיל", correct: false }, { text: "תרמופיל", correct: false }, { text: "היפרתרמופיל", correct: false } ], explanation: "פסיכרופילים הם אורגניזמים המותאמים לחיים בטמפרטורות נמוכות, עם טמפרטורת גידול אופטימלית מתחת ל-15°C." },
+             { id: 'w8q5', question: "מהי טמפרטורת הגידול האופטימלית עבור רוב החיידקים הפתוגניים לאדם?", options: [ { text: "סביב 4°C", correct: false }, { text: "סביב 37°C (טמפ' הגוף)", correct: true }, { text: "סביב 60°C", correct: false }, { text: "מעל 80°C", correct: false } ], explanation: "מכיוון שחיידקים אלו מותאמים לגדול בגוף האדם, טמפרטורת הגידול האופטימלית שלהם קרובה לטמפרטורת הגוף הנורמלית, ולכן הם מסווגים כמזופילים." },
+             { id: 'w8q6', question: "מהי התאמה אופיינית של ממברנות תאים באורגניזמים תרמופיליים והיפרתרמופיליים?", options: [ { text: "אחוז גבוה של חומצות שומן קצרות ובלתי רוויות", correct: false }, { text: "אחוז גבוה של חומצות שומן ארוכות ורוויות (בחיידקים) או ליפידים עם קשרי אתר (בארכאות)", correct: true }, { text: "היעדר מוחלט של חלבונים בממברנה", correct: false }, { text: "נזילות גבוהה מאוד של הממברנה", correct: false } ], explanation: "כדי לשמור על יציבות הממברנה בטמפרטורות גבוהות, היא צריכה להיות פחות נוזלית. הדבר מושג על ידי חומצות שומן ארוכות ורוויות (המגבירות אינטראקציות ון דר ואלס) בחיידקים, ועל ידי ליפידים בעלי קשרי אתר יציבים ולעיתים אף מבנה חד-שכבתי בארכאות." },
+             { id: 'w8q7', question: "מהי אנדוספורה (endospore)?", options: [ { text: "סוג של וירוס חיידקי", correct: false }, { text: "מבנה רבייה מינית בחיידקים", correct: false }, { text: "מבנה הישרדות רדום ועמיד הנוצר בתוך תא חיידקי", correct: true }, { text: "החומר התורשתי של החיידק", correct: false } ], explanation: "אנדוספורה אינה צורת רבייה, אלא מבנה מובחן ועמיד ביותר הנוצר על ידי חיידקים מסוימים (כמו Bacillus ו-Clostridium) בתגובה לתנאי עקה, ומאפשר להם לשרוד תקופות ארוכות בתנאים קשים." },
+             { id: 'w8q8', question: "איזה מאפיין של האנדוספורה תורם באופן המשמעותי ביותר לעמידותה הגבוהה לחום?", options: [ { text: "מעטפת החלבונים החיצונית", correct: false }, { text: "היעדר פעילות מטבולית", correct: false }, { text: "התכולה הנמוכה מאוד של מים בליבה (ייבוש)", correct: true }, { text: "הימצאות קורטקס מפפטידוגליקן", correct: false } ], explanation: "התכולה הנמוכה של מים חופשיים בליבת הנבג, המושגת בין היתר בזכות הצטברות DPA וסידן והמבנה האוסמוטי של הקורטקס, היא הגורם המרכזי המייצב את המקרומולקולות (DNA, חלבונים) ומונע דנטורציה בחום." },
+             { id: 'w8q9', question: "מה תפקידם העיקרי של חלבוני SASPs (Small Acid-Soluble Spore Proteins) באנדוספורה?", options: [ { text: "ליצור את מעטפת הנבג", correct: false }, { text: "להגן על ה-DNA מנזקי קרינת UV ולשמש מאגר חומרי מזון בנביטה", correct: true }, { text: "לשאוב מים אל מחוץ לליבה", correct: false }, { text: "לפרק את דופן תא האם", correct: false } ], explanation: "חלבוני SASPs נקשרים ל-DNA בליבה ומשנים את המבנה שלו לצורה עמידה יותר בפני קרינת UV וכימיקלים. בנוסף, עם תחילת הנביטה, הם מתפרקים ומשמשים כמקור לחומצות אמינו ואנרגיה לתא המתעורר." },
+             { id: 'w8q10', question: "תהליך יצירת האנדוספורה נקרא:", options: [ { text: "נביטה (Germination)", correct: false }, { text: "ספורולציה (Sporulation)", correct: true }, { text: "חלוקה בינארית", correct: false }, { text: "קוניוגציה", correct: false } ], explanation: "ספורולציה הוא התהליך המורכב והמבוקר גנטית שבו תא וגטטיבי פעיל הופך לאנדוספורה רדומה ועמידה." },
+            { id: 'w8q11', question: "מה נכון לגבי שלב ה'נביטה' (Germination) של אנדוספורה?", options: [ { text: "זהו תהליך איטי הלוקח ימים", correct: false }, { text: "הנבג מאבד את עמידותו לחום ומתחיל לספוח מים", correct: true }, { text: "הוא דורש נוכחות של קרינת UV", correct: false }, { text: "הוא תהליך יצירת הנבג", correct: false } ], explanation: "נביטה היא תהליך מהיר יחסית שבו האנדוספורה מאבדת את תכונות העמידות שלה, סופחת מים, הקורטקס מתפרק, והמטבוליזם מתחדש לקראת חזרה למצב וגטטיבי (outgrowth)." },
+            { id: 'w8q12', question: "איזה מהבאים אינו גורם סביבתי המשפיע על גידול מיקרואורגניזמים?", options: [ { text: "טמפרטורה", correct: false }, { text: "זמינות חמצן", correct: false }, { text: "pH", correct: false }, { text: "צבע המושבה", correct: true } ], explanation: "טמפרטורה, זמינות חמצן ורמת החומציות (pH) הם גורמים פיזיקליים וכימיים מרכזיים המשפיעים על קצב הגידול והישרדות של מיקרואורגניזמים. צבע המושבה הוא מאפיין של החיידק, לא גורם סביבתי המשפיע עליו." },
+            { id: 'w8q13', question: "אנאירוביים אובליגטוריים חסרים בדרך כלל את האנזימים:", options: [ { text: "SOD וקטלאז", correct: true }, { text: "DNA פולימראז", correct: false }, { text: "ATP סינתאז", correct: false }, { text: "טרנספפטידאז", correct: false } ], explanation: "היעדר האנזימים המנטרלים תוצרי חמצן רעילים, כמו סופראוקסיד דיסמוטאז (SOD) וקטלאז, הוא הסיבה העיקרית לרגישות הגבוהה של אנאירוביים אובליגטוריים לחמצן." },
+            { id: 'w8q14', question: "מהי טמפרטורת המינימום לגידול?", options: [ { text: "הטמפרטורה שבה קצב הגידול הוא המהיר ביותר", correct: false }, { text: "הטמפרטורה הנמוכה ביותר שבה האורגניזם עדיין יכול לגדול ולהתרבות", correct: true }, { text: "הטמפרטורה שבה האורגניזם יוצר נבגים", correct: false }, { text: "הטמפרטורה שבה הממברנה קופאת", correct: false } ], explanation: "מתחת לטמפרטורת המינימום, הממברנה הופכת נוקשה מדי, תהליכי ההובלה והאנזימטיקה איטיים מדי, ולא מתאפשר גידול." },
+            { id: 'w8q15', question: "מהי טמפרטורת המקסימום לגידול?", options: [ { text: "הטמפרטורה שבה קצב הגידול הוא המהיר ביותר", correct: false }, { text: "הטמפרטורה הגבוהה ביותר שבה האורגניזם עדיין יכול לגדול ולהתרבות", correct: true }, { text: "הטמפרטורה שבה כל המים בתא רותחים", correct: false }, { text: "הטמפרטורה שבה הנבגים נובטים", correct: false } ], explanation: "מעל טמפרטורת המקסימום, מתרחשת דנטורציה בלתי הפיכה של חלבונים חיוניים, נזק לממברנה ומוות של התא." },
+            { id: 'w8q16', question: "איזה חומר ייחודי מצטבר בריכוז גבוה בליבת האנדוספורה ותורם לעמידותה?", options: [ { text: "ATP", correct: false }, { text: "כלורופיל", correct: false }, { text: "חומצה דיפיקולינית (DPA)", correct: true }, { text: "כולסטרול", correct: false } ], explanation: "חומצה דיפיקולינית (Dipicolinic acid), יחד עם יוני סידן, היא מרכיב מרכזי וייחודי בליבת האנדוספורה, התורם לייבוש הליבה וליציבות המקרומולקולות בחום." },
+            { id: 'w8q17', question: "היכן נמצאת שכבת הקורטקס באנדוספורה?", options: [ { text: "השכבה החיצונית ביותר", correct: false }, { text: "בתוך הליבה, סביב ה-DNA", correct: false }, { text: "בין הליבה למעטפת הנבג", correct: true }, { text: "רק באקסוספוריום", correct: false } ], explanation: "הקורטקס, שכבה עבה של פפטידוגליקן מיוחד, ממוקם סביב ממברנת הליבה (core membrane) ומתחת למעטפת הנבג (spore coat)." },
+            { id: 'w8q18', question: "מדוע אנדוספורות קשות לצביעה בשיטות רגילות כמו צביעת גרם?", options: [ { text: "כי אין להן דופן כלל", correct: false }, { text: "כי המעטפות החיצוניות שלהן אטומות וחדירותן נמוכה לצבעים", correct: true }, { text: "כי הן קטנות מדי", correct: false }, { text: "כי הן שקופות לחלוטין", correct: false } ], explanation: "מעטפת הנבג (spore coat) ושכבות נוספות מקשות על חדירת צבענים אל תוך הנבג בטמפרטורת החדר. צביעת נבגים דורשת לרוב חימום כדי לאפשר חדירה של הצבע." },
+            { id: 'w8q19', question: "חיידקים יוצרי אנדוספורות שייכים בדרך כלל לקבוצת:", options: [ { text: "חיידקים גרם-שליליים", correct: false }, { text: "ארכאות", correct: false }, { text: "חיידקים גרם-חיוביים (כמו Bacillus, Clostridium)", correct: true }, { text: "מיקופלזמה", correct: false } ], explanation: "יצירת אנדוספורות היא מאפיין ידוע של סוגים מסוימים במשפחות של חיידקים גרם-חיוביים, בעיקר Bacillus (אירוביים או פקולטטיביים) ו-Clostridium (אנאירוביים אובליגטוריים)." },
+            { id: 'w8q20', question: "איזה תהליך מתרחש במהלך ספורולציה אך לא במהלך חלוקה בינארית רגילה?", options: [ { text: "שכפול DNA", correct: false }, { text: "סינתזת חלבונים", correct: false }, { text: "חלוקת תא א-סימטרית", correct: true }, { text: "גידול בנפח התא", correct: false } ], explanation: "אחד השלבים המוקדמים והמכריעים בספורולציה הוא חלוקה א-סימטרית של התא, היוצרת תא אם גדול ופרה-נבג (forespore) קטן, בניגוד לחלוקה הסימטרית בחלוקה בינארית רגילה." },
+            { id: 'w8q21', question: "ההתאמה של חיידקים פסיכרופיליים לקור כוללת:", options: [ { text: "ממברנות נוקשות עם שומנים רוויים", correct: false }, { text: "אנזימים בעלי מבנה גמיש יותר הפעילים בטמפרטורות נמוכות", correct: true }, { text: "יצירת אנדוספורות עמידות לקור", correct: false }, { text: "טמפרטורת גידול אופטימלית גבוהה", correct: false } ], explanation: "כדי לשמור על פעילות אנזימטית בקור, האנזימים של פסיכרופילים הם לרוב בעלי מבנה מרחבי גמיש יותר (פחות קשרים מייצבים) המאפשר להם לפעול ביעילות גם בטמפרטורות נמוכות. בנוסף, הממברנות שלהם עשירות בחומצות שומן בלתי רוויות וקצרות כדי לשמור על נזילות." },
+            { id: 'w8q22', question: "מה נכון לגבי טמפרטורות קרדינליות?", options: [ { text: "הן זהות עבור כל המיקרואורגניזמים", correct: false }, { text: "הן קובעות את טווח הטמפרטורות שבו אורגניזם יכול לגדול", correct: true }, { text: "הטמפרטורה האופטימלית תמיד קרובה יותר למינימום", correct: false }, { text: "הן לא מושפעות מגורמים סביבתיים אחרים", correct: false } ], explanation: "הטמפרטורות הקרדינליות (מינימום, אופטימום, מקסימום) הן ייחודיות לכל אורגניזם ומגדירות את טווח הטמפרטורות שבו הוא מסוגל לגדול ולהתרבות. הטווח והערכים המדויקים מושפעים מהגנטיקה של האורגניזם." },
+            { id: 'w8q23', question: "מדוע נטרול מי חמצן (H2O2) חשוב לאורגניזמים הגדלים בנוכחות חמצן?", options: [ { text: "כי מי חמצן הם מקור אנרגיה חשוב", correct: false }, { text: "כי מי חמצן הם תוצר לוואי רעיל של מטבוליזם אירובי", correct: true }, { text: "כי מי חמצן נדרשים לסינתזת הדופן", correct: false }, { text: "כי מי חמצן מעודדים יצירת נבגים", correct: false } ], explanation: "מי חמצן הם אחד מתוצרי החמצן הריאקטיביים (ROS) הנוצרים בתא בנוכחות חמצן. הם רעילים ויכולים לגרום נזק למקרומולקולות, ולכן אורגניזמים אירוביים פיתחו אנזימים כמו קטלאז ופראוקסידאז כדי לנטרל אותם." },
+            { id: 'w8q24', question: "מהי התכונה המאפשרת לאנדוספורות לשרוד בתנאי יובש קיצוניים לאורך זמן?", options: [ { text: "היכולת לבצע פוטוסינתזה", correct: false }, { text: "התכולה הנמוכה מאוד של מים בליבה", correct: true }, { text: "נוכחות שוטונים", correct: false }, { text: "קצב חלוקה מהיר", correct: false } ], explanation: "הייבוש הקיצוני של הליבה, יחד עם המעטפות המגנות, הופכים את האנדוספורה למבנה רדום ועמיד מאוד ליובש, שיכול לשרוד שנים רבות עד לחשיפה מחודשת לתנאי לחות מתאימים." },
+            { id: 'w8q25', question: "מה קורה למעטפת הנבג (Spore coat) במהלך הנביטה?", options: [ { text: "היא מתעבה ומתקשה עוד יותר", correct: false }, { text: "היא נשארת ללא שינוי", correct: false }, { text: "היא מתפרקת או נסדקת כדי לאפשר את יציאת התא הוגטטיבי", correct: true }, { text: "היא הופכת לממברנה הציטופלסמית החדשה", correct: false } ], explanation: "במהלך הנביטה וה-outgrowth, אנזימים מפרקים את שכבות המעטפת והקורטקס, ומאפשרים לתא הוגטטיבי החדש שנוצר בתוך הליבה לצאת החוצה." },
+            { id: 'w8q26', question: "אורגניזם שאינו יכול לגדול מתחת ל-40°C ייקרא:", options: [ { text: "פסיכרופיל", correct: false }, { text: "מזופיל", correct: false }, { text: "תרמופיל או היפרתרמופיל", correct: true }, { text: "אירוטולרנטי", correct: false } ], explanation: "תרמופילים גדלים בטמפרטורות גבוהות יחסית (מעל 45°C בערך), והיפרתרמופילים בטמפרטורות גבוהות מאוד (מעל 80°C). אורגניזם שאינו יכול לגדול כלל מתחת ל-40°C בוודאי שייך לאחת משתי קבוצות אלו." },
+            { id: 'w8q27', question: "חיידק החי במעמקי הים ליד נביעות הידרותרמיות חמות מאוד הוא ככל הנראה:", options: [ { text: "פסיכרופיל", correct: false }, { text: "מזופיל", correct: false }, { text: "היפרתרמופיל", correct: true }, { text: "אנאירובי פקולטטיבי", correct: false } ], explanation: "נביעות הידרותרמיות במעמקי הים הן סביבה חמה ביותר (לעיתים מעל 100°C) ולרוב גם אנאירובית. אורגניזמים החיים שם (בעיקר ארכאות) הם היפרתרמופילים המותאמים לתנאים קיצוניים אלו." },
+            { id: 'w8q28', question: "אנדוספורות נוצרות בדרך כלל כאשר:", options: [ { text: "התנאים הסביבתיים אופטימליים לגידול", correct: false }, { text: "התא החיידקי נתקל בתנאי עקה כמו מחסור במזון", correct: true }, { text: "החיידק פוגש חיידק אחר ליצירת קוניוגציה", correct: false }, { text: "הטמפרטורה יורדת מתחת לנקודת הקיפאון", correct: false } ], explanation: "ספורולציה היא תגובה לתנאי עקה, בעיקר מחסור בנוטריינטים חיוניים (פחמן, חנקן, זרחן). זהו מנגנון המאפשר לחיידק לשרוד תקופות קשות עד שהתנאים ישתפרו." },
+            { id: 'w8q29', question: "חיידק Clostridium tetani, הגורם למחלת הצפדת (טטנוס), הוא אנאירובי אובליגטורי ויוצר אנדוספורות. היכן סביר ביותר למצוא את הנבגים שלו?", options: [ { text: "במים צלולים ועשירים בחמצן", correct: false }, { text: "בקרקע, באבק ובמעי בעלי חיים (סביבות דלות חמצן)", correct: true }, { text: "על פני פירות טריים", correct: false }, { text: "באוויר בגובה רב", correct: false } ], explanation: "כאנאירובי אובליגטורי, החיידק עצמו לא ישרוד בסביבה עשירת חמצן. הנבגים העמידים שלו יכולים להימצא בקרקע ובסביבות אחרות שעלולות להיות דלות בחמצן, שם הם יכולים לשרוד לאורך זמן עד שיגיעו לסביבה אנאירובית מתאימה (כמו פצע עמוק) וינבטו." },
+            { id: 'w8q30', question: "מה ההבדל המרכזי בין נבג (spore) לציסטה (cyst) בחיידקים?", options: [ { text: "נבגים נוצרים רק בגרם-שליליים, ציסטות רק בגרם-חיוביים", correct: false }, { text: "ציסטות עמידות יותר לחום מנבגים", correct: false }, { text: "אנדוספורות נוצרות בתוך התא ועמידות מאוד, ציסטות הן צורות תרדמת אחרות, פחות עמידות, הנוצרות לעיתים בהתעגלות התא כולו", correct: true }, { text: "נבגים משמשים לרבייה, ציסטות להישרדות", correct: false } ], explanation: "אנדוספורות הן מבני הישרדות בעלי עמידות קיצונית הנוצרים בתהליך מורכב בתוך התא. ציסטות הן צורות תרדמת פחות נפוצות ופחות עמידות הנוצרות על ידי חיידקים אחרים (כמו Azotobacter) בתגובה לתנאי עקה, לרוב על ידי התעבות הדופן והאטה מטבולית." }
+        ];
+
+
+        // --- MCQ JavaScript Logic (Use unique names like _w8) ---
+         let currentMCQIndex_w8 = 0;
+         let score_w8 = 0;
+         let userAnswers_w8 = {};
+         let viewMode_w8 = 'single';
+         const mcqsContainer_w8 = document.getElementById('mcqs-container');
+         const resultsContainer_w8 = document.getElementById('results');
+         const mcqNav_w8 = document.getElementById('mcq-nav');
+         const mcqCounterElement_w8 = document.getElementById('mcq-counter');
+         const prevBtn_w8 = document.getElementById('prev-mcq-btn');
+         const nextBtn_w8 = document.getElementById('next-mcq-btn');
+         const viewToggleBtn_w8 = document.getElementById('view-toggle-btn');
+         let shuffledMCQs_w8 = [];
+
+         function shuffleArray(array) { /* ... */
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+         function renderMCQElement_w8(mcq, index) { /* ... */
+            let shuffledOptions = [...mcq.options];
+            shuffleArray(shuffledOptions);
+
+            let optionsHTML = '<ul class="options">';
+            shuffledOptions.forEach(option => {
+                const isSelected = userAnswers_w8[mcq.id] === option.text;
+                 optionsHTML += `<li data-correct="${option.correct}" class="${isSelected ? 'selected' : ''}">${option.text}</li>`;
+             });
+             optionsHTML += '</ul>';
+
+             const isAnswered = mcq.id in userAnswers_w8;
+             const correctOptionText = mcq.options.find(opt => opt.correct).text;
+             const userAnswer = userAnswers_w8[mcq.id];
+             const wasCorrect = isAnswered && userAnswer === correctOptionText;
+
+             const mcqElement = document.createElement('div');
+             mcqElement.classList.add('mcq');
+             mcqElement.id = `mcq-${mcq.id}`; // Unique ID
+             if (isAnswered) {
+                mcqElement.classList.add('mcq-answered');
+             }
+
+             mcqElement.innerHTML = `
+                 <p class="question-text">${index + 1}. ${mcq.question}</p>
+                 ${optionsHTML}
+                 <div class="feedback" style="display: ${isAnswered ? 'block' : 'none'};">
+                     ${isAnswered ? (wasCorrect ? 'נכון!' : 'לא נכון.') : ''}
+                 </div>
+                 <div class="explanation" style="display: ${isAnswered ? 'block' : 'none'};">
+                     ${mcq.explanation}
+                 </div>
+             `;
+
+            if (isAnswered) {
+                const optionsLi = mcqElement.querySelectorAll('.options li');
+                optionsLi.forEach(li => {
+                    li.classList.add('answered');
+                    if (li.textContent === userAnswer) {
+                        li.classList.add(wasCorrect ? 'correct' : 'incorrect');
+                    } else if (li.dataset.correct === 'true' && !wasCorrect) {
+                         li.classList.add('correct');
+                     }
+                 });
+                 const feedbackDiv = mcqElement.querySelector('.feedback');
+                 feedbackDiv.classList.add(wasCorrect ? 'correct' : 'incorrect');
+             }
+
+            if (!isAnswered) {
+                const optionsElements = mcqElement.querySelectorAll('.options li');
+                 optionsElements.forEach(optionEl => {
+                     optionEl.addEventListener('click', () => checkAnswer_w8(mcq.id, optionEl, mcqElement));
+                 });
+             }
+
+            return mcqElement;
+         }
+         function displayMCQs_w8() { /* ... */
+             mcqsContainer_w8.innerHTML = '';
+             resultsContainer_w8.style.display = 'none';
+
+             if (viewMode_w8 === 'single') {
+                 mcqNav_w8.style.display = 'flex';
+                 mcqCounterElement_w8.style.display = 'block';
+                 mcqCounterElement_w8.textContent = `שאלה ${currentMCQIndex_w8 + 1} מתוך ${shuffledMCQs_w8.length}`;
+                 const mcqElement = renderMCQElement_w8(shuffledMCQs_w8[currentMCQIndex_w8], currentMCQIndex_w8);
+                 mcqsContainer_w8.appendChild(mcqElement);
+                 updateNavButtons_w8();
+             } else { // 'all' mode
+                 mcqNav_w8.style.display = 'none';
+                 mcqCounterElement_w8.style.display = 'none';
+                 shuffledMCQs_w8.forEach((mcq, index) => {
+                     const mcqElement = renderMCQElement_w8(mcq, index);
+                     mcqsContainer_w8.appendChild(mcqElement);
+                 });
+                 updateResultsDisplay_w8();
+                 resultsContainer_w8.style.display = 'block';
+             }
+         }
+         function checkAnswer_w8(mcqId, selectedOptionEl, mcqElement) { /* ... */
+             if (userAnswers_w8[mcqId]) return;
+
+             const isCorrect = selectedOptionEl.getAttribute('data-correct') === 'true';
+             const feedbackEl = mcqElement.querySelector('.feedback');
+             const explanationEl = mcqElement.querySelector('.explanation');
+             const optionsUl = mcqElement.querySelector('.options');
+             const allOptions = optionsUl.querySelectorAll('li');
+
+             userAnswers_w8[mcqId] = selectedOptionEl.textContent;
+
+             mcqElement.classList.add('mcq-answered');
+             allOptions.forEach(opt => {
+                 opt.classList.add('answered');
+             });
+
+             if (isCorrect) {
+                 score_w8++;
+             }
+
+             selectedOptionEl.classList.add(isCorrect ? 'correct' : 'incorrect');
+             feedbackEl.textContent = isCorrect ? 'נכון!' : 'לא נכון.';
+             feedbackEl.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+             feedbackEl.style.display = 'block';
+             explanationEl.style.display = 'block';
+
+             if (!isCorrect) {
+                 allOptions.forEach(opt => {
+                     if (opt.getAttribute('data-correct') === 'true') {
+                         opt.classList.add('correct');
+                     }
+                 });
+             }
+
+             if (viewMode_w8 === 'all') {
+                 updateResultsDisplay_w8();
+             }
+         }
+         function updateResultsDisplay_w8() { /* ... */
+            const answeredCount = Object.keys(userAnswers_w8).length;
+             resultsContainer_w8.innerHTML = `ענית על ${answeredCount} מתוך ${shuffledMCQs_w8.length}<br>ציון נוכחי: ${score_w8} מתוך ${answeredCount || 0}`;
+             resultsContainer_w8.style.display = 'block';
+         }
+         function updateNavButtons_w8() { /* ... */
+            prevBtn_w8.disabled = currentMCQIndex_w8 === 0;
+            nextBtn_w8.disabled = currentMCQIndex_w8 === shuffledMCQs_w8.length - 1;
+         }
+         function nextMCQ_w8() { /* ... */
+            if (currentMCQIndex_w8 < shuffledMCQs_w8.length - 1) {
+                 currentMCQIndex_w8++;
+                 displayMCQs_w8();
+             }
+             if(currentMCQIndex_w8 === shuffledMCQs_w8.length -1){
+                 updateResultsDisplay_w8();
+                 resultsContainer_w8.style.display = 'block';
+             }
+         }
+         function prevMCQ_w8() { /* ... */
+             if (currentMCQIndex_w8 > 0) {
+                 currentMCQIndex_w8--;
+                 resultsContainer_w8.style.display = 'none';
+                 displayMCQs_w8();
+             }
+         }
+         function toggleViewMode_w8() { /* ... */
+            if (viewMode_w8 === 'single') {
+                 viewMode_w8 = 'all';
+                 viewToggleBtn_w8.textContent = 'הצג שאלה בודדת';
+             } else {
+                 viewMode_w8 = 'single';
+                 viewToggleBtn_w8.textContent = 'הצג הכל';
+             }
+             displayMCQs_w8();
+         }
+
+        function initWeek8() { // Unique init function name
+            shuffledMCQs_w8 = [...mcqData_w8];
+            shuffleArray(shuffledMCQs_w8);
+            userAnswers_w8 = {};
+            score_w8 = 0;
+            currentMCQIndex_w8 = 0;
+            viewMode_w8 = 'single';
+            viewToggleBtn_w8.textContent = 'הצג הכל';
+
+            displayMCQs_w8();
+
+            prevBtn_w8.addEventListener('click', prevMCQ_w8);
+            nextBtn_w8.addEventListener('click', nextMCQ_w8);
+            viewToggleBtn_w8.addEventListener('click', toggleViewMode_w8);
+        }
+
+        window.onload = initWeek8;
+
+    </script>
+
+</body>
+</html>
